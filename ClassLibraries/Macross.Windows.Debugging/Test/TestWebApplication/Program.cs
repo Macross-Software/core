@@ -1,3 +1,5 @@
+using System.Drawing;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -12,7 +14,10 @@ namespace TestWebApplication
 			return Host
 				.CreateDefaultBuilder(args)
 				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
-				.ConfigureDebugWindow();
+				.ConfigureDebugWindow(
+					options => options.WindowTitle = "My Application DebugWindow Title",
+					(window) => window.BackColor = Color.Red,
+					(tab) => tab.BackColor = Color.Blue);
 		}
 	}
 }

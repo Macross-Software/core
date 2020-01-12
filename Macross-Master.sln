@@ -56,6 +56,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.ServiceMana
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.Debugging", "Macross.Windows.Debugging", "{89D0A30E-FF83-4D1E-A8A6-2030969DEC67}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Windows.Debugging\Example.png = ClassLibraries\Macross.Windows.Debugging\Example.png
 		ClassLibraries\Macross.Windows.Debugging\README.md = ClassLibraries\Macross.Windows.Debugging\README.md
 	EndProjectSection
 EndProject
