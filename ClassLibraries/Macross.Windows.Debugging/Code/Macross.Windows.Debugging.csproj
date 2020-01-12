@@ -14,6 +14,8 @@
 
       Commonly Used Types:
       Macross.Windows.Debugging.DebugWindow
+
+      Commonly Used Extensions:
       Microsoft.Extensions.Hosting.DebuggingExtensions.ConfigureDebugWindow
     </Description>
     <Product>Macross.Windows.Debugging</Product>
@@ -24,6 +26,8 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/Macross-Software/core/blob/develop/ClassLibraries/Macross.Windows.Debugging/README.md</PackageProjectUrl>
+    <PackageLicenseExpression>https://github.com/Macross-Software/core/blob/develop/LICENSE.txt</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

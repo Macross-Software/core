@@ -11,7 +11,7 @@
       Provides converters and extensions for the System.Text.Json API.
 
       Commonly Used Types:
-      JsonStringEnumMemberConverter
+      System.Text.Json.JsonStringEnumMemberConverter
     </Description>
     <Product>Macross.Json.Extensions</Product>
     <Company>Macross Software</Company>
@@ -21,6 +21,8 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageProjectUrl>https://github.com/Macross-Software/core/blob/develop/ClassLibraries/Macross.Json.Extensions/README.md</PackageProjectUrl>
+    <PackageLicenseExpression>https://github.com/Macross-Software/core/blob/develop/LICENSE.txt</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

@@ -63,7 +63,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Windows.Debugging",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWebApplication", "ClassLibraries\Macross.Windows.Debugging\Test\TestWebApplication\TestWebApplication.csproj", "{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging", "Macross.Logging", "{1398A6A5-549A-4F0E-8D8A-25FCF40A8C22}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging.Abstractions", "Macross.Logging.Abstractions", "{1398A6A5-549A-4F0E-8D8A-25FCF40A8C22}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Logging.Abstractions\README.md = ClassLibraries\Macross.Logging.Abstractions\README.md
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.Abstractions", "ClassLibraries\Macross.Logging.Abstractions\Code\Macross.Logging.Abstractions.csproj", "{5420102D-E3A5-483F-B591-B004896EE460}"
 EndProject
@@ -78,9 +81,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Json.Extensions", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Json.Extensions.Tests", "ClassLibraries\Macross.Json.Extensions\Test\Macross.Json.Extensions.Tests.csproj", "{8225D558-B4E0-4322-AB97-BB4077943FA7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp", "ClassLibraries\Macross.Windows.Debugging\Test\TestConsoleApp\TestConsoleApp.csproj", "{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestConsoleApp", "ClassLibraries\Macross.Windows.Debugging\Test\TestConsoleApp\TestConsoleApp.csproj", "{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWindowsService", "ClassLibraries\Macross.Windows.Debugging\Test\TestWindowsService\TestWindowsService.csproj", "{810BF840-2AAD-4329-B4CB-3BB26EE41037}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWindowsService", "ClassLibraries\Macross.Windows.Debugging\Test\TestWindowsService\TestWindowsService.csproj", "{810BF840-2AAD-4329-B4CB-3BB26EE41037}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
