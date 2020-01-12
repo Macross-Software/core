@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Description>
+      Macross Software Windows impersonation library.
+
+      Provides an API for managing impersonation in Windows threads &amp; processes.
+    </Description>
+    <Product>Macross.Windows.Impersonation</Product>
+    <Company>Macross Software</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <OutputPath>..\..\..\_build\DLLs\Release\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Release\Macross.Windows.Impersonation.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\..\_build\DLLs\Debug\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Debug\Macross.Windows.Impersonation.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Principal.Windows" Version="4.7.0" Condition="'$(TargetFramework)' != 'net48'" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Description>
+      Macross Software logging abstractions library.
+
+      Provides base types for the Macross logging framework.
+
+      Commonly Used Types:
+      Macross.Logging.LoggerJsonMessage
+
+      Commonly Used Extensions:
+      Microsoft.Extensions.Logging.ILogger.Write
+      Microsoft.Extensions.Logging.ILogger.WriteTrace
+      Microsoft.Extensions.Logging.ILogger.WriteDebug
+      Microsoft.Extensions.Logging.ILogger.WriteInfo
+      Microsoft.Extensions.Logging.ILogger.WriteWarning
+      Microsoft.Extensions.Logging.ILogger.WriteError
+      Microsoft.Extensions.Logging.ILogger.WriteCritical
+      Microsoft.Extensions.Logging.ILogger.BeginGroup
+    </Description>
+    <Product>Macross.Logging.Abstractions</Product>
+    <Company>Macross Software</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <OutputPath>..\..\..\_build\DLLs\Release\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Release\Macross.Logging.Abstractions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\..\_build\DLLs\Debug\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Debug\Macross.Logging.Abstractions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.0" />
+    <PackageReference Include="System.Text.Json" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Macross.Json.Extensions\Code\Macross.Json.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

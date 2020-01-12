@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Description>
+      Macross Software Windows permissions library.
+
+      Provides an API for managing Windows permissions.
+
+      Commonly Used Types:
+      Macross.Windows.Permissions.LocalSecurityAuthorityController
+
+      Common Uses:
+      Grant "logon as service" permission to a user on a specific Windows machine.
+    </Description>
+    <Product>Macross.Windows.Permissions</Product>
+    <Company>Macross Software</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <OutputPath>..\..\..\_build\DLLs\Release\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Release\Macross.Windows.Permissions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\..\_build\DLLs\Debug\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Debug\Macross.Windows.Permissions.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

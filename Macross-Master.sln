@@ -1,0 +1,175 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28729.10
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Solution Items", "_Solution Items", "{57E682E8-B415-492D-9AE0-7D5D5FC58230}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		CodeAnalysis.ruleset = CodeAnalysis.ruleset
+		Directory.Build.props = Directory.Build.props
+		LICENSE.txt = LICENSE.txt
+		NuGet.config = NuGet.config
+		README.md = README.md
+		stylecop.json = stylecop.json
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.CommandLine", "ClassLibraries\Macross.CommandLine\Code\Macross.CommandLine.csproj", "{1216A810-C75D-4D74-9338-6CC7E18AA4AB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Extensions", "ClassLibraries\Macross.Extensions\Code\Macross.Extensions.csproj", "{4DB423CD-EB8E-48A9-971F-0A9DFFBFDC9C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Extensions.Tests", "ClassLibraries\Macross.Extensions\Test\Macross.Extensions.Tests.csproj", "{57215373-8197-4B73-8723-86CF0C8169F6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Windows.Impersonation", "ClassLibraries\Macross.Windows.Impersonation\Code\Macross.Windows.Impersonation.csproj", "{A3A119F6-C665-4D15-9D94-4AFE55B8ED0F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Windows.ServiceManagement", "ClassLibraries\Macross.Windows.ServiceManagement\Code\Macross.Windows.ServiceManagement.csproj", "{44280276-7CF6-40E3-BFD8-8F9ECDBDD5BA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Windows.Permissions", "ClassLibraries\Macross.Windows.Permissions\Code\Macross.Windows.Permissions.csproj", "{9C36A0C3-276C-42E0-9A0C-1D4EEEA299E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.CommandLine.Tests", "ClassLibraries\Macross.CommandLine\Test\Macross.CommandLine.Tests.csproj", "{501350C4-718C-4F43-A7B2-C1BCA1675DC3}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.CommandLine", "Macross.CommandLine", "{9EEE05BE-A742-4DBC-A23A-837B8AFE8EDD}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.CommandLine\README.md = ClassLibraries\Macross.CommandLine\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Extensions", "Macross.Extensions", "{1499F6AA-D7CB-48E2-815F-9C0049B940CC}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Extensions\README.md = ClassLibraries\Macross.Extensions\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.Impersonation", "Macross.Windows.Impersonation", "{053C4BDE-0244-4FF5-A109-8D77924AA8DD}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Windows.Impersonation\README.md = ClassLibraries\Macross.Windows.Impersonation\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.Permissions", "Macross.Windows.Permissions", "{D71D578C-C84F-4D48-BD2B-374C3204ED7A}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Windows.Permissions\README.md = ClassLibraries\Macross.Windows.Permissions\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.ServiceManagement", "Macross.Windows.ServiceManagement", "{9CDF4862-022A-4A30-9028-785963FC9A07}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Windows.ServiceManagement\README.md = ClassLibraries\Macross.Windows.ServiceManagement\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.Debugging", "Macross.Windows.Debugging", "{89D0A30E-FF83-4D1E-A8A6-2030969DEC67}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Windows.Debugging\README.md = ClassLibraries\Macross.Windows.Debugging\README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Windows.Debugging", "ClassLibraries\Macross.Windows.Debugging\Code\Macross.Windows.Debugging.csproj", "{D2143E38-BDE6-4C6D-AD06-04A83D170FAD}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWebApplication", "ClassLibraries\Macross.Windows.Debugging\Test\TestWebApplication\TestWebApplication.csproj", "{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging", "Macross.Logging", "{1398A6A5-549A-4F0E-8D8A-25FCF40A8C22}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.Abstractions", "ClassLibraries\Macross.Logging.Abstractions\Code\Macross.Logging.Abstractions.csproj", "{5420102D-E3A5-483F-B591-B004896EE460}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.Abstractions.Tests", "ClassLibraries\Macross.Logging.Abstractions\Test\Macross.Logging.Abstractions.Tests.csproj", "{A9E5FD09-2852-4E7A-8853-1CFBF256ACF7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Json.Extensions", "Macross.Json.Extensions", "{FC997E0B-C1FC-4D96-80E7-AB3F358B5632}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Json.Extensions\README.md = ClassLibraries\Macross.Json.Extensions\README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Json.Extensions", "ClassLibraries\Macross.Json.Extensions\Code\Macross.Json.Extensions.csproj", "{59349E8C-02C0-4993-A459-71F70F6C9F7A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Json.Extensions.Tests", "ClassLibraries\Macross.Json.Extensions\Test\Macross.Json.Extensions.Tests.csproj", "{8225D558-B4E0-4322-AB97-BB4077943FA7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestConsoleApp", "ClassLibraries\Macross.Windows.Debugging\Test\TestConsoleApp\TestConsoleApp.csproj", "{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestWindowsService", "ClassLibraries\Macross.Windows.Debugging\Test\TestWindowsService\TestWindowsService.csproj", "{810BF840-2AAD-4329-B4CB-3BB26EE41037}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1216A810-C75D-4D74-9338-6CC7E18AA4AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1216A810-C75D-4D74-9338-6CC7E18AA4AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1216A810-C75D-4D74-9338-6CC7E18AA4AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1216A810-C75D-4D74-9338-6CC7E18AA4AB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4DB423CD-EB8E-48A9-971F-0A9DFFBFDC9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4DB423CD-EB8E-48A9-971F-0A9DFFBFDC9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4DB423CD-EB8E-48A9-971F-0A9DFFBFDC9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4DB423CD-EB8E-48A9-971F-0A9DFFBFDC9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{57215373-8197-4B73-8723-86CF0C8169F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57215373-8197-4B73-8723-86CF0C8169F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57215373-8197-4B73-8723-86CF0C8169F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57215373-8197-4B73-8723-86CF0C8169F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3A119F6-C665-4D15-9D94-4AFE55B8ED0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3A119F6-C665-4D15-9D94-4AFE55B8ED0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3A119F6-C665-4D15-9D94-4AFE55B8ED0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3A119F6-C665-4D15-9D94-4AFE55B8ED0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44280276-7CF6-40E3-BFD8-8F9ECDBDD5BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44280276-7CF6-40E3-BFD8-8F9ECDBDD5BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44280276-7CF6-40E3-BFD8-8F9ECDBDD5BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44280276-7CF6-40E3-BFD8-8F9ECDBDD5BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C36A0C3-276C-42E0-9A0C-1D4EEEA299E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C36A0C3-276C-42E0-9A0C-1D4EEEA299E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C36A0C3-276C-42E0-9A0C-1D4EEEA299E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C36A0C3-276C-42E0-9A0C-1D4EEEA299E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{501350C4-718C-4F43-A7B2-C1BCA1675DC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{501350C4-718C-4F43-A7B2-C1BCA1675DC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{501350C4-718C-4F43-A7B2-C1BCA1675DC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{501350C4-718C-4F43-A7B2-C1BCA1675DC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2143E38-BDE6-4C6D-AD06-04A83D170FAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2143E38-BDE6-4C6D-AD06-04A83D170FAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2143E38-BDE6-4C6D-AD06-04A83D170FAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2143E38-BDE6-4C6D-AD06-04A83D170FAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5420102D-E3A5-483F-B591-B004896EE460}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5420102D-E3A5-483F-B591-B004896EE460}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5420102D-E3A5-483F-B591-B004896EE460}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5420102D-E3A5-483F-B591-B004896EE460}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9E5FD09-2852-4E7A-8853-1CFBF256ACF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9E5FD09-2852-4E7A-8853-1CFBF256ACF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9E5FD09-2852-4E7A-8853-1CFBF256ACF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9E5FD09-2852-4E7A-8853-1CFBF256ACF7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59349E8C-02C0-4993-A459-71F70F6C9F7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59349E8C-02C0-4993-A459-71F70F6C9F7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59349E8C-02C0-4993-A459-71F70F6C9F7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59349E8C-02C0-4993-A459-71F70F6C9F7A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8225D558-B4E0-4322-AB97-BB4077943FA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8225D558-B4E0-4322-AB97-BB4077943FA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8225D558-B4E0-4322-AB97-BB4077943FA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8225D558-B4E0-4322-AB97-BB4077943FA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ECA91ED-800F-43ED-91EB-DA31AB0552CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{810BF840-2AAD-4329-B4CB-3BB26EE41037}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{810BF840-2AAD-4329-B4CB-3BB26EE41037}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{810BF840-2AAD-4329-B4CB-3BB26EE41037}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{810BF840-2AAD-4329-B4CB-3BB26EE41037}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1216A810-C75D-4D74-9338-6CC7E18AA4AB} = {9EEE05BE-A742-4DBC-A23A-837B8AFE8EDD}
+		{4DB423CD-EB8E-48A9-971F-0A9DFFBFDC9C} = {1499F6AA-D7CB-48E2-815F-9C0049B940CC}
+		{57215373-8197-4B73-8723-86CF0C8169F6} = {1499F6AA-D7CB-48E2-815F-9C0049B940CC}
+		{A3A119F6-C665-4D15-9D94-4AFE55B8ED0F} = {053C4BDE-0244-4FF5-A109-8D77924AA8DD}
+		{44280276-7CF6-40E3-BFD8-8F9ECDBDD5BA} = {9CDF4862-022A-4A30-9028-785963FC9A07}
+		{9C36A0C3-276C-42E0-9A0C-1D4EEEA299E7} = {D71D578C-C84F-4D48-BD2B-374C3204ED7A}
+		{501350C4-718C-4F43-A7B2-C1BCA1675DC3} = {9EEE05BE-A742-4DBC-A23A-837B8AFE8EDD}
+		{D2143E38-BDE6-4C6D-AD06-04A83D170FAD} = {89D0A30E-FF83-4D1E-A8A6-2030969DEC67}
+		{6DF96724-84E7-4F1A-82BB-B8F89EF9E1F2} = {89D0A30E-FF83-4D1E-A8A6-2030969DEC67}
+		{5420102D-E3A5-483F-B591-B004896EE460} = {1398A6A5-549A-4F0E-8D8A-25FCF40A8C22}
+		{A9E5FD09-2852-4E7A-8853-1CFBF256ACF7} = {1398A6A5-549A-4F0E-8D8A-25FCF40A8C22}
+		{59349E8C-02C0-4993-A459-71F70F6C9F7A} = {FC997E0B-C1FC-4D96-80E7-AB3F358B5632}
+		{8225D558-B4E0-4322-AB97-BB4077943FA7} = {FC997E0B-C1FC-4D96-80E7-AB3F358B5632}
+		{3ECA91ED-800F-43ED-91EB-DA31AB0552CD} = {89D0A30E-FF83-4D1E-A8A6-2030969DEC67}
+		{810BF840-2AAD-4329-B4CB-3BB26EE41037} = {89D0A30E-FF83-4D1E-A8A6-2030969DEC67}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8D27B7B0-BD74-4094-96C3-490528274426}
+	EndGlobalSection
+EndGlobal

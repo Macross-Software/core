@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Description>
+      Macross Software Windows service management library.
+
+      Provides an API for managing Windows services. Operations inlcuded: create, delete, query, start, stop, pause, &amp; continue.
+
+      Contains similiar functionality to what is provided in System.ServiceProcess but also adds in Create &amp; Delete operations to replace (in spirit) what ServiceProcessInstaller &amp; ServiceInstaller from System.Configuration.Install provided in .NET Framework.
+
+      Provides an asynchronous WaitForStatus method.
+    </Description>
+    <Product>Macross.Windows.ServiceManagement</Product>
+    <Company>Macross Software</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <OutputPath>..\..\..\_build\DLLs\Release\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Release\Macross.Windows.ServiceManagement.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\..\_build\DLLs\Debug\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Debug\Macross.Windows.ServiceManagement.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>

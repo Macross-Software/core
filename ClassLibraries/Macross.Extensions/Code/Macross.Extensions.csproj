@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <Description>
+      Macross Software extensions library.
+
+      Provides useful types, helper methods, and utilities not found in the framework.
+
+      Commonly Used Types:
+      System.ParseFunc
+      System.TryParseFunc
+      System.BitCompactor
+
+      Commonly Used Extensions:
+      System.IEnumerable&lt;byte&gt;.ToHexView
+    </Description>
+    <Product>Macross.Extensions</Product>
+    <Company>Macross Software</Company>
+    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <OutputPath>..\..\..\_build\DLLs\Release\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Release\Macross.Extensions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>..\..\..\_build\DLLs\Debug\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\Debug\Macross.Extensions.xml</DocumentationFile>
+  </PropertyGroup>
+
+</Project>
