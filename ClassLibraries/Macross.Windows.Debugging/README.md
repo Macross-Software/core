@@ -162,7 +162,7 @@ See: [ControllerNameLoggerGroupMiddleware.cs](./Test/TestWebApplication/Controll
 public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 {
 	...
-	app.UseRouting();
+	app.UseRouting(); // <- Order is important!
 	app.UseMiddleware<ControllerNameLoggerGroupMiddleware>();
 	...
 }
@@ -197,6 +197,8 @@ public class ControllerNameLoggerGroupMiddleware
 	}
 }
 ```
+
+Note: It is important that `UseRouting` be executed before this middleware otherwise routing information won't be available.
 
 ## How it works...
 
