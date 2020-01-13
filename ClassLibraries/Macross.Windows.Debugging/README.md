@@ -140,7 +140,7 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 
 	In the above example everything that happens under the "Group" scope will be grouped together.
 
-	BeginGroup is a heper extension over `ILogger.BeginScope`. This is the same thing:
+	BeginGroup is a helper extension over `ILogger.BeginScope`. This is the same thing:
 
 	```csharp
 	using IDisposable Scope = _Logger.BeginScope(new LoggerGroup("Business Logic Area"));
