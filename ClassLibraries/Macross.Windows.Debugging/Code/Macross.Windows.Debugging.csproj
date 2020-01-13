@@ -27,7 +27,7 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/Macross-Software/core/blob/develop/ClassLibraries/Macross.Windows.Debugging/README.md</PackageProjectUrl>
-    <PackageLicenseExpression>https://github.com/Macross-Software/core/blob/develop/LICENSE.txt</PackageLicenseExpression>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
