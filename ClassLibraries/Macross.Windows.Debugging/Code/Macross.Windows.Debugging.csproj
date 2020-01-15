@@ -26,7 +26,7 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <PackageProjectUrl>https://github.com/Macross-Software/core/blob/develop/ClassLibraries/Macross.Windows.Debugging/README.md</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Windows.Debugging</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
