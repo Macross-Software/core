@@ -29,6 +29,18 @@ namespace Microsoft.Extensions.Logging
 		/// Formats and writes a <see cref="LogLevel.Trace"/> log message at the specified log level.
 		/// </summary>
 		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+		/// <param name="message">Format string of the log message.</param>
+		/// <param name="args">An object array that contains zero or more objects to format.</param>
+		public static void WriteTrace(
+			this ILogger logger,
+			string message,
+			params object?[]? args)
+			=> Write(logger, LogLevel.Trace, null, message, args);
+
+		/// <summary>
+		/// Formats and writes a <see cref="LogLevel.Trace"/> log message at the specified log level.
+		/// </summary>
+		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
 		/// <param name="data">Data to be attached to the log entry.</param>
 		/// <param name="message">Format string of the log message.</param>
 		/// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -72,6 +84,18 @@ namespace Microsoft.Extensions.Logging
 			string? message,
 			params object?[]? args)
 			=> Write(logger, LogLevel.Trace, eventId, data, exception, message, args);
+
+		/// <summary>
+		/// Formats and writes a <see cref="LogLevel.Debug"/> log message at the specified log level.
+		/// </summary>
+		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+		/// <param name="message">Format string of the log message.</param>
+		/// <param name="args">An object array that contains zero or more objects to format.</param>
+		public static void WriteDebug(
+			this ILogger logger,
+			string message,
+			params object?[]? args)
+			=> Write(logger, LogLevel.Debug, null, message, args);
 
 		/// <summary>
 		/// Formats and writes a <see cref="LogLevel.Debug"/> log message at the specified log level.
@@ -125,6 +149,18 @@ namespace Microsoft.Extensions.Logging
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message at the specified log level.
 		/// </summary>
 		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+		/// <param name="message">Format string of the log message.</param>
+		/// <param name="args">An object array that contains zero or more objects to format.</param>
+		public static void WriteInfo(
+			this ILogger logger,
+			string message,
+			params object?[]? args)
+			=> Write(logger, LogLevel.Information, null, message, args);
+
+		/// <summary>
+		/// Formats and writes an <see cref="LogLevel.Information"/> log message at the specified log level.
+		/// </summary>
+		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
 		/// <param name="data">Data to be attached to the log entry.</param>
 		/// <param name="message">Format string of the log message.</param>
 		/// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -168,6 +204,18 @@ namespace Microsoft.Extensions.Logging
 			string? message,
 			params object?[]? args)
 			=> Write(logger, LogLevel.Information, eventId, data, exception, message, args);
+
+		/// <summary>
+		/// Formats and writes a <see cref="LogLevel.Warning"/> log message at the specified log level.
+		/// </summary>
+		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+		/// <param name="message">Format string of the log message.</param>
+		/// <param name="args">An object array that contains zero or more objects to format.</param>
+		public static void WriteWarning(
+			this ILogger logger,
+			string message,
+			params object?[]? args)
+			=> Write(logger, LogLevel.Warning, null, message, args);
 
 		/// <summary>
 		/// Formats and writes a <see cref="LogLevel.Warning"/> log message at the specified log level.
@@ -221,6 +269,18 @@ namespace Microsoft.Extensions.Logging
 		/// Formats and writes an <see cref="LogLevel.Error"/> log message at the specified log level.
 		/// </summary>
 		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+		/// <param name="message">Format string of the log message.</param>
+		/// <param name="args">An object array that contains zero or more objects to format.</param>
+		public static void WriteError(
+			this ILogger logger,
+			string message,
+			params object?[]? args)
+			=> Write(logger, LogLevel.Error, null, message, args);
+
+		/// <summary>
+		/// Formats and writes an <see cref="LogLevel.Error"/> log message at the specified log level.
+		/// </summary>
+		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
 		/// <param name="data">Data to be attached to the log entry.</param>
 		/// <param name="message">Format string of the log message.</param>
 		/// <param name="args">An object array that contains zero or more objects to format.</param>
@@ -264,6 +324,18 @@ namespace Microsoft.Extensions.Logging
 			string? message,
 			params object?[]? args)
 			=> Write(logger, LogLevel.Error, eventId, data, exception, message, args);
+
+		/// <summary>
+		/// Formats and writes a <see cref="LogLevel.Critical"/> log message at the specified log level.
+		/// </summary>
+		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
+		/// <param name="message">Format string of the log message.</param>
+		/// <param name="args">An object array that contains zero or more objects to format.</param>
+		public static void WriteCritical(
+			this ILogger logger,
+			string message,
+			params object?[]? args)
+			=> Write(logger, LogLevel.Critical, null, message, args);
 
 		/// <summary>
 		/// Formats and writes a <see cref="LogLevel.Critical"/> log message at the specified log level.
