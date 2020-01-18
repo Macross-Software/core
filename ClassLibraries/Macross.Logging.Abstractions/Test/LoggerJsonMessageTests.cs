@@ -144,7 +144,7 @@ namespace Macross.Logging.Abstractions.Tests
 					IgnoreNullValues = true
 				});
 
-			Assert.AreEqual(@$"{{""TimestampUtc"":""{Logger.Message.TimestampUtc:O}"",""ThreadId"":{Logger.Message.ThreadId},""LogLevel"":""Information"",""CategoryName"":""Category"",""Content"":""Hello world.""}}", json);
+			Assert.AreEqual(@$"{{""TimestampUtc"":{JsonSerializer.Serialize(Logger.Message.TimestampUtc)},""ThreadId"":{Logger.Message.ThreadId},""LogLevel"":""Information"",""CategoryName"":""Category"",""Content"":""Hello world.""}}", json);
 		}
 
 		private class TestProduct
