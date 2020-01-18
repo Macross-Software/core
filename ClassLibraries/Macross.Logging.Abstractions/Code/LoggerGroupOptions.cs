@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 
-namespace Macross.Windows.Debugging
+namespace Macross.Logging
 {
 	/// <summary>
 	/// Stores options for grouping log messages by category.
 	/// </summary>
-	public class DebugWindowLoggerGroupOptions
+	public class LoggerGroupOptions
 	{
 		/// <summary>
 		/// Gets or sets the group name.

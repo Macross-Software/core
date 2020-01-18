@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Concurrent;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Threading;
@@ -9,8 +7,6 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading.Channels;
 using System.Text.Json;
-using System.Text.RegularExpressions;
-using System.Linq;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -24,16 +20,6 @@ namespace Macross.Windows.Debugging
 	/// </summary>
 	public partial class DebugWindow : Form
 	{
-		private class GroupFilter : Collection<Regex>
-		{
-			public string GroupName { get; }
-
-			public GroupFilter(string groupName)
-			{
-				GroupName = groupName;
-			}
-		}
-
 		private readonly IHostEnvironment _HostEnvironment;
 		private readonly DebugWindowMessageManager _MessageManager;
 		private readonly IOptionsMonitor<DebugWindowLoggerOptions> _Options;
@@ -43,8 +29,7 @@ namespace Macross.Windows.Debugging
 		private readonly DebugWindowConfigureTabAction? _ConfigureTabAction;
 
 		private readonly Dictionary<string, DebugWindowTabPage> _Tabs = new Dictionary<string, DebugWindowTabPage>(StringComparer.OrdinalIgnoreCase);
-		private IEnumerable<GroupFilter>? _GroupFilters;
-		private ConcurrentDictionary<string, string>? _CategoryGroupCache = new ConcurrentDictionary<string, string>();
+		private LoggerGroupCache? _LoggerGroupCache;
 
 		/// <summary>
 		/// Gets the <see cref="DebugWindowLoggerOptions"/> associated with the control.
@@ -177,41 +162,9 @@ namespace Macross.Windows.Debugging
 			if (options.StartMinimized)
 				WindowState = FormWindowState.Minimized;
 
-			if ((options.GroupOptions?.Count() ?? 0) <= 0)
-			{
-				_GroupFilters = null;
-				_CategoryGroupCache = new ConcurrentDictionary<string, string>();
-				return;
-			}
+			LoggerGroupCache GroupCache = new LoggerGroupCache(options.GroupOptions);
 
-			Collection<GroupFilter>? Filters = null;
-
-			foreach (DebugWindowLoggerGroupOptions? Group in options.GroupOptions)
-			{
-				if (string.IsNullOrEmpty(Group?.GroupName))
-					continue;
-
-				GroupFilter GroupFilter = new GroupFilter(Group.GroupName);
-
-				foreach (string? CategoryFilter in Group.CategoryNameFilters)
-				{
-					if (string.IsNullOrEmpty(CategoryFilter))
-						continue;
-
-					GroupFilter.Add(new Regex($"^{CategoryFilter.Replace("*", ".*?", StringComparison.OrdinalIgnoreCase)}$", RegexOptions.Compiled));
-				}
-
-				if (GroupFilter.Count <= 0)
-					continue;
-
-				if (Filters == null)
-					Filters = new Collection<GroupFilter>();
-
-				Filters.Add(GroupFilter);
-			}
-
-			_GroupFilters = Filters;
-			_CategoryGroupCache = new ConcurrentDictionary<string, string>();
+			_LoggerGroupCache = GroupCache;
 		}
 
 		private async Task MessageProcessingTask()
@@ -227,7 +180,7 @@ namespace Macross.Windows.Debugging
 						if (_CloseCancellationToken.IsCancellationRequested)
 							return;
 
-						string TabTitle = Message.GroupName ?? ResolveGroupForCategoryName(Message.CategoryName);
+						string TabTitle = Message.GroupName ?? _LoggerGroupCache.ResolveGroupNameForCategoryName(Message.CategoryName);
 
 						if (!_Tabs.TryGetValue(TabTitle, out DebugWindowTabPage Tab))
 						{
@@ -263,29 +216,6 @@ namespace Macross.Windows.Debugging
 			catch (OperationCanceledException)
 			{
 			}
-		}
-
-		private string ResolveGroupForCategoryName(string? categoryName)
-		{
-			if (string.IsNullOrEmpty(categoryName))
-				categoryName = "Uncategorized";
-
-			return _CategoryGroupCache.GetOrAdd(categoryName, (_) =>
-			{
-				if (_GroupFilters == null)
-					return categoryName;
-
-				foreach (GroupFilter GroupFilter in _GroupFilters)
-				{
-					foreach (Regex Filter in GroupFilter)
-					{
-						if (Filter.IsMatch(categoryName))
-							return GroupFilter.GroupName;
-					}
-				}
-
-				return categoryName;
-			});
 		}
 
 		private string SerializeMessageToJson(LoggerJsonMessage message)

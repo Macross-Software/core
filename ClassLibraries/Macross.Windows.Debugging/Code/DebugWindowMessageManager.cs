@@ -20,9 +20,11 @@ namespace Macross.Windows.Debugging
 		/// <param name="token">Optional <see cref="CancellationToken"/>.</param>
 		public void AddMessage(LoggerJsonMessage message, CancellationToken token = default)
 		{
-			while (Messages.Writer.WaitToWriteAsync(token).GetAwaiter().GetResult())
+			ChannelWriter<LoggerJsonMessage> Writer = Messages.Writer;
+
+			while (Writer.WaitToWriteAsync(token).GetAwaiter().GetResult())
 			{
-				if (Messages.Writer.TryWrite(message))
+				if (Writer.TryWrite(message))
 					return;
 			}
 

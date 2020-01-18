@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 using Microsoft.Extensions.Hosting;
 
+using Macross.Logging;
+
 namespace Macross.Windows.Debugging
 {
 	/// <summary>
@@ -64,14 +66,14 @@ namespace Macross.Windows.Debugging
 		/// <remarks>
 		/// Default settings are constructed as:
 		/// <code><![CDATA[
-		///   new DebugWindowLoggerGroupOptions[]
+		///   new LoggerGroupOptions[]
 		///   {
-		///   	new DebugWindowLoggerGroupOptions
+		///   	new LoggerGroupOptions
 		///   	{
 		///   		GroupName = "System",
 		///   		CategoryNameFilters = new string[] { "System*" }
 		///   	},
-		///   	new DebugWindowLoggerGroupOptions
+		///   	new LoggerGroupOptions
 		///   	{
 		///   		GroupName = "Microsoft",
 		///   		CategoryNameFilters = new string[] { "Microsoft*" }
@@ -79,14 +81,14 @@ namespace Macross.Windows.Debugging
 		///   };
 		/// ]]></code>
 		/// </remarks>
-		public IEnumerable<DebugWindowLoggerGroupOptions>? GroupOptions { get; set; } = new DebugWindowLoggerGroupOptions[]
+		public IEnumerable<LoggerGroupOptions>? GroupOptions { get; set; } = new LoggerGroupOptions[]
 		{
-			new DebugWindowLoggerGroupOptions
+			new LoggerGroupOptions
 			{
 				GroupName = "System",
 				CategoryNameFilters = new string[] { "System*" }
 			},
-			new DebugWindowLoggerGroupOptions
+			new LoggerGroupOptions
 			{
 				GroupName = "Microsoft",
 				CategoryNameFilters = new string[] { "Microsoft*" }
