@@ -5,7 +5,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
     <IncludeSymbols>true</IncludeSymbols>
-    <Description>Macross Software loggig abstractions library tests.</Description>
+    <Description>Macross Software logging abstractions library tests.</Description>
     <Product>Macross.Logging.Abstractions.Tests</Product>
     <Company>Macross Software</Company>
     <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
