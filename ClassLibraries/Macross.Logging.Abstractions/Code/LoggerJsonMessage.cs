@@ -54,7 +54,7 @@ namespace Macross.Logging
 				(Message.Data, Message.Scope) = ParseScope(scope);
 
 			if (exception != null)
-				Message.Exceptions = LoggerJsonMessageExceptionHelper.ParseException(exception);
+				Message.Exception = LoggerJsonMessageException.FromException(exception);
 
 			if (state is IEnumerable<KeyValuePair<string, object?>> StateValues)
 			{
@@ -197,7 +197,7 @@ namespace Macross.Logging
 		/// <summary>
 		/// Gets or sets the exception details.
 		/// </summary>
-		public IEnumerable<LoggerJsonMessageException>? Exceptions { get; set; }
+		public LoggerJsonMessageException? Exception { get; set; }
 
 		/// <summary>
 		/// Gets or sets the scope data values associated with the message.

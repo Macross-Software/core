@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace Macross.Logging
@@ -29,8 +30,21 @@ namespace Macross.Logging
 			if (!string.IsNullOrEmpty(exception.StackTrace))
 				Exception.StackTrace = exception.StackTrace.Split('\r', '\n').Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s));
 
-			if (exception.InnerException != null)
-				Exception.InnerException = FromException(exception.InnerException);
+			if (exception is AggregateException AggregateException)
+			{
+				Collection<LoggerJsonMessageException> Exceptions = new Collection<LoggerJsonMessageException>();
+
+				foreach (Exception ChildException in AggregateException.InnerExceptions)
+				{
+					Exceptions.Add(FromException(ChildException));
+				}
+
+				Exception.InnerExceptions = Exceptions;
+			}
+			else if (exception.InnerException != null)
+			{
+				Exception.InnerExceptions = new[] { FromException(exception.InnerException) };
+			}
 
 			return Exception;
 		}
@@ -56,8 +70,8 @@ namespace Macross.Logging
 		public IEnumerable<string>? StackTrace { get; set; }
 
 		/// <summary>
-		/// Gets or sets the inner exception associated with the exception.
+		/// Gets or sets the inner exceptions associated with the exception.
 		/// </summary>
-		public LoggerJsonMessageException? InnerException { get; set; }
+		public IEnumerable<LoggerJsonMessageException>? InnerExceptions { get; set; }
 	}
 }
