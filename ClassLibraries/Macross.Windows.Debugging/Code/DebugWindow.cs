@@ -10,6 +10,7 @@ using System.Text.Json;
 
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 using Macross.Logging;
 
@@ -224,7 +225,19 @@ namespace Macross.Windows.Debugging
 			catch (Exception JsonException)
 #pragma warning restore CA1031 // Do not catch general exception types
 			{
-				return $"Message from Category [{message.CategoryName}] with Content [{message.Content}] could not be serialized into Json.{Environment.NewLine}{JsonException}";
+				return JsonSerializer.Serialize(
+					new LoggerJsonMessage
+					{
+						LogLevel = message.LogLevel,
+						TimestampUtc = message.TimestampUtc,
+						ThreadId = message.ThreadId,
+						EventId = message.EventId,
+						GroupName = message.GroupName,
+						CategoryName = message.CategoryName,
+						Content = $"Message with Content [{message.Content}] contained data that could not be serialized into Json.",
+						Exception = LoggerJsonMessageException.FromException(JsonException)
+					},
+					_JsonOptions);
 			}
 		}
 	}
