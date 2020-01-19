@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Macross.Windows.Debugging
 {
@@ -14,40 +12,16 @@ namespace Macross.Windows.Debugging
 	{
 		private readonly ConcurrentDictionary<string, DebugWindowLogger> _Loggers = new ConcurrentDictionary<string, DebugWindowLogger>();
 		private readonly DebugWindowMessageManager _MessageManager;
-		private readonly IOptionsMonitor<DebugWindowLoggerOptions> _Options;
-		private readonly IDisposable _OptionsReloadToken;
 		private IExternalScopeProvider? _ScopeProvider;
 
-		public DebugWindowLoggerProvider(
-			DebugWindowMessageManager messageManager,
-			IOptionsMonitor<DebugWindowLoggerOptions> options)
+		public DebugWindowLoggerProvider(DebugWindowMessageManager messageManager)
 		{
 			_MessageManager = messageManager;
-			_Options = options;
-
-			ReloadLoggerOptions(options.CurrentValue);
-			_OptionsReloadToken = _Options.OnChange(ReloadLoggerOptions);
-		}
-
-		/// <summary>
-		/// Finalizes an instance of the <see cref="DebugWindowLoggerProvider"/> class.
-		/// </summary>
-		~DebugWindowLoggerProvider()
-		{
-			Dispose(false);
 		}
 
 		/// <inheritdoc/>
 		public void Dispose()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		protected virtual void Dispose(bool isDisposing)
-		{
-			if (isDisposing)
-				_OptionsReloadToken.Dispose();
 		}
 
 		/// <inheritdoc/>
@@ -57,8 +31,7 @@ namespace Macross.Windows.Debugging
 				categoryName,
 				_ => new DebugWindowLogger(categoryName, _MessageManager)
 				{
-					ScopeProvider = _ScopeProvider,
-					Options = _Options.CurrentValue
+					ScopeProvider = _ScopeProvider
 				});
 		}
 
@@ -70,14 +43,6 @@ namespace Macross.Windows.Debugging
 			foreach (KeyValuePair<string, DebugWindowLogger> Logger in _Loggers)
 			{
 				Logger.Value.ScopeProvider = _ScopeProvider;
-			}
-		}
-
-		private void ReloadLoggerOptions(DebugWindowLoggerOptions options)
-		{
-			foreach (KeyValuePair<string, DebugWindowLogger> Logger in _Loggers)
-			{
-				Logger.Value.Options = options;
 			}
 		}
 	}

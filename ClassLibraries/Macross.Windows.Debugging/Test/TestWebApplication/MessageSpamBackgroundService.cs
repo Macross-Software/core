@@ -22,7 +22,12 @@ namespace TestWebApplication
 
 			while (!stoppingToken.IsCancellationRequested)
 			{
-				_Log.LogInformation("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
+				if (MessageIndex % 7 == 0)
+					_Log.LogDebug("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
+				else if (MessageIndex % 10 == 0)
+					_Log.LogWarning("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
+				else
+					_Log.LogInformation("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
 
 				await Task.Delay(100, stoppingToken).ConfigureAwait(false);
 			}

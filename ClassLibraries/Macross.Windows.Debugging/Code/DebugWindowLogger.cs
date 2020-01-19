@@ -15,8 +15,6 @@ namespace Macross.Windows.Debugging
 
 		internal IExternalScopeProvider? ScopeProvider { get; set; }
 
-		internal DebugWindowLoggerOptions? Options { get; set; }
-
 		public DebugWindowLogger(string categoryName, DebugWindowMessageManager messageManager)
 		{
 			_CategoryName = categoryName;
