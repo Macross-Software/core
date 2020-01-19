@@ -29,12 +29,8 @@ namespace Macross.Windows.Debugging
 		private readonly DebugWindowConfigureTabAction? _ConfigureTabAction;
 
 		private readonly Dictionary<string, DebugWindowTabPage> _Tabs = new Dictionary<string, DebugWindowTabPage>(StringComparer.OrdinalIgnoreCase);
+		private JsonSerializerOptions? _JsonOptions;
 		private LoggerGroupCache? _LoggerGroupCache;
-
-		/// <summary>
-		/// Gets the <see cref="DebugWindowLoggerOptions"/> associated with the control.
-		/// </summary>
-		public DebugWindowLoggerOptions Options => _Options.CurrentValue;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DebugWindow"/> class.
@@ -162,9 +158,9 @@ namespace Macross.Windows.Debugging
 			if (options.StartMinimized)
 				WindowState = FormWindowState.Minimized;
 
-			LoggerGroupCache GroupCache = new LoggerGroupCache(options.GroupOptions);
+			_JsonOptions = options.JsonOptions ?? DebugWindowLoggerOptions.DefaultJsonOptions;
 
-			_LoggerGroupCache = GroupCache;
+			_LoggerGroupCache = new LoggerGroupCache(options.GroupOptions);
 		}
 
 		private async Task MessageProcessingTask()
@@ -222,7 +218,7 @@ namespace Macross.Windows.Debugging
 		{
 			try
 			{
-				return JsonSerializer.Serialize(message, Options.JsonOptions);
+				return JsonSerializer.Serialize(message, _JsonOptions);
 			}
 #pragma warning disable CA1031 // Do not catch general exception types
 			catch (Exception JsonException)

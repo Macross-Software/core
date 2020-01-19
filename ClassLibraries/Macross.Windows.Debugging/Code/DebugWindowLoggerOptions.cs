@@ -15,6 +15,26 @@ namespace Macross.Windows.Debugging
 	public class DebugWindowLoggerOptions
 	{
 		/// <summary>
+		/// Gets the default <see cref="JsonSerializerOptions"/> options to use when displaying messages.</summary>
+		/// <remarks>
+		/// Default settings are constructed as:
+		/// <code><![CDATA[
+		///   new JsonSerializerOptions
+		///   {
+		///       IgnoreNullValues = true,
+		///       WriteIndented = true,
+		///       Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+		///   };
+		/// ]]></code>
+		/// </remarks>
+		public static JsonSerializerOptions DefaultJsonOptions { get; } = new JsonSerializerOptions
+		{
+			IgnoreNullValues = true,
+			WriteIndented = true,
+			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+		};
+
+		/// <summary>
 		/// Gets or sets a value indicating whether or not the debugger should be launched on startup if it isn't already attached. Default value: False.
 		/// </summary>
 		/// <remarks>
@@ -99,21 +119,8 @@ namespace Macross.Windows.Debugging
 		/// Gets or sets the <see cref="JsonSerializerOptions"/> to use when displaying messages.
 		/// </summary>
 		/// <remarks>
-		/// Default settings are constructed as:
-		/// <code><![CDATA[
-		///   new JsonSerializerOptions
-		///   {
-		///       IgnoreNullValues = true,
-		///       WriteIndented = true,
-		///       Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-		///   };
-		/// ]]></code>
+		/// See <see cref="DefaultJsonOptions"/> for default values.
 		/// </remarks>
-		public JsonSerializerOptions JsonOptions { get; set; } = new JsonSerializerOptions
-		{
-			IgnoreNullValues = true,
-			WriteIndented = true,
-			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-		};
+		public JsonSerializerOptions? JsonOptions { get; set; }
 	}
 }

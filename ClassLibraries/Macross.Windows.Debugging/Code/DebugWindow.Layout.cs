@@ -51,7 +51,7 @@ namespace Macross.Windows.Debugging
 			Controls.Add(TabContainer);
 			Controls.Add(MainMenu);
 
-			if (Options.MinimizeToSystemTray)
+			if (_Options.CurrentValue.MinimizeToSystemTray)
 			{
 				NotifyIcon = new NotifyIcon
 				{
