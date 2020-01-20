@@ -16,7 +16,8 @@ This repo contains the open source Macross Software projects.
 * [Macross.Windows.Debugging](./ClassLibraries/Macross.Windows.Debugging/README.md) - Debugging UI.
 * [Macross.Json.Extensions](./ClassLibraries/Macross.Json.Extensions/README.md) - System.Text.Json extensions and libraries.
 * [Macross.Logging.Abstractions](./ClassLibraries/Macross.Logging.Abstractions/README.md) - Logging extensions and helpers.
-
+* [Macross.Logging.Files](./ClassLibraries/Macross.Logging.Files/README.md) - File logging.
+ 
 ## Pre-release Projects
 
 * [Macross.CommandLine](./ClassLibraries/Macross.CommandLine/README.md) - Simple command-line parsing.
