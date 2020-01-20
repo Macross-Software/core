@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
+using System.Text;
 using System.Text.Json;
 
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,8 @@ namespace Macross.Logging.Files
 	internal class FileLoggerProvider : ILoggerProvider, ISupportExternalScope
 #pragma warning restore CA1812 // Remove class never instantiated
 	{
+		private static readonly byte[] s_NewLine = Encoding.UTF8.GetBytes(Environment.NewLine);
+
 		private static void TestDiskPermissions(string logFileDirectory, string logFileArchiveDirectory, string testFileName)
 		{
 			try
@@ -52,6 +55,7 @@ namespace Macross.Logging.Files
 		private readonly IDisposable _OptionsReloadToken;
 		private Timer? _Timer;
 		private IExternalScopeProvider? _ScopeProvider;
+		private string? _ApplicationName;
 		private string? _LogFileNamePattern;
 		private int? _LogFileMaxSizeInKilobytes;
 		private JsonSerializerOptions? _JsonOptions;
@@ -128,6 +132,10 @@ namespace Macross.Logging.Files
 
 		private void ApplyOptions(FileLoggerOptions options)
 		{
+			_ApplicationName = !string.IsNullOrWhiteSpace(options.ApplicationName)
+				? options.ApplicationName.Trim()
+				: _HostEnvironment.ApplicationName;
+
 			string LogFileDirectory = PrepareLogFileDirectory("Log file directory", options.LogFileDirectory, FileLoggerOptions.DefaultLogFileDirectory);
 			string LogFileArchiveDirectory = PrepareLogFileDirectory("Log file archive directory", options.LogFileArchiveDirectory, FileLoggerOptions.DefaultLogFileArchiveDirectory);
 
@@ -138,7 +146,7 @@ namespace Macross.Logging.Files
 					 : FileLoggerOptions.DefaultGroupLogFileNamePattern;
 
 			string TestFileName = FileNameGenerator.GenerateFileName(
-				_HostEnvironment.ApplicationName,
+				_ApplicationName,
 				new SystemTime(),
 				"__OptionsTest__",
 				LogFileNamePattern);
@@ -179,7 +187,7 @@ namespace Macross.Logging.Files
 			}
 
 			optionValue = FileNameGenerator.GenerateFileName(
-				_HostEnvironment.ApplicationName,
+				_ApplicationName!,
 				new SystemTime(),
 				string.Empty,
 				optionValue);
@@ -218,7 +226,7 @@ namespace Macross.Logging.Files
 					FileLoggerOptions Options = _Options.CurrentValue;
 
 					if (_Timer != null || Options.ArchiveLogFilesOnStartup)
-						_LogFileManager.ArchiveLogFiles(_HostEnvironment.ApplicationName, Options, _LogFileNamePattern!);
+						_LogFileManager.ArchiveLogFiles(_ApplicationName!, Options, _LogFileNamePattern!);
 
 					DateTime UtcNow = DateTime.UtcNow;
 					DateTime NextArchiveTimeUtc = UtcNow.Date.AddDays(1);
@@ -246,7 +254,7 @@ namespace Macross.Logging.Files
 					break;
 
 				LogFile? LogFile = _LogFileManager.FindLogFile(
-					_HostEnvironment.ApplicationName,
+					_ApplicationName!,
 					Message.GroupName!,
 					() => _Options.CurrentValue,
 					_LogFileNamePattern!,
@@ -268,15 +276,15 @@ namespace Macross.Logging.Files
 			}
 		}
 
-		private Task SerializeMessageToJson(Stream stream, LoggerJsonMessage message)
+		private async Task SerializeMessageToJson(Stream stream, LoggerJsonMessage message)
 		{
 			try
 			{
-				return JsonSerializer.SerializeAsync(stream, message, _JsonOptions);
+				await JsonSerializer.SerializeAsync(stream, message, _JsonOptions).ConfigureAwait(false);
 			}
 			catch (JsonException JsonException)
 			{
-				return JsonSerializer.SerializeAsync(
+				await JsonSerializer.SerializeAsync(
 					stream,
 					new LoggerJsonMessage
 					{
@@ -289,8 +297,10 @@ namespace Macross.Logging.Files
 						Content = $"Message with Content [{message.Content}] contained data that could not be serialized into Json.",
 						Exception = LoggerJsonMessageException.FromException(JsonException)
 					},
-					_JsonOptions);
+					_JsonOptions).ConfigureAwait(false);
 			}
+
+			await stream.WriteAsync(s_NewLine, 0, s_NewLine.Length).ConfigureAwait(false);
 		}
 	}
 }

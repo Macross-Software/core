@@ -2,6 +2,8 @@
 using System.Text.Encodings.Web;
 using System.Collections.Generic;
 
+using Microsoft.Extensions.Hosting;
+
 namespace Macross.Logging.Files
 {
 	/// <summary>
@@ -46,6 +48,11 @@ namespace Macross.Logging.Files
 		/// Gets the default log file archive directory, used when <see cref="LogFileArchiveDirectory"/> is not specified.
 		/// </summary>
 		public const string DefaultLogFileArchiveDirectory = "C:\\Logs\\Archive\\{ApplicationName}\\";
+
+		/// <summary>
+		/// Gets or sets the application name string that should be used as the {ApplicationName} token in file paths. If not supplied the <see cref="IHostEnvironment.ApplicationName"/> value will be used.
+		/// </summary>
+		public string? ApplicationName { get; set; }
 
 		/// <summary>
 		/// Gets or sets the directory used to store log files.
