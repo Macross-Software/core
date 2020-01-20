@@ -63,8 +63,7 @@ When you start debugging a web application Visual Studio will attach to an IIS E
 		},
 		"IIS Express": {
 			"commandName": "IISExpress",
-			"launchBrowser": false,
-			"launchUrl": "weatherforecast",
+			"launchBrowser": true,
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development"
 			}
