@@ -1,0 +1,37 @@
+﻿@model WeatherForecast
+
+<h1>Weather Forecast for @Model.FriendlyName (@Model.PostalCode)</h1>
+
+<div>
+	High: @Model.HighTemperatureInFahrenheitDegrees
+</div>
+
+<div>
+	Low: @Model.HighTemperatureInFahrenheitDegrees
+</div>
+
+<div id="update"></div>
+
+<script>
+	var NextPull = new Date(
+		@Model.ForecastGoodUntilTime?.Year,
+		@(Model.ForecastGoodUntilTime?.Month - 1),
+		@Model.ForecastGoodUntilTime?.Day,
+		@Model.ForecastGoodUntilTime?.Hour,
+		@Model.ForecastGoodUntilTime?.Minute,
+		@Model.ForecastGoodUntilTime?.Second);
+	function Tick() {
+		setTimeout(function () {
+			var TimeInMilliseconds = (NextPull.getTime() - new Date().getTime());
+			if (TimeInMilliseconds <= 0) {
+				Update();
+				return;
+			}
+			$('#update').text('Next update in: ' + (TimeInMilliseconds / 1000) + ' s');
+			Tick();
+		}, 1000);
+	}
+	$(function () {
+		Tick();
+	});
+</script>
