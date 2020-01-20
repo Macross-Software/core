@@ -301,6 +301,8 @@ namespace Macross.Logging.Files
 			}
 
 			await stream.WriteAsync(s_NewLine, 0, s_NewLine.Length).ConfigureAwait(false);
+
+			await stream.FlushAsync().ConfigureAwait(false);
 		}
 	}
 }
