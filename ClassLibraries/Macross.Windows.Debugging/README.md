@@ -45,11 +45,39 @@ internal class Program
 }
 ```
 
+## Visual Studio Launch Settings
+
+When you start debugging a web application Visual Studio will attach to an IIS Express process by default. In that scenario the `DebugWindow` won't spawn until a request comes through the web server and the process is actually spun up. You will get a much better experience if you launch your code directly using the compiled `EXE`. The recommended approach is to switch the default order in `.\Properties\launchSettings.json`:
+
+```json
+	...
+	"profiles": {
+		"WebApplication1": {
+			"commandName": "Project",
+			"launchBrowser": false,
+			"launchUrl": "weatherforecast",
+			"applicationUrl": "https://localhost:5001;http://localhost:5000",
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			}
+		},
+		"IIS Express": {
+			"commandName": "IISExpress",
+			"launchBrowser": false,
+			"launchUrl": "weatherforecast",
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Development"
+			}
+		}
+	}
+	...
+```
+
 ## Configuration
 
 There are different ways to configure the [DebugWindowLoggerOptions](./Code/DebugWindowLoggerOptions.cs) object.
 
-* At Runtime
+* At runtime:
 
   The `ConfigureDebugWindow` method accepts a few callbacks that can be used for configuration at runtime:
 
@@ -64,7 +92,7 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 
   The second and third callbacks allow direct manipulation of the `DebugWindow` and any `DebugWindowTabPage` controls as they are created. Use these for advanced configuration of the UI such as adding controls.
 
-* Via IConfiguration (AppSettings, Command-line, etc.)
+* Via `IConfiguration` pipeline (AppSettings, Command-line, Environment Variables, etc.):
 
   The `DebugWindowLoggerOptions` object will bind to the `DebugWindow` logging configuration section:
 
@@ -95,7 +123,7 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 		-ArgumentList "--environment Development --Logging:DebugWindow:ShowDebugWindow=true"
 	```
 
-* Groups
+* Groups:
 
   Log messages in .NET Core are written into categories. Typically the category is the [Namespace].[ClassName] which can lead to a lot of tabs being opened to display messages. To make things more useful, messages can be grouped together.
 
