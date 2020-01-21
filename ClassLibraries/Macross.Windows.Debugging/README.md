@@ -234,4 +234,6 @@ Note: It is important that `UseRouting` be executed before this middleware other
 
 ## Writing the flattened message JSON structure to actual log files...
 
-Some users will find the flattened message JSON format displayed in the UI conveniant and will ask to write it out into actual log files, that is coming soon. Structures are already available in the [Macross.Logging.Abstractions](../Macross.Logging.Abstractions/README.md) library.
+If you find the flattened message JSON format displayed in the UI conveniant and want to write it out into actual log files, see [Macross.Logging.Files](../Macross.Logging.Files/README.md).
+
+A demo web application using the `DebugWindow` and `Macross.Logging.Files` is available [here](./Demo/README.md).
