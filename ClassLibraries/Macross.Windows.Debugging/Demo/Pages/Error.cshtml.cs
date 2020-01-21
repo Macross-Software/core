@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -25,7 +23,7 @@ namespace DemoWebApplication.Pages
 		{
 			_Logger.WriteInfo("START");
 
-			RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
+			RequestId = HttpContext.TraceIdentifier;
 
 			_Logger.WriteInfo(
 				new
