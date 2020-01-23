@@ -63,6 +63,33 @@ namespace Macross.ServiceModel.Extensions.Tests
 			public void SendStatus(int status) => _SoapClient.Channel.SendStatus(status);
 		}
 
+		private interface ITestService
+		{
+			public CommunicationState ChannelState { get; }
+
+			void EnsureStatus(int status);
+		}
+
+#pragma warning disable CA1812 // Remove class never instantiated
+		private class TestService : ITestService
+#pragma warning restore CA1812 // Remove class never instantiated
+		{
+			private readonly SoapClient<ITestProxy> _SoapClient;
+
+			public CommunicationState ChannelState => _SoapClient.State;
+
+			public TestService(SoapClient<ITestProxy> soapClient)
+			{
+				_SoapClient = soapClient ?? throw new ArgumentNullException(nameof(soapClient));
+			}
+
+			public void EnsureStatus(int status)
+			{
+				if (_SoapClient.Channel.GetStatus() != status)
+					throw new InvalidOperationException();
+			}
+		}
+
 		[TestMethod]
 		public void AddSoapClientProxyTest()
 		{
@@ -92,6 +119,37 @@ namespace Macross.ServiceModel.Extensions.Tests
 			}
 
 			Assert.AreEqual(CommunicationState.Closed, TestProxy.ChannelState);
+		}
+
+		[TestMethod]
+		public void AddSoapClientServiceTest()
+		{
+			ServiceCollection ServiceCollection = new ServiceCollection();
+
+			ServiceCollection
+				.AddSoapClient<ITestService, TestService, ITestProxy>((serviceProvider, soapClientFactory)
+					=> new ChannelFactory<ITestProxy>(new BasicHttpBinding(), new EndpointAddress("http://localhost:9999/")));
+
+			ServiceProvider ServiceProvider = ServiceCollection.BuildServiceProvider();
+
+			ITestService TestService;
+
+			using (IServiceScope Scope = ServiceProvider.CreateScope())
+			{
+				TestService = Scope.ServiceProvider.GetRequiredService<ITestService>();
+
+				Assert.IsNotNull(TestService);
+
+				try
+				{
+					TestService.EnsureStatus(0);
+				}
+				catch (CommunicationException)
+				{
+				}
+			}
+
+			Assert.AreEqual(CommunicationState.Closed, TestService.ChannelState);
 		}
 
 		[TestMethod]

@@ -24,11 +24,29 @@ namespace Microsoft.Extensions.DependencyInjection
 			Func<IServiceProvider, ISoapClientFactory, ChannelFactory<TClient>> createFactory)
 			where TClient : class
 			where TImplementation : class, TClient
+				=> AddSoapClient<TClient, TImplementation, TClient>(services, createFactory);
+
+		/// <summary>
+		/// Adds the <see cref="ISoapClientFactory"/> and related services to the <see cref="IServiceCollection"/> and configures
+		/// a named <see cref="SoapClient"/>.
+		/// </summary>
+		/// <typeparam name="TClient">The type of the typed client. The type specified will be registered in the service collection as a transient service.</typeparam>
+		/// <typeparam name="TImplementation">The implementation type which will be injected with a <see cref="SoapClient{TChannel}"/> instance.</typeparam>
+		/// <typeparam name="TChannel">The channel type.</typeparam>
+		/// <param name="services">The <see cref="IServiceCollection"/>.</param>
+		/// <param name="createFactory">A delegate that is used to create a <see cref="ChannelFactory{TChannel}"/> to build clients.</param>
+		/// <returns>An <see cref="ISoapClientBuilder"/> that can be used to configure the client.</returns>
+		public static ISoapClientBuilder AddSoapClient<TClient, TImplementation, TChannel>(
+			this IServiceCollection services,
+			Func<IServiceProvider, ISoapClientFactory, ChannelFactory<TChannel>> createFactory)
+			where TClient : class
+			where TImplementation : class, TClient
+			where TChannel : class
 		{
 			if (createFactory == null)
 				throw new ArgumentNullException(nameof(createFactory));
 
-			string Name = typeof(TClient).FullName;
+			string Name = typeof(TChannel).FullName;
 
 			services.AddOptions();
 
@@ -42,12 +60,12 @@ namespace Microsoft.Extensions.DependencyInjection
 			services.AddTransient(serviceProvider =>
 				serviceProvider
 					.GetRequiredService<ISoapClientFactory>()
-					.GetSoapClient<TClient>());
+					.GetSoapClient<TChannel>());
 
 			services.AddTransient<TClient>(serviceProvider =>
 			{
-				ITypedSoapClientFactory<TClient, TImplementation> TypedSoapClientFactory = serviceProvider.GetRequiredService<ITypedSoapClientFactory<TClient, TImplementation>>();
-				return TypedSoapClientFactory.CreateClient(serviceProvider.GetRequiredService<SoapClient<TClient>>());
+				ITypedSoapClientFactory<TChannel, TImplementation> TypedSoapClientFactory = serviceProvider.GetRequiredService<ITypedSoapClientFactory<TChannel, TImplementation>>();
+				return TypedSoapClientFactory.CreateClient(serviceProvider.GetRequiredService<SoapClient<TChannel>>());
 			});
 
 			return new DefaultSoapClientBuilder(services, Name);
