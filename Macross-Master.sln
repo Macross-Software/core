@@ -104,7 +104,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.ServiceModel.Extens
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.ServiceModel.Extensions", "ClassLibraries\Macross.ServiceModel.Extensions\Code\Macross.ServiceModel.Extensions.csproj", "{9502140B-CD53-43C9-9B01-E65E793C5752}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Macross.ServiceModel.Extensions.Tests", "ClassLibraries\Macross.ServiceModel.Extensions\Test\Macross.ServiceModel.Extensions.Tests.csproj", "{FB40FBF0-8A32-42EF-AD59-54586D5A90D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.ServiceModel.Extensions.Tests", "ClassLibraries\Macross.ServiceModel.Extensions\Test\Macross.ServiceModel.Extensions.Tests.csproj", "{FB40FBF0-8A32-42EF-AD59-54586D5A90D5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
