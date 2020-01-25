@@ -30,6 +30,27 @@ namespace Microsoft.Extensions.DependencyInjection
 		}
 
 		/// <summary>
+		/// Adds an additional <see cref="IEndpointBehavior"/> from the dependency injection container for a named <see cref="SoapClient"/>.
+		/// </summary>
+		/// <typeparam name="T">The <see cref="IEndpointBehavior"/> to be registered.</typeparam>
+		/// <param name="builder">The <see cref="ISoapClientBuilder"/>.</param>
+		/// <returns>An <see cref="ISoapClientBuilder"/> that can be used to configure the client.</returns>
+		public static ISoapClientBuilder AddEndpointBehavior<T>(this ISoapClientBuilder builder)
+			where T : class, IEndpointBehavior
+		{
+			if (builder == null)
+				throw new ArgumentNullException(nameof(builder));
+
+			builder.Services.AddTransient<T>();
+
+			builder.Services.Configure<SoapClientFactoryOptions>(builder.Name, options
+				=> options.ChannelFactoryConfigurationActions.Add((serviceProvider, channelFactory) =>
+					channelFactory.Endpoint.EndpointBehaviors.Add(serviceProvider.GetRequiredService<T>())));
+
+			return builder;
+		}
+
+		/// <summary>
 		/// Adds a delegate that will be used to create an <see cref="IEndpointBehavior"/> for a named <see cref="SoapClient"/>'s parent <see cref="ChannelFactory"/> when it is created.
 		/// </summary>
 		/// <param name="builder">The <see cref="ISoapClientBuilder"/>.</param>

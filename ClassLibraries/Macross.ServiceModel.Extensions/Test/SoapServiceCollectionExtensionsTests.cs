@@ -3,6 +3,7 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -171,6 +172,33 @@ namespace Macross.ServiceModel.Extensions.Tests
 			ServiceProvider ServiceProvider = ServiceCollection.BuildServiceProvider();
 
 			ITestProxy TestProxy = ServiceProvider.GetRequiredService<ITestProxy>();
+
+			Assert.IsNotNull(CustomEndpointBehavior);
+			Assert.IsTrue(CustomEndpointBehavior.ClientBehaviorApplied);
+		}
+
+		[TestMethod]
+		public void EndpointBehaviorRegisteredServiceTest()
+		{
+			ServiceCollection ServiceCollection = new ServiceCollection();
+
+			ChannelFactory<ITestProxy>? Factory = null;
+
+			ServiceCollection
+				.AddSoapClient<ITestProxy, TestProxy>((serviceProvider, soapClientFactory) =>
+				{
+					Factory = new ChannelFactory<ITestProxy>(new BasicHttpBinding(), new EndpointAddress("http://localhost:9999/"));
+					return Factory;
+				})
+				.AddEndpointBehavior<CustomEndpointBehavior>();
+
+			ServiceProvider ServiceProvider = ServiceCollection.BuildServiceProvider();
+
+			ITestProxy TestProxy = ServiceProvider.GetRequiredService<ITestProxy>();
+
+			Assert.IsNotNull(Factory);
+
+			CustomEndpointBehavior? CustomEndpointBehavior = Factory.Endpoint.EndpointBehaviors[typeof(CustomEndpointBehavior)] as CustomEndpointBehavior;
 
 			Assert.IsNotNull(CustomEndpointBehavior);
 			Assert.IsTrue(CustomEndpointBehavior.ClientBehaviorApplied);
