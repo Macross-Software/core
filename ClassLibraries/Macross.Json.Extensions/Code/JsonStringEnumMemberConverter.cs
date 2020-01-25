@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
-	/// Converter to convert enums to and from strings.
+	/// <see cref="JsonConverterFactory"/> to convert enums to and from strings, respecting <see cref="EnumMemberAttribute"/> decorations. Supports nullable enums.
 	/// </summary>
 	public class JsonStringEnumMemberConverter : JsonConverterFactory
 	{

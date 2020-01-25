@@ -12,7 +12,8 @@
       Provides converters and extensions for the System.Text.Json API.
 
       Commonly Used Types:
-      System.Text.Json.JsonStringEnumMemberConverter
+      System.Text.Json.Serialization.JsonStringEnumMemberConverter
+      System.Text.Json.Serialization.JsonTimeSpanConverter
     </Description>
     <Product>Macross.Json.Extensions</Product>
     <Company>Macross Software</Company>
@@ -20,7 +21,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <VersionPrefix>1.0.1</VersionPrefix>
+    <VersionPrefix>1.1.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>

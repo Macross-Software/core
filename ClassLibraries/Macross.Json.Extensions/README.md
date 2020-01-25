@@ -89,3 +89,22 @@ Hopefully by .NET 5 this library will no longer be needed.
 		Assert.AreEqual(DayOfWeek.Friday, ParsedDayOfWeek);
 	}
 	```
+
+## TimeSpans
+
+System.Text.Json doesn't support `TimeSpan` [de]serialization at all (see [corefx #38641](https://github.com/dotnet/corefx/issues/38641)). It appears to be slated for .NET Core 5, but in the meantime [JsonTimeSpanConverter](./Code/JsonTimeSpanConverter.cs) is provided to add in support for `TimeSpan` and `TimeSpan?` for those of us who need to transport time values in our JSON ahead of the next major release.
+
+Usage is simple, register the `JsonTimeSpanConverter` on your `TimeSpan`s or via `JsonSerializerOptions.Converters`.
+
+`TimeSpan` values will be transposed using the [Constant ("c") Format Specifier](https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-timespan-format-strings#the-constant-c-format-specifier).
+
+```csharp
+public class TestClass
+{
+	[JsonConverter(typeof(JsonTimeSpanConverter))]
+	public TimeSpan TimeSpan { get; set; }
+
+	[JsonConverter(typeof(JsonTimeSpanConverter))]
+	public TimeSpan? NullableTimeSpan { get; set; }
+}
+```
