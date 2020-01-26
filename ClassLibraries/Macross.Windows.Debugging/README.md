@@ -50,6 +50,7 @@ internal class Program
 When you start debugging a web application Visual Studio will attach to an IIS Express process by default. In that scenario the `DebugWindow` won't spawn until a request comes through the web server and the process is actually spun up. You will get a much better experience if you launch your code directly using the compiled `EXE`. The recommended approach is to switch the default order in `.\Properties\launchSettings.json`:
 
 ```json
+{
 	...
 	"profiles": {
 		"WebApplication1": {
@@ -70,6 +71,7 @@ When you start debugging a web application Visual Studio will attach to an IIS E
 		}
 	}
 	...
+}
 ```
 
 ## Configuration
@@ -131,22 +133,22 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 	The `GroupOptions` sub-section can be used to define groups by filters. The defaults look like this:
 
 	```json
-		{
-			"Logging": {
-				"DebugWindow": {
-					"GroupOptions": [
-						{
-							"GroupName": "System",
-							"CategoryNameFilters": ["System*"]
-						},
-						{
-							"GroupName": "Microsoft",
-							"CategoryNameFilters": ["Microsoft*"]
-						}
-					]
-				}
+	{
+		"Logging": {
+			"DebugWindow": {
+				"GroupOptions": [
+					{
+						"GroupName": "System",
+						"CategoryNameFilters": ["System*"]
+					},
+					{
+						"GroupName": "Microsoft",
+						"CategoryNameFilters": ["Microsoft*"]
+					}
+				]
 			}
 		}
+	}
 	```
 
 	Note: You should use wildcards when defining filters.
@@ -178,6 +180,8 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 
 	_Logger.LogInformation("Logical process complete.");
 	```
+
+	For more information on `BeginGroup` see [Macross.Logging.Abstractions](../Macross.Logging.Abstractions/README.md).
 
 ## Grouping messages by Controller...
 
