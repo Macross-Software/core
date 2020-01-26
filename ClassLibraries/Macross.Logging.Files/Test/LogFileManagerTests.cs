@@ -9,11 +9,16 @@ namespace Macross.Logging.Files.Tests
 	[TestClass]
 	public class LogFileManagerTests
 	{
+		private static readonly TestSystemTime s_DefaultSystemTime = new TestSystemTime(2020, 1, 20, 7, 0, 0);
+
 		private static readonly FileLoggerOptions s_DefaultOptions = new FileLoggerOptions
 		{
 			LogFileDirectory = FileLoggerOptions.DefaultLogFileDirectory,
 			LogFileArchiveDirectory = FileLoggerOptions.DefaultLogFileArchiveDirectory
 		};
+
+		private static readonly LogFileManagementSchedule s_DefaultManagementSchedule =
+			LogFileManagementSchedule.Build(s_DefaultSystemTime, s_DefaultOptions);
 
 		private static TestFileSystem CreateDefaultFileSystem()
 		{
@@ -27,14 +32,15 @@ namespace Macross.Logging.Files.Tests
 		{
 			using LogFileManager Manager = new LogFileManager(
 				CreateDefaultFileSystem(),
-				new TestSystemTime(2020, 1, 19, 8, 0, 0));
+				s_DefaultSystemTime);
 
 			LogFile LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.log", LogFile.FinalFileName);
@@ -45,21 +51,23 @@ namespace Macross.Logging.Files.Tests
 		{
 			using LogFileManager Manager = new LogFileManager(
 				CreateDefaultFileSystem(),
-				new TestSystemTime(2020, 1, 19, 8, 0, 0));
+				s_DefaultSystemTime);
 
 			LogFile LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				s_DefaultManagementSchedule);
 
 			LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.log", LogFile.FinalFileName);
@@ -70,14 +78,15 @@ namespace Macross.Logging.Files.Tests
 		{
 			using LogFileManager Manager = new LogFileManager(
 				CreateDefaultFileSystem(),
-				new TestSystemTime(2020, 1, 19, 8, 0, 0));
+				s_DefaultSystemTime);
 
 			LogFile LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				s_DefaultManagementSchedule);
 
 			LogFile.Toxic = true;
 
@@ -86,7 +95,8 @@ namespace Macross.Logging.Files.Tests
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.1.log", LogFile.FinalFileName);
@@ -96,7 +106,8 @@ namespace Macross.Logging.Files.Tests
 		public void LogFileDateCutoverTest()
 		{
 			TestFileSystem FileSystem = CreateDefaultFileSystem();
-			TestSystemTime SystemTime = new TestSystemTime(2020, 1, 19, 8, 0, 0);
+			TestSystemTime SystemTime = new TestSystemTime(2020, 1, 18, 23, 59, 59, DateTimeKind.Local);
+			LogFileManagementSchedule ManagementSchedule = LogFileManagementSchedule.Build(SystemTime, s_DefaultOptions);
 
 			using LogFileManager Manager = new LogFileManager(FileSystem, SystemTime);
 
@@ -105,22 +116,64 @@ namespace Macross.Logging.Files.Tests
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				ManagementSchedule);
 
-			SystemTime.UtcNow = SystemTime.UtcNow.AddDays(1);
+			Assert.IsNotNull(LogFile);
+			Assert.AreEqual($"{Environment.MachineName}.20200118.log", LogFile.FinalFileName);
+
+			SystemTime.UtcNow = new DateTime(2020, 1, 19, 1, 0, 1, DateTimeKind.Local).ToUniversalTime();
 
 			LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				null);
+				null,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
-			Assert.AreEqual($"{Environment.MachineName}.20200120.log", LogFile.FinalFileName);
+			Assert.AreEqual($"{Environment.MachineName}.20200119.log", LogFile.FinalFileName);
 
 			Assert.AreEqual(1, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileDirectory).Count());
 			Assert.AreEqual(1, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileArchiveDirectory).Count());
+		}
+
+		[TestMethod]
+		public void LogFileDateCutoverBeforeArchiveTest()
+		{
+			TestFileSystem FileSystem = CreateDefaultFileSystem();
+			TestSystemTime SystemTime = new TestSystemTime(2020, 1, 18, 23, 59, 59, DateTimeKind.Local);
+			LogFileManagementSchedule ManagementSchedule = LogFileManagementSchedule.Build(SystemTime, s_DefaultOptions);
+
+			using LogFileManager Manager = new LogFileManager(FileSystem, SystemTime);
+
+			LogFile LogFile = Manager.FindLogFile(
+				"AppName",
+				"Group",
+				() => s_DefaultOptions,
+				FileLoggerOptions.DefaultLogFileNamePattern,
+				null,
+				ManagementSchedule);
+
+			Assert.IsNotNull(LogFile);
+			Assert.AreEqual($"{Environment.MachineName}.20200118.log", LogFile.FinalFileName);
+
+			SystemTime.UtcNow = new DateTime(2020, 1, 19, 0, 0, 0, DateTimeKind.Local).ToUniversalTime();
+
+			LogFile = Manager.FindLogFile(
+				"AppName",
+				"Group",
+				() => s_DefaultOptions,
+				FileLoggerOptions.DefaultLogFileNamePattern,
+				null,
+				ManagementSchedule);
+
+			Assert.IsNotNull(LogFile);
+			Assert.AreEqual($"{Environment.MachineName}.20200119.log", LogFile.FinalFileName);
+
+			Assert.AreEqual(2, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileDirectory).Count());
+			Assert.AreEqual(0, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileArchiveDirectory).Count());
 		}
 
 		[TestMethod]
@@ -128,7 +181,7 @@ namespace Macross.Logging.Files.Tests
 		{
 			TestFileSystem FileSystem = CreateDefaultFileSystem();
 
-			using LogFileManager Manager = new LogFileManager(FileSystem, new TestSystemTime(2020, 1, 19, 8, 0, 0));
+			using LogFileManager Manager = new LogFileManager(FileSystem, s_DefaultSystemTime);
 
 			string BaseFileName = $"{FileLoggerOptions.DefaultLogFileDirectory}{Environment.MachineName}.20200119";
 
@@ -151,7 +204,8 @@ namespace Macross.Logging.Files.Tests
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				1);
+				1,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.9.log", LogFile.FinalFileName);
@@ -162,7 +216,7 @@ namespace Macross.Logging.Files.Tests
 		{
 			TestFileSystem FileSystem = CreateDefaultFileSystem();
 
-			using LogFileManager Manager = new LogFileManager(FileSystem, new TestSystemTime(2020, 1, 19, 8, 0, 0));
+			using LogFileManager Manager = new LogFileManager(FileSystem, s_DefaultSystemTime);
 
 			string BaseFileName = $"{FileLoggerOptions.DefaultLogFileDirectory}{Environment.MachineName}.20200119";
 
@@ -184,7 +238,8 @@ namespace Macross.Logging.Files.Tests
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				1);
+				1,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.log", LogFile.FinalFileName);
@@ -196,7 +251,8 @@ namespace Macross.Logging.Files.Tests
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				1);
+				1,
+				s_DefaultManagementSchedule);
 
 			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.10.log", LogFile.FinalFileName);
@@ -206,7 +262,7 @@ namespace Macross.Logging.Files.Tests
 		public void ArchiveLogFilesTest()
 		{
 			TestFileSystem FileSystem = CreateDefaultFileSystem();
-			TestSystemTime SystemTime = new TestSystemTime(2020, 1, 19);
+			TestSystemTime SystemTime = new TestSystemTime(2020, 1, 19, 1, 0, 0, DateTimeKind.Local);
 
 			using LogFileManager Manager = new LogFileManager(FileSystem, SystemTime);
 
@@ -237,7 +293,10 @@ namespace Macross.Logging.Files.Tests
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
-				1);
+				1,
+				s_DefaultManagementSchedule);
+
+			Assert.AreEqual($"{Environment.MachineName}.20200119.1.log", LogFile.FinalFileName);
 
 			Assert.AreEqual(16, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileDirectory).Count());
 			Assert.AreEqual(0, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileArchiveDirectory).Count());

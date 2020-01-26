@@ -18,6 +18,7 @@ namespace Macross.Logging.Files
 	internal class FileLoggerProvider : ILoggerProvider, ISupportExternalScope
 #pragma warning restore CA1812 // Remove class never instantiated
 	{
+		private static readonly ISystemTime s_DefaultSystemTime = new SystemTime();
 		private static readonly byte[] s_NewLine = Encoding.UTF8.GetBytes(Environment.NewLine);
 
 		private static void TestDiskPermissions(string logFileDirectory, string logFileArchiveDirectory, string testFileName)
@@ -43,7 +44,7 @@ namespace Macross.Logging.Files
 			}
 		}
 
-		private readonly LogFileManager _LogFileManager = new LogFileManager(new FileSystem(), new SystemTime());
+		private readonly LogFileManager _LogFileManager = new LogFileManager(new FileSystem(), s_DefaultSystemTime);
 		private readonly ConcurrentDictionary<string, FileLogger> _Loggers = new ConcurrentDictionary<string, FileLogger>();
 		private readonly ConcurrentQueue<LoggerJsonMessage> _Messages = new ConcurrentQueue<LoggerJsonMessage>();
 		private readonly EventWaitHandle _StopHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -60,6 +61,7 @@ namespace Macross.Logging.Files
 		private int? _LogFileMaxSizeInKilobytes;
 		private JsonSerializerOptions? _JsonOptions;
 		private LoggerGroupCache? _LoggerGroupCache;
+		private LogFileManagementSchedule? _ManagementSchedule;
 
 		public FileLoggerProvider(IHostEnvironment hostEnvironment, IOptionsMonitor<FileLoggerOptions> options)
 		{
@@ -147,7 +149,7 @@ namespace Macross.Logging.Files
 
 			string TestFileName = FileNameGenerator.GenerateFileName(
 				_ApplicationName,
-				new SystemTime(),
+				s_DefaultSystemTime,
 				"__OptionsTest__",
 				LogFileNamePattern);
 
@@ -188,7 +190,7 @@ namespace Macross.Logging.Files
 
 			optionValue = FileNameGenerator.GenerateFileName(
 				_ApplicationName!,
-				new SystemTime(),
+				s_DefaultSystemTime,
 				string.Empty,
 				optionValue);
 
@@ -228,22 +230,22 @@ namespace Macross.Logging.Files
 					if (_Timer != null || Options.ArchiveLogFilesOnStartup)
 						_LogFileManager.ArchiveLogFiles(_ApplicationName!, Options, _LogFileNamePattern!);
 
-					DateTime UtcNow = DateTime.UtcNow;
-					DateTime NextArchiveTimeUtc = UtcNow.Date.AddDays(1);
-					TimeSpan TimeUntilNextArchive = NextArchiveTimeUtc - UtcNow;
-					if (TimeUntilNextArchive <= TimeSpan.FromMinutes(5))
-						TimeUntilNextArchive = NextArchiveTimeUtc.AddDays(1) - UtcNow;
+					_ManagementSchedule = LogFileManagementSchedule.Build(s_DefaultSystemTime, Options);
 
-					_Timer = new Timer((s) => _ArchiveNowHandle.Set(), null, TimeUntilNextArchive, TimeSpan.FromMilliseconds(-1));
+					_Timer = new Timer(
+						(s) => _ArchiveNowHandle.Set(),
+						state: null,
+						_ManagementSchedule.TimeUntilNextArchiveUtc,
+						TimeSpan.FromMilliseconds(-1));
 					_ArchiveNowHandle.Reset();
 					continue;
 				}
 
-				DrainMessages(true);
+				DrainMessages(archiveLogFiles: true);
 			}
 
 			// When exiting make sure anything remaining in the queue is pumped to files.
-			DrainMessages(false);
+			DrainMessages(archiveLogFiles: false);
 		}
 
 		private void DrainMessages(bool archiveLogFiles)
@@ -258,7 +260,8 @@ namespace Macross.Logging.Files
 					Message.GroupName!,
 					() => _Options.CurrentValue,
 					_LogFileNamePattern!,
-					_LogFileMaxSizeInKilobytes);
+					_LogFileMaxSizeInKilobytes,
+					_ManagementSchedule!);
 
 				if (LogFile != null)
 				{

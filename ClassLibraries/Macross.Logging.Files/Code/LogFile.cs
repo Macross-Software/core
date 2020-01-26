@@ -5,7 +5,9 @@ namespace Macross.Logging.Files
 {
 	internal class LogFile
 	{
-		public DateTime DateUtc { get; }
+		public DateTime CreatedAtUtc { get; }
+
+		public LogFileManagementSchedule ManagementSchedule { get; }
 
 		public string FileName { get; }
 
@@ -19,9 +21,10 @@ namespace Macross.Logging.Files
 
 		public bool Toxic { get; set; }
 
-		public LogFile(DateTime dateUtc, string fileName, int index, string finalFileName, string finalFullPath, Stream stream)
+		public LogFile(DateTime createdAtUtc, LogFileManagementSchedule managementSchedule, string fileName, int index, string finalFileName, string finalFullPath, Stream stream)
 		{
-			DateUtc = dateUtc;
+			CreatedAtUtc = createdAtUtc;
+			ManagementSchedule = managementSchedule;
 			FileName = fileName;
 			Index = index;
 			FinalFileName = finalFileName;

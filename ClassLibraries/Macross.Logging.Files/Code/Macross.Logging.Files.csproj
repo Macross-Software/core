@@ -12,6 +12,7 @@
       A simple library for writing structured JSON out to disk, quickly.
 
       Commonly Used Types:
+      Macross.Logging.Files.FileLoggerProvider
       Macross.Logging.Files.FileLogger
       Macross.Logging.Files.FileLoggerOptions
 

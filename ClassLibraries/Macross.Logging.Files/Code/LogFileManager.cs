@@ -76,7 +76,8 @@ namespace Macross.Logging.Files
 			string groupName,
 			Func<FileLoggerOptions> options,
 			string logFileNamePattern,
-			int? logFileMaxSizeInKilobytes)
+			int? logFileMaxSizeInKilobytes,
+			LogFileManagementSchedule managementSchedule)
 		{
 			string FileName = FindFileNameForMessage(applicationName, groupName, logFileNamePattern);
 
@@ -88,11 +89,12 @@ namespace Macross.Logging.Files
 					options,
 					logFileNamePattern,
 					logFileMaxSizeInKilobytes,
+					managementSchedule,
 					FileName,
 					ExistingLogFile);
 			}
 
-			LogFile? NewLogFile = CreateNewLogFile(options().LogFileDirectory!, logFileMaxSizeInKilobytes, FileName, 0);
+			LogFile? NewLogFile = CreateNewLogFile(options().LogFileDirectory!, logFileMaxSizeInKilobytes, managementSchedule, FileName, 0);
 			if (NewLogFile != null)
 				_LogFiles[FileName] = NewLogFile;
 			return NewLogFile;
@@ -143,20 +145,23 @@ namespace Macross.Logging.Files
 			Func<FileLoggerOptions> options,
 			string logFileNamePattern,
 			int? logFileMaxSizeInKilobytes,
+			LogFileManagementSchedule managementSchedule,
 			string fileName,
 			LogFile existingLogFile)
 		{
-			if (_SystemTime.UtcNow.Date > existingLogFile.DateUtc)
+			DateTime UtcNow = _SystemTime.UtcNow;
+			if (UtcNow >= existingLogFile.ManagementSchedule.NextCutoverTimeUtc)
 			{
 				string NewFileName = FileNameGenerator.GenerateFileName(applicationName, _SystemTime, groupName, logFileNamePattern!);
 
-				LogFile? NewLogFile = CreateNewLogFile(options().LogFileDirectory!, logFileMaxSizeInKilobytes, NewFileName, 0);
+				LogFile? NewLogFile = CreateNewLogFile(options().LogFileDirectory!, logFileMaxSizeInKilobytes, managementSchedule, NewFileName, 0);
 				if (NewLogFile == null)
 					return existingLogFile;
 
 				existingLogFile.Stream.Dispose();
-				TryArchiveLogFile(options(), existingLogFile.FinalFullPath);
 				_LogFiles.Remove(fileName);
+				if (UtcNow > existingLogFile.ManagementSchedule.NextArchiveTimeUtc)
+					TryArchiveLogFile(options(), existingLogFile.FinalFullPath);
 
 				_LogFiles[NewFileName] = NewLogFile;
 				_GroupNameToFileNameCache![groupName] = NewFileName;
@@ -166,7 +171,7 @@ namespace Macross.Logging.Files
 
 			if (existingLogFile.Toxic || IsLogFileOverCapacity(logFileMaxSizeInKilobytes, existingLogFile.Stream.Length))
 			{
-				LogFile? NewLogFile = CreateNewLogFile(options().LogFileDirectory!, logFileMaxSizeInKilobytes, fileName, existingLogFile.Index + 1);
+				LogFile? NewLogFile = CreateNewLogFile(options().LogFileDirectory!, logFileMaxSizeInKilobytes, managementSchedule, fileName, existingLogFile.Index + 1);
 				if (NewLogFile == null)
 					return existingLogFile;
 
@@ -190,7 +195,12 @@ namespace Macross.Logging.Files
 			return FileName;
 		}
 
-		private LogFile? CreateNewLogFile(string logFileDirectory, int? logFileMaxSizeInKilobytes, string fileName, int index)
+		private LogFile? CreateNewLogFile(
+			string logFileDirectory,
+			int? logFileMaxSizeInKilobytes,
+			LogFileManagementSchedule managementSchedule,
+			string fileName,
+			int index)
 		{
 			string[]? FileNameComponents = null;
 
@@ -207,7 +217,8 @@ namespace Macross.Logging.Files
 					if (!_FileSystem.FileExists(FullFilePath))
 					{
 						return new LogFile(
-							_SystemTime.UtcNow.Date,
+							_SystemTime.UtcNow,
+							managementSchedule,
 							fileName,
 							index,
 							CandidateFileName,
@@ -225,7 +236,8 @@ namespace Macross.Logging.Files
 						}
 
 						return new LogFile(
-							_FileSystem.GetFileCreationTimeUtc(FullFilePath).Date,
+							_FileSystem.GetFileCreationTimeUtc(FullFilePath),
+							managementSchedule,
 							fileName,
 							index,
 							CandidateFileName,

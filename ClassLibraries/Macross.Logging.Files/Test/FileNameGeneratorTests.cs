@@ -13,8 +13,8 @@ namespace Macross.Logging.Files.Tests
 		[TestMethod]
 		public void DefaultLogFileNameTest()
 		{
-			string Expected = $"{Environment.MachineName}.20200119.log";
-			string Actual = FileNameGenerator.GenerateFileName("AppName", s_Jan19Utc, "Group", FileLoggerOptions.DefaultLogFileNamePattern);
+			string Expected = $"{Environment.MachineName}.20201107.log";
+			string Actual = FileNameGenerator.GenerateFileName("AppName", s_Nov7Local, "Group", FileLoggerOptions.DefaultLogFileNamePattern);
 
 			Assert.AreEqual(Expected, Actual);
 		}
@@ -22,8 +22,8 @@ namespace Macross.Logging.Files.Tests
 		[TestMethod]
 		public void DefaultGroupLogFileNameTest()
 		{
-			string Expected = $"{Environment.MachineName}.Group.20200119.log";
-			string Actual = FileNameGenerator.GenerateFileName("AppName", s_Jan19Utc, "Group", FileLoggerOptions.DefaultGroupLogFileNamePattern);
+			string Expected = $"{Environment.MachineName}.Group.20201107.log";
+			string Actual = FileNameGenerator.GenerateFileName("AppName", s_Nov7Local, "Group", FileLoggerOptions.DefaultGroupLogFileNamePattern);
 
 			Assert.AreEqual(Expected, Actual);
 		}
@@ -42,6 +42,15 @@ namespace Macross.Logging.Files.Tests
 		{
 			string Expected = $"{Environment.MachineName}.20201107.log";
 			string Actual = FileNameGenerator.GenerateFileName("AppName", s_Nov7Local, "Group", "{MachineName}.{DateTime:yyyyMMdd}.log");
+
+			Assert.AreEqual(Expected, Actual);
+		}
+
+		[TestMethod]
+		public void UtcTimeLogFileNameTest()
+		{
+			string Expected = $"{Environment.MachineName}.20200119.log";
+			string Actual = FileNameGenerator.GenerateFileName("AppName", s_Jan19Utc, "Group", "{MachineName}.{DateTimeUtc:yyyyMMdd}.log");
 
 			Assert.AreEqual(Expected, Actual);
 		}

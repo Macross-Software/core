@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.Encodings.Web;
 using System.Collections.Generic;
 
@@ -32,12 +34,12 @@ namespace Macross.Logging.Files
 		/// <summary>
 		/// Gets the default log file name pattern, used when <see cref="LogFileNamePattern"/> is not specified and <see cref="IncludeGroupNameInFileName"/> is false.
 		/// </summary>
-		public const string DefaultLogFileNamePattern = "{MachineName}.{DateTimeUtc:yyyyMMdd}.log";
+		public const string DefaultLogFileNamePattern = "{MachineName}.{DateTime:yyyyMMdd}.log";
 
 		/// <summary>
 		/// Gets the default log file name pattern, used when <see cref="LogFileNamePattern"/> is not specified and <see cref="IncludeGroupNameInFileName"/> is true.
 		/// </summary>
-		public const string DefaultGroupLogFileNamePattern = "{MachineName}.{GroupName}.{DateTimeUtc:yyyyMMdd}.log";
+		public const string DefaultGroupLogFileNamePattern = "{MachineName}.{GroupName}.{DateTime:yyyyMMdd}.log";
 
 		/// <summary>
 		/// Gets the default log file directory, used when <see cref="LogFileDirectory"/> is not specified.
@@ -48,6 +50,16 @@ namespace Macross.Logging.Files
 		/// Gets the default log file archive directory, used when <see cref="LogFileArchiveDirectory"/> is not specified.
 		/// </summary>
 		public const string DefaultLogFileArchiveDirectory = "C:\\Logs\\Archive\\{ApplicationName}\\";
+
+		/// <summary>
+		/// Gets the default log file cutover time, used when <see cref="LogFileCutoverTime"/> is not specified.
+		/// </summary>
+		public static TimeSpan DefaultLogFileCutoverTime { get; } = new TimeSpan(0, 0, 0);
+
+		/// <summary>
+		/// Gets the default log file archive time, used when <see cref="LogFileArchiveTime"/> is not specified.
+		/// </summary>
+		public static TimeSpan DefaultLogFileArchiveTime { get; } = new TimeSpan(1, 0, 0);
 
 		/// <summary>
 		/// Gets or sets the application name string that should be used as the {ApplicationName} token in file paths. If not supplied the <see cref="IHostEnvironment.ApplicationName"/> value will be used.
@@ -72,7 +84,7 @@ namespace Macross.Logging.Files
 		/// <summary>
 		/// Gets or sets the maximum file size in kilobytes of log files. Use 0 to indicate no maxium size. Default value: 10 Mb.
 		/// </summary>
-		public int LogFileMaxSizeInKilobytes { get; set; } = 1024 * 10; // 10 Mb default file size.
+		public int LogFileMaxSizeInKilobytes { get; set; } = 1024 * 20; // 20 Mb default file size.
 
 		/// <summary>
 		/// Gets or sets the log file naming pattern to use.
@@ -88,6 +100,24 @@ namespace Macross.Logging.Files
 		/// Gets or sets a value indicating whether old log files should be archived on startup. Default value: true.
 		/// </summary>
 		public bool ArchiveLogFilesOnStartup { get; set; } = true;
+
+		/// <summary>
+		/// Gets or sets a value indicating what time zone mode should be used for cutover and archive time calculations. Valid values: Utc or Local. Default value: Local.
+		/// </summary>
+		[JsonConverter(typeof(JsonStringEnumConverter))]
+		public DateTimeKind CutoverAndArchiveTimeZoneMode { get; set; } = DateTimeKind.Local;
+
+		/// <summary>
+		/// Gets or sets the time of day to cutover log files.
+		/// </summary>
+		[JsonConverter(typeof(JsonTimeSpanConverter))]
+		public TimeSpan? LogFileCutoverTime { get; set; }
+
+		/// <summary>
+		/// Gets or sets the time of day to archive log files.
+		/// </summary>
+		[JsonConverter(typeof(JsonTimeSpanConverter))]
+		public TimeSpan? LogFileArchiveTime { get; set; }
 
 		/// <summary>
 		/// Gets or sets the filters to use to group log messages by category.
