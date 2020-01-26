@@ -6,7 +6,7 @@
 
 ## Log Message Flattening
 
-The .NET Core logging framework is pretty wide-open. Developers can add whatever they want to scopes and log whatever they want as states. The framework really leaves it up to [ILoggerProvider](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.iloggerprovider) authors to sort it out, providing little guidance. Log message flattening in `Macross.Logging.Abstractions` follows thses rules:
+The .NET Core logging framework is pretty wide-open. Developers can add whatever they want to scopes and log whatever they want as states. The framework really leaves it up to [ILoggerProvider](https://docs.microsoft.com/en-us/dotnet/api/microsoft.extensions.logging.iloggerprovider) authors to sort it out, providing little guidance. Log message flattening in `Macross.Logging.Abstractions` (via `LoggerJsonMessage.FromLoggerData`) follows thses rules:
 
 1. When `state` is `IEnumerable<KeyValuePair<string, object>>` treat data as top-level properties on the JSON and call the formatter to build the content.
 
@@ -157,6 +157,8 @@ The .NET Core logging framework is pretty wide-open. Developers can add whatever
 			...
 		}
 		```
+
+4. Exceptions, LogLevel, ThreadId, TimestampUtc, CategoryName, & GroupName are straight-forward, they will be added off the root when present.
 
 ## Grouping
 
