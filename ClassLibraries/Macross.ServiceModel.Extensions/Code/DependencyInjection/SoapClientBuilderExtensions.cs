@@ -15,6 +15,15 @@ namespace Microsoft.Extensions.DependencyInjection
 		/// <param name="builder">The <see cref="ISoapClientBuilder"/>.</param>
 		/// <param name="configureChannelFactory">A delegate that is used to configure the <see cref="ChannelFactory"/>.</param>
 		/// <returns>An <see cref="ISoapClientBuilder"/> that can be used to configure the client.</returns>
+		public static ISoapClientBuilder ConfigureChannelFactory(this ISoapClientBuilder builder, Action<ChannelFactory> configureChannelFactory)
+			=> ConfigureChannelFactory(builder, (serviceProvider, channelFactory) => configureChannelFactory(channelFactory));
+
+		/// <summary>
+		/// Adds a delegate that will be called each time a <see cref="SoapClient"/>'s parent <see cref="ChannelFactory"/> is created.
+		/// </summary>
+		/// <param name="builder">The <see cref="ISoapClientBuilder"/>.</param>
+		/// <param name="configureChannelFactory">A delegate that is used to configure the <see cref="ChannelFactory"/>.</param>
+		/// <returns>An <see cref="ISoapClientBuilder"/> that can be used to configure the client.</returns>
 		public static ISoapClientBuilder ConfigureChannelFactory(this ISoapClientBuilder builder, Action<IServiceProvider, ChannelFactory> configureChannelFactory)
 		{
 			if (builder == null)

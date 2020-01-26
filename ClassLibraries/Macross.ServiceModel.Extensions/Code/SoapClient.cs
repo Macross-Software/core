@@ -47,7 +47,7 @@ namespace System.ServiceModel
 		/// <summary>Causes the <see cref="SoapClient" /> object to transition from its current state into the closed state.</summary>
 		public void Close()
 		{
-			if (_CommunicationObject != null && State != CommunicationState.Closed)
+			if (_CommunicationObject != null)
 			{
 				switch (State)
 				{
