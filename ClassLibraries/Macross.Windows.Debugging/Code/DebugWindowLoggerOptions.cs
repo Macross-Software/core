@@ -15,6 +15,41 @@ namespace Macross.Windows.Debugging
 	public class DebugWindowLoggerOptions
 	{
 		/// <summary>
+		/// Gets the default <see cref="LoggerGroupOptions"/> filters used to group log messages by category.
+		/// </summary>
+		/// <remarks>
+		/// Default settings are constructed as:
+		/// <code><![CDATA[
+		///   new LoggerGroupOptions[]
+		///   {
+		///   	new LoggerGroupOptions
+		///   	{
+		///   		GroupName = "System",
+		///   		CategoryNameFilters = new string[] { "System*" }
+		///   	},
+		///   	new LoggerGroupOptions
+		///   	{
+		///   		GroupName = "Microsoft",
+		///   		CategoryNameFilters = new string[] { "Microsoft*" }
+		///   	},
+		///   };
+		/// ]]></code>
+		/// </remarks>
+		public static IEnumerable<LoggerGroupOptions> DefaultGroupOptions { get; } = new LoggerGroupOptions[]
+		{
+			new LoggerGroupOptions
+			{
+				GroupName = "System",
+				CategoryNameFilters = new string[] { "System*" }
+			},
+			new LoggerGroupOptions
+			{
+				GroupName = "Microsoft",
+				CategoryNameFilters = new string[] { "Microsoft*" }
+			},
+		};
+
+		/// <summary>
 		/// Gets the default <see cref="JsonSerializerOptions"/> options to use when displaying messages.</summary>
 		/// <remarks>
 		/// Default settings are constructed as:
@@ -84,36 +119,9 @@ namespace Macross.Windows.Debugging
 		/// Gets or sets the filters to use to group log messages by category.
 		/// </summary>
 		/// <remarks>
-		/// Default settings are constructed as:
-		/// <code><![CDATA[
-		///   new LoggerGroupOptions[]
-		///   {
-		///   	new LoggerGroupOptions
-		///   	{
-		///   		GroupName = "System",
-		///   		CategoryNameFilters = new string[] { "System*" }
-		///   	},
-		///   	new LoggerGroupOptions
-		///   	{
-		///   		GroupName = "Microsoft",
-		///   		CategoryNameFilters = new string[] { "Microsoft*" }
-		///   	},
-		///   };
-		/// ]]></code>
+		/// See <see cref="DefaultGroupOptions"/> for default values.
 		/// </remarks>
-		public IEnumerable<LoggerGroupOptions>? GroupOptions { get; set; } = new LoggerGroupOptions[]
-		{
-			new LoggerGroupOptions
-			{
-				GroupName = "System",
-				CategoryNameFilters = new string[] { "System*" }
-			},
-			new LoggerGroupOptions
-			{
-				GroupName = "Microsoft",
-				CategoryNameFilters = new string[] { "Microsoft*" }
-			},
-		};
+		public IEnumerable<LoggerGroupOptions>? GroupOptions { get; set; }
 
 		/// <summary>
 		/// Gets or sets the <see cref="JsonSerializerOptions"/> to use when displaying messages.

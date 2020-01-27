@@ -170,7 +170,7 @@ namespace Macross.Logging.Files
 
 			_JsonOptions = options.JsonOptions ?? FileLoggerOptions.DefaultJsonOptions;
 
-			_LoggerGroupCache = new LoggerGroupCache(options.GroupOptions);
+			_LoggerGroupCache = new LoggerGroupCache(options.GroupOptions ?? FileLoggerOptions.DefaultGroupOptions);
 
 			_LogFileManager.ClearCache();
 		}

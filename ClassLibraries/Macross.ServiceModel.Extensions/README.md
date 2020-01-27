@@ -2,7 +2,7 @@
 
 [![nuget](https://img.shields.io/nuget/v/Macross.ServiceModel.Extensions.svg)](https://www.nuget.org/packages/Macross.ServiceModel.Extensions/)
 
-Macross.ServiceModel.Extensions provides a factory implementation pattern for [WCF](https://github.com/dotnet/wcf) clients (`SoapClient`) which closely mirrors what [HttpClientFactory](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests) provides for `HttpClient`s. This is done to help with dependency injection and performance (`ChannelFactory` reuse) when using the WCF API on top of .NET Core.
+[Macross.ServiceModel.Extensions](https://www.nuget.org/packages/Macross.ServiceModel.Extensions/) is a .NET Standard 2.0+ library which provides a factory implementation pattern for [WCF](https://github.com/dotnet/wcf) clients (`SoapClient`), closely mirroring what [HttpClientFactory](https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests) provides for `HttpClient`s. This is done to help with dependency injection and performance (`ChannelFactory` reuse) when using the WCF API on top of .NET Core.
 
 ## SoapClient
 

@@ -161,7 +161,7 @@ namespace Macross.Windows.Debugging
 
 			_JsonOptions = options.JsonOptions ?? DebugWindowLoggerOptions.DefaultJsonOptions;
 
-			_LoggerGroupCache = new LoggerGroupCache(options.GroupOptions);
+			_LoggerGroupCache = new LoggerGroupCache(options.GroupOptions ?? DebugWindowLoggerOptions.DefaultGroupOptions);
 		}
 
 		private async Task MessageProcessingTask()

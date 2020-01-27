@@ -151,7 +151,7 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 	}
 	```
 
-	Note: You should use wildcards when defining filters.
+	**Notes**: 1) You should use wildcards when defining filters. 2) Once you define one group option, the two default rules will no longer be applied.
 
   * Code-based Grouping
 

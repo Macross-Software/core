@@ -14,6 +14,41 @@ namespace Macross.Logging.Files
 	public class FileLoggerOptions
 	{
 		/// <summary>
+		/// Gets the default <see cref="LoggerGroupOptions"/> filters used to group log messages by category.
+		/// </summary>
+		/// <remarks>
+		/// Default settings are constructed as:
+		/// <code><![CDATA[
+		///   new LoggerGroupOptions[]
+		///   {
+		///   	new LoggerGroupOptions
+		///   	{
+		///   		GroupName = "System",
+		///   		CategoryNameFilters = new string[] { "System*" }
+		///   	},
+		///   	new LoggerGroupOptions
+		///   	{
+		///   		GroupName = "Microsoft",
+		///   		CategoryNameFilters = new string[] { "Microsoft*" }
+		///   	},
+		///   };
+		/// ]]></code>
+		/// </remarks>
+		public static IEnumerable<LoggerGroupOptions> DefaultGroupOptions { get; } = new LoggerGroupOptions[]
+		{
+			new LoggerGroupOptions
+			{
+				GroupName = "System",
+				CategoryNameFilters = new string[] { "System*" }
+			},
+			new LoggerGroupOptions
+			{
+				GroupName = "Microsoft",
+				CategoryNameFilters = new string[] { "Microsoft*" }
+			},
+		};
+
+		/// <summary>
 		/// Gets the default <see cref="JsonSerializerOptions"/> options to use when serializing messages.</summary>
 		/// <remarks>
 		/// Default settings are constructed as:
@@ -82,7 +117,7 @@ namespace Macross.Logging.Files
 		public bool IncludeGroupNameInFileName { get; set; } = false;
 
 		/// <summary>
-		/// Gets or sets the maximum file size in kilobytes of log files. Use 0 to indicate no maxium size. Default value: 10 Mb.
+		/// Gets or sets the maximum file size in kilobytes of log files. Use 0 to indicate no maxium size. Default value: 20 Mb.
 		/// </summary>
 		public int LogFileMaxSizeInKilobytes { get; set; } = 1024 * 20; // 20 Mb default file size.
 
@@ -123,36 +158,9 @@ namespace Macross.Logging.Files
 		/// Gets or sets the filters to use to group log messages by category.
 		/// </summary>
 		/// <remarks>
-		/// Default settings are constructed as:
-		/// <code><![CDATA[
-		///   new LoggerGroupOptions[]
-		///   {
-		///   	new LoggerGroupOptions
-		///   	{
-		///   		GroupName = "System",
-		///   		CategoryNameFilters = new string[] { "System*" }
-		///   	},
-		///   	new LoggerGroupOptions
-		///   	{
-		///   		GroupName = "Microsoft",
-		///   		CategoryNameFilters = new string[] { "Microsoft*" }
-		///   	},
-		///   };
-		/// ]]></code>
+		/// See <see cref="DefaultGroupOptions"/> for default values.
 		/// </remarks>
-		public IEnumerable<LoggerGroupOptions>? GroupOptions { get; set; } = new LoggerGroupOptions[]
-		{
-			new LoggerGroupOptions
-			{
-				GroupName = "System",
-				CategoryNameFilters = new string[] { "System*" }
-			},
-			new LoggerGroupOptions
-			{
-				GroupName = "Microsoft",
-				CategoryNameFilters = new string[] { "Microsoft*" }
-			},
-		};
+		public IEnumerable<LoggerGroupOptions>? GroupOptions { get; set; }
 
 		/// <summary>
 		/// Gets or sets the <see cref="JsonSerializerOptions"/> to use when serializing messages.
