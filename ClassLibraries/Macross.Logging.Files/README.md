@@ -145,7 +145,7 @@ You can override these defaults via configuration but for advanced stuff you'll 
 The following tokens are defined for directory and file name patterns:
 
 |Token Name|Details|
-|---|---|---|
+|---|---|
 |`{MachineName}`|Replaced with `Environment.MachineName`.|
 |`{ApplicationName}`|Replaced with `AppicationName` on options or `IHostEnvironment.ApplicationName`.|
 |`{GroupName}`|Replaced with the resolved `GroupName` for the message. The default is to use the category name on the message. `{GroupName}` token is not supported in the directory name, only as part of log file name.|
