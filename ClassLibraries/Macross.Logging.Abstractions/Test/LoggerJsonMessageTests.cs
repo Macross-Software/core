@@ -131,6 +131,25 @@ namespace Macross.Logging.Abstractions.Tests
 		}
 
 		[TestMethod]
+		public void WriteExtensionEnumerableDataValidTest()
+		{
+			TestLogger Logger = new TestLogger();
+
+			Logger.Write(
+				LogLevel.Information,
+				new Dictionary<string, object>
+				{
+					["ProductId"] = 3,
+					["AddressId"] = 4
+				},
+				"Data test.");
+
+			Assert.AreEqual(2, Logger.Message?.Data?.Count);
+			Assert.AreEqual(3, Logger.Message?.Data?["ProductId"]);
+			Assert.AreEqual(4, Logger.Message?.Data?["AddressId"]);
+		}
+
+		[TestMethod]
 		public void SerializeMessageToJsonTest()
 		{
 			TestLogger Logger = new TestLogger();
