@@ -74,8 +74,7 @@ namespace Macross.Logging
 
 					if (Item.Key == "{Data}")
 					{
-						if (Item.Value != null)
-							AddObjectPropertiesToMessageData(Message.Data, Item.Value);
+						AddDataToMessage(Message.Data, Item.Value);
 						continue;
 					}
 
@@ -144,6 +143,21 @@ namespace Macross.Logging
 			}
 
 			return (Data, Scope);
+		}
+
+		private static void AddDataToMessage(IDictionary<string, object?> messageData, object? data)
+		{
+			if (data is IEnumerable<KeyValuePair<string, object?>> DataValues)
+			{
+				foreach (KeyValuePair<string, object?> DataItem in DataValues)
+				{
+					messageData[DataItem.Key] = DataItem.Value;
+				}
+			}
+			else if (data != null)
+			{
+				AddObjectPropertiesToMessageData(messageData, data);
+			}
 		}
 
 		private static void AddObjectPropertiesToMessageData(IDictionary<string, object?> data, object value)
