@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.Logging
 			this ILogger logger,
 			string message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, 0, (object?)null, null, message, args);
+			=> Write(logger, LogLevel.Information, 0, (object?)null, null, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -28,7 +28,7 @@ namespace Microsoft.Extensions.Logging
 			EventId eventId,
 			string message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, eventId, (object?)null, null, message, args);
+			=> Write(logger, LogLevel.Information, eventId, (object?)null, null, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -42,7 +42,7 @@ namespace Microsoft.Extensions.Logging
 			object? data,
 			string? message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, 0, data, null, message, args);
+			=> Write(logger, LogLevel.Information, 0, data, null, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -58,7 +58,7 @@ namespace Microsoft.Extensions.Logging
 			object? data,
 			string? message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, eventId, data, null, message, args);
+			=> Write(logger, LogLevel.Information, eventId, data, null, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -68,7 +68,7 @@ namespace Microsoft.Extensions.Logging
 		public static void WriteInfo(
 			this ILogger logger,
 			Exception? exception)
-			=> Write(logger, LogLevel.Trace, 0, (object?)null, exception, null, null);
+			=> Write(logger, LogLevel.Information, 0, (object?)null, exception, null, null);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -80,7 +80,7 @@ namespace Microsoft.Extensions.Logging
 			this ILogger logger,
 			EventId eventId,
 			Exception? exception)
-			=> Write(logger, LogLevel.Trace, eventId, (object?)null, exception, null, null);
+			=> Write(logger, LogLevel.Information, eventId, (object?)null, exception, null, null);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -94,7 +94,7 @@ namespace Microsoft.Extensions.Logging
 			Exception? exception,
 			string? message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, 0, (object?)null, exception, message, args);
+			=> Write(logger, LogLevel.Information, 0, (object?)null, exception, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -110,7 +110,7 @@ namespace Microsoft.Extensions.Logging
 			Exception? exception,
 			string? message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, eventId, (object?)null, exception, message, args);
+			=> Write(logger, LogLevel.Information, eventId, (object?)null, exception, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -126,7 +126,7 @@ namespace Microsoft.Extensions.Logging
 			Exception? exception,
 			string? message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, 0, data, exception, message, args);
+			=> Write(logger, LogLevel.Information, 0, data, exception, message, args);
 
 		/// <summary>
 		/// Formats and writes an <see cref="LogLevel.Information"/> log message.
@@ -144,6 +144,6 @@ namespace Microsoft.Extensions.Logging
 			Exception? exception,
 			string? message,
 			params object?[]? args)
-			=> Write(logger, LogLevel.Trace, eventId, data, exception, message, args);
+			=> Write(logger, LogLevel.Information, eventId, data, exception, message, args);
 	}
 }
