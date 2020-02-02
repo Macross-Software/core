@@ -18,16 +18,13 @@ namespace DemoWebApplication
 		// Tests that the end of a path matches: /filename.extension[?querystring]
 		private static readonly Regex s_IsStaticAssetRegex = new Regex("\\/[^\\/]*?\\.[^\\/]*?$", RegexOptions.Compiled);
 
-		// Tests for vN or vN.N in a path segment.
-		private static readonly Regex s_IsVersionRegex = new Regex("^v\\d*(?:\\.\\d*)?$", RegexOptions.Compiled);
-
 		private static string ConvertPathToGroup(string path)
 		{
 			string[] Segments = path.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
 			return Segments.Length == 0
 				? "Index"
-				: !s_IsVersionRegex.IsMatch(Segments[0])
+				: !string.Equals("api", Segments[0], StringComparison.OrdinalIgnoreCase)
 					? Segments[0]
 					: Segments.Length == 1 || string.IsNullOrEmpty(Segments[1])
 						? "Index"

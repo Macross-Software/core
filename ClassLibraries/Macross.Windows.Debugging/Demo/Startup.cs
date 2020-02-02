@@ -20,6 +20,7 @@ namespace DemoWebApplication
 		public void ConfigureServices(IServiceCollection services)
 #pragma warning restore CA1822 // Mark members as static
 		{
+			services.AddControllers();
 			services.AddRazorPages();
 
 			services.AddHostedService<MessageSpamBackgroundService>();
@@ -52,7 +53,11 @@ namespace DemoWebApplication
 
 			app.UseAuthorization();
 
-			app.UseEndpoints(endpoints => endpoints.MapRazorPages());
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllers();
+				endpoints.MapRazorPages();
+			});
 		}
 	}
 }
