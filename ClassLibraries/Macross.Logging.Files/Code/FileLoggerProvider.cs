@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using System.IO;
 using System.Text;
 using System.Text.Json;
@@ -20,6 +19,7 @@ namespace Macross.Logging.Files
 	{
 		private static readonly ISystemTime s_DefaultSystemTime = new SystemTime();
 		private static readonly byte[] s_NewLine = Encoding.UTF8.GetBytes(Environment.NewLine);
+		private static readonly BufferWriter s_Buffer = new BufferWriter(16 * 1024);
 
 		private static void TestDiskPermissions(string logFileDirectory, string logFileArchiveDirectory, string testFileName)
 		{
@@ -267,7 +267,7 @@ namespace Macross.Logging.Files
 				{
 					try
 					{
-						SerializeMessageToJson(LogFile.Stream, Message).GetAwaiter().GetResult();
+						SerializeMessageToJson(LogFile.Stream, Message);
 					}
 #pragma warning disable CA1031 // Do not catch general exception types
 					catch
@@ -279,33 +279,42 @@ namespace Macross.Logging.Files
 			}
 		}
 
-		private async Task SerializeMessageToJson(Stream stream, LoggerJsonMessage message)
+		private void SerializeMessageToJson(Stream stream, LoggerJsonMessage message)
 		{
 			try
 			{
-				await JsonSerializer.SerializeAsync(stream, message, _JsonOptions).ConfigureAwait(false);
-			}
-			catch (JsonException JsonException)
-			{
-				await JsonSerializer.SerializeAsync(
-					stream,
-					new LoggerJsonMessage
+				using (Utf8JsonWriter Writer = new Utf8JsonWriter(s_Buffer))
+				{
+					try
 					{
-						LogLevel = message.LogLevel,
-						TimestampUtc = message.TimestampUtc,
-						ThreadId = message.ThreadId,
-						EventId = message.EventId,
-						GroupName = message.GroupName,
-						CategoryName = message.CategoryName,
-						Content = $"Message with Content [{message.Content}] contained data that could not be serialized into Json.",
-						Exception = LoggerJsonMessageException.FromException(JsonException)
-					},
-					_JsonOptions).ConfigureAwait(false);
+						JsonSerializer.Serialize(Writer, message, _JsonOptions);
+					}
+					catch (JsonException JsonException)
+					{
+						JsonSerializer.Serialize(
+							Writer,
+							new LoggerJsonMessage
+							{
+								LogLevel = message.LogLevel,
+								TimestampUtc = message.TimestampUtc,
+								ThreadId = message.ThreadId,
+								EventId = message.EventId,
+								GroupName = message.GroupName,
+								CategoryName = message.CategoryName,
+								Content = $"Message with Content [{message.Content}] contained data that could not be serialized into Json.",
+								Exception = LoggerJsonMessageException.FromException(JsonException)
+							},
+							_JsonOptions);
+					}
+				}
+				s_Buffer.WriteToStream(stream);
+				stream.Write(s_NewLine, 0, s_NewLine.Length);
+				stream.Flush();
 			}
-
-			await stream.WriteAsync(s_NewLine, 0, s_NewLine.Length).ConfigureAwait(false);
-
-			await stream.FlushAsync().ConfigureAwait(false);
+			finally
+			{
+				s_Buffer.Clear();
+			}
 		}
 	}
 }
