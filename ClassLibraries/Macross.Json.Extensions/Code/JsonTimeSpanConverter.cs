@@ -3,7 +3,7 @@
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
-	/// <see cref="JsonConverterFactory"/> to convert TimeSpan to and from strings. Supports <see cref="Nullable{TimeSpan}"/>.
+	/// <see cref="JsonConverterFactory"/> to convert <see cref="TimeSpan"/> to and from strings. Supports <see cref="Nullable{TimeSpan}"/>.
 	/// </summary>
 	/// <remarks>
 	/// TimeSpans are transposed using the constant ("c") format specifier: [-][d.]hh:mm:ss[.fffffff].

@@ -52,6 +52,7 @@ namespace Macross.Json.Extensions.Tests
 			NullableTestClass Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""TimeSpan"":""01:02:03""}");
 
 			Assert.IsNotNull(Actual);
+			Assert.IsTrue(Actual.TimeSpan.HasValue);
 			Assert.AreEqual(new TimeSpan(1, 2, 3), Actual.TimeSpan);
 
 			Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""TimeSpan"":null}");

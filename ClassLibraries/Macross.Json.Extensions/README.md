@@ -108,3 +108,30 @@ public class TestClass
 	public TimeSpan? NullableTimeSpan { get; set; }
 }
 ```
+
+## DateTimes
+
+Some of the older Microsoft JSON serialization libraries handle `DateTime`s differently than System.Text.Json does. If you are talking to an older API and it returns JSON like this...
+
+```/Date(1580803200000-0800)/``` or ```/Date(1580803200000)/```
+
+...you will get an exception (see [runtime #30776](https://github.com/dotnet/runtime/issues/30776)) trying to deserialize those into `DateTime`s or `DateTimeOffset`s with what System.Text.Json provides out of the box.
+
+[JsonMicrosoftDateTimeConverter](./Code/JsonMicrosoftDateTimeConverter.cs) and [JsonMicrosoftDateTimeOffsetConverter](./Code/JsonMicrosoftDateTimeOffsetConverter.cs) are provided to add in support for the legacy Microsoft date format.
+
+```csharp
+public class TestClass
+{
+	[JsonConverter(typeof(JsonMicrosoftDateTimeConverter))]
+	public DateTime DateTime { get; set; }
+
+	[JsonConverter(typeof(JsonMicrosoftDateTimeConverter))]
+	public DateTime? NullableDateTime { get; set; }
+
+	[JsonConverter(typeof(JsonMicrosoftDateTimeOffsetConverter))]
+	public DateTimeOffset DateTimeOffset { get; set; }
+
+	[JsonConverter(typeof(JsonMicrosoftDateTimeOffsetConverter))]
+	public DateTimeOffset? NullableDateTimeOffset { get; set; }
+}
+```
