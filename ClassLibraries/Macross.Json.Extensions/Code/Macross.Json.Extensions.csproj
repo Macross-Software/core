@@ -14,6 +14,8 @@
       Commonly Used Types:
       System.Text.Json.Serialization.JsonStringEnumMemberConverter
       System.Text.Json.Serialization.JsonTimeSpanConverter
+      System.Text.Json.Serialization.JsonMicrosoftDateTimeConverter
+      System.Text.Json.Serialization.JsonMicrosoftDateTimeOffsetConverter
     </Description>
     <Product>Macross.Json.Extensions</Product>
     <Company>Macross Software</Company>
