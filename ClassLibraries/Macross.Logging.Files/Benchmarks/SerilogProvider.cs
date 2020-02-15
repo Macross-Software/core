@@ -18,7 +18,8 @@ namespace LoggingBenchmarks
 				.WriteTo.File(
 					new JsonFormatter(),
 					"C:\\LogsPerf\\Serilog\\Log.json",
-					rollingInterval: RollingInterval.Day)
+					rollingInterval: RollingInterval.Day,
+					fileSizeLimitBytes: null)
 				.CreateLogger();
 
 			return (Log.CloseAndFlush, new SerilogLoggerFactory());

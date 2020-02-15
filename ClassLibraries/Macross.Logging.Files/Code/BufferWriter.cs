@@ -47,14 +47,11 @@ namespace Macross.Logging.Files
 
 				int newSize = checked(_Buffer.Length + growBy);
 
-				byte[] oldBuffer = _Buffer;
+				Span<byte> previousBuffer = _Buffer.AsSpan(0, _Index);
 
-				_Buffer = ArrayPool<byte>.Shared.Rent(newSize);
+				_Buffer = new byte[newSize];
 
-				Span<byte> previousBuffer = oldBuffer.AsSpan(0, _Index);
 				previousBuffer.CopyTo(_Buffer);
-				previousBuffer.Clear();
-				ArrayPool<byte>.Shared.Return(oldBuffer);
 			}
 		}
 	}

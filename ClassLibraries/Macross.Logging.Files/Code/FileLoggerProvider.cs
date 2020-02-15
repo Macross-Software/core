@@ -5,6 +5,7 @@ using System.Threading;
 using System.IO;
 using System.Text;
 using System.Text.Json;
+using System.Runtime.CompilerServices;
 
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -279,6 +280,7 @@ namespace Macross.Logging.Files
 			}
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private void SerializeMessageToJson(Stream stream, LoggerJsonMessage message)
 		{
 			try
