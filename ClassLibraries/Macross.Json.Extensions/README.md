@@ -92,6 +92,8 @@ Hopefully by .NET 5 this library will no longer be needed.
 
 ## TimeSpans
 
+Blog: https://blog.macrosssoftware.com/index.php/2020/02/16/system-text-json-timespan-serialization/
+
 System.Text.Json doesn't support `TimeSpan` [de]serialization at all (see [corefx #38641](https://github.com/dotnet/corefx/issues/38641)). It appears to be slated for .NET Core 5, but in the meantime [JsonTimeSpanConverter](./Code/JsonTimeSpanConverter.cs) is provided to add in support for `TimeSpan` and `TimeSpan?` for those of us who need to transport time values in our JSON ahead of the next major release.
 
 Usage is simple, register the `JsonTimeSpanConverter` on your `TimeSpan`s or via `JsonSerializerOptions.Converters`.
