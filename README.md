@@ -1,6 +1,8 @@
 # Macross Software
 
-This repo contains the open source Macross Software projects.
+[![Build Status](https://dev.azure.com/Macross-Software/core/_apis/build/status/Macross-Software.core.Gated%20Build?branchName=develop)](https://dev.azure.com/Macross-Software/core/_build/latest?definitionId=1&branchName=develop)
+
+This repo contains open source Macross Software projects.
 
 ## Requirements
 
