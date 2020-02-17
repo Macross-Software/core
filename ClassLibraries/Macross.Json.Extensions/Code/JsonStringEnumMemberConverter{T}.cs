@@ -29,6 +29,8 @@ namespace System.Text.Json.Serialization
 			}
 		}
 
+		private const BindingFlags EnumBindings = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+
 		private readonly bool _AllowIntegerValues;
 		private readonly Type? _UnderlyingType;
 		private readonly Type _EnumType;
@@ -62,18 +64,9 @@ namespace System.Text.Json.Serialization
 				ulong rawValue = GetEnumValue(enumValue);
 
 				string name = builtInNames[i];
-
-				string transformedName;
-				if (namingPolicy == null)
-				{
-					FieldInfo field = _EnumType.GetField(name, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static)!;
-					EnumMemberAttribute enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
-					transformedName = enumMemberAttribute?.Value ?? name;
-				}
-				else
-				{
-					transformedName = namingPolicy.ConvertName(name) ?? name;
-				}
+				FieldInfo field = _EnumType.GetField(name, EnumBindings)!;
+				EnumMemberAttribute enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
+				string transformedName = enumMemberAttribute?.Value ?? namingPolicy?.ConvertName(name) ?? name;
 
 				_RawToTransformed[rawValue] = new EnumInfo(transformedName, enumValue, rawValue);
 				_TransformedToRaw[transformedName] = new EnumInfo(name, enumValue, rawValue);

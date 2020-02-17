@@ -56,6 +56,34 @@ namespace Macross.Json.Extensions.Tests
 			Assert.AreEqual(DayOfWeek.Friday, Value);
 		}
 
+		[TestMethod]
+		public void EnumMemberSerializationOptionsTest()
+		{
+			JsonSerializerOptions options = new JsonSerializerOptions
+			{
+				Converters = { new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase) }
+			};
+			string json = JsonSerializer.Serialize(TestValues.First, options);
+			Assert.AreEqual(@"""first""", json);
+
+			json = JsonSerializer.Serialize(TestValues.Second, options);
+			Assert.AreEqual(@"""_second""", json);
+		}
+
+		[TestMethod]
+		public void EnumMemberDeserializationOptionsTest()
+		{
+			JsonSerializerOptions options = new JsonSerializerOptions
+			{
+				Converters = { new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase) }
+			};
+			TestValues Value = JsonSerializer.Deserialize<TestValues>(@"""first""", options);
+			Assert.AreEqual(TestValues.First, Value);
+
+			Value = JsonSerializer.Deserialize<TestValues>(@"""_second""", options);
+			Assert.AreEqual(TestValues.Second, Value);
+		}
+
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
 		[Flags]
 		public enum FlagDefinitions
@@ -73,6 +101,14 @@ namespace Macross.Json.Extensions.Tests
 			Three = 0x04,
 			[EnumMember(Value = "four value")]
 			Four = 0x08,
+		}
+
+		public enum TestValues
+		{
+			First,
+
+			[EnumMember(Value = "_second")]
+			Second,
 		}
 	}
 }
