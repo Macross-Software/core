@@ -9,13 +9,15 @@ namespace Macross.Json.Extensions.Tests
 	[TestClass]
 	public class JsonMicrosoftDateTimeConverterTests
 	{
+		private static readonly DateTime s_TestLocalDateTime = new DateTimeOffset(2020, 2, 4, 0, 0, 0, TimeSpan.FromHours(-8)).LocalDateTime;
+
 		[TestMethod]
 		public void DateTimeSerializationTest()
 		{
 			string Json = JsonSerializer.Serialize(
 				new TestClass
 				{
-					DateTime = new DateTime(2020, 2, 4)
+					DateTime = s_TestLocalDateTime
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""/Date(1580803200000)/""}", Json);
@@ -23,7 +25,7 @@ namespace Macross.Json.Extensions.Tests
 			Json = JsonSerializer.Serialize(
 				new TestClass
 				{
-					DateTime = new DateTime(2020, 2, 4).ToUniversalTime()
+					DateTime = s_TestLocalDateTime.ToUniversalTime()
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""/Date(1580803200000)/""}", Json);
@@ -35,7 +37,7 @@ namespace Macross.Json.Extensions.Tests
 			string Json = JsonSerializer.Serialize(
 				new NullableTestClass
 				{
-					DateTime = new DateTime(2020, 2, 4)
+					DateTime = s_TestLocalDateTime
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""/Date(1580803200000)/""}", Json);
@@ -52,7 +54,7 @@ namespace Macross.Json.Extensions.Tests
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(DateTimeKind.Utc, Actual.DateTime.Kind);
-			Assert.AreEqual(new DateTime(2020, 2, 4).ToUniversalTime(), Actual.DateTime);
+			Assert.AreEqual(s_TestLocalDateTime.ToUniversalTime(), Actual.DateTime);
 		}
 
 		[TestMethod]
@@ -63,7 +65,7 @@ namespace Macross.Json.Extensions.Tests
 			Assert.IsNotNull(Actual);
 			Assert.IsTrue(Actual.DateTime.HasValue);
 			Assert.AreEqual(DateTimeKind.Utc, Actual.DateTime!.Value.Kind);
-			Assert.AreEqual(new DateTime(2020, 2, 4).ToUniversalTime(), Actual.DateTime);
+			Assert.AreEqual(s_TestLocalDateTime.ToUniversalTime(), Actual.DateTime);
 
 			Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""DateTime"":null}");
 
