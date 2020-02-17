@@ -43,9 +43,9 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				// Note: There is no check for token == JsonTokenType.Null becaue Json serializer won't call the converter in that case.
+				// Note: There is no check for token == JsonTokenType.Null because Json serializer won't call the converter in that case.
 				if (reader.TokenType != JsonTokenType.String)
-					throw new NotSupportedException();
+					throw new JsonException();
 
 				return TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
 			}
@@ -53,7 +53,7 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
 			{
-				// Note: There is no check for value == null becaue Json serializer won't call the converter in that case.
+				// Note: There is no check for value == null because Json serializer won't call the converter in that case.
 				writer.WriteStringValue(value.ToString("c", CultureInfo.InvariantCulture));
 			}
 		}
@@ -63,9 +63,9 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				// Note: There is no check for token == JsonTokenType.Null becaue Json serializer won't call the converter in that case.
+				// Note: There is no check for token == JsonTokenType.Null because Json serializer won't call the converter in that case.
 				if (reader.TokenType != JsonTokenType.String)
-					throw new NotSupportedException();
+					throw new JsonException();
 
 				return TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
 			}
@@ -73,7 +73,7 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, TimeSpan? value, JsonSerializerOptions options)
 			{
-				// Note: There is no check for value == null becaue Json serializer won't call the converter in that case.
+				// Note: There is no check for value == null because Json serializer won't call the converter in that case.
 				writer.WriteStringValue(value!.Value.ToString("c", CultureInfo.InvariantCulture));
 			}
 		}

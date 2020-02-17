@@ -67,7 +67,7 @@ namespace System.Text.Json.Serialization
 			public DateTime ReadDateTime(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
-					throw new NotSupportedException();
+					throw new JsonException();
 
 				string formatted = reader.GetString();
 				Match match = s_Regex.Match(formatted);
@@ -76,7 +76,7 @@ namespace System.Text.Json.Serialization
 						!match.Success
 						|| !long.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unixTime))
 				{
-					throw new Exception("Unexpected value format, unable to parse DateTime.");
+					throw new JsonException("Unexpected value format, unable to parse DateTime.");
 				}
 
 				return s_Epoch.AddMilliseconds(unixTime);

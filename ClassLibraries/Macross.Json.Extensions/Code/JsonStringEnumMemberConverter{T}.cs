@@ -288,7 +288,7 @@ namespace System.Text.Json.Serialization
 				TypeCode.Byte => (byte)value,
 				TypeCode.Int16 => (ulong)(short)value,
 				TypeCode.UInt16 => (ushort)value,
-				_ => throw new NotSupportedException(),
+				_ => throw new JsonException(),
 			};
 		}
 	}

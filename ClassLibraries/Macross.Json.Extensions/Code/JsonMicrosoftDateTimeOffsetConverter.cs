@@ -67,7 +67,7 @@ namespace System.Text.Json.Serialization
 			public DateTimeOffset ReadDateTimeOffset(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
-					throw new NotSupportedException();
+					throw new JsonException();
 
 				string formatted = reader.GetString();
 				Match match = s_Regex.Match(formatted);
@@ -78,7 +78,7 @@ namespace System.Text.Json.Serialization
 						|| !int.TryParse(match.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int hours)
 						|| !int.TryParse(match.Groups[4].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int minutes))
 				{
-					throw new Exception("Unexpected value format, unable to parse DateTimeOffset.");
+					throw new JsonException("Unexpected value format, unable to parse DateTimeOffset.");
 				}
 
 				int sign = match.Groups[2].Value[0] == '+' ? 1 : -1;
