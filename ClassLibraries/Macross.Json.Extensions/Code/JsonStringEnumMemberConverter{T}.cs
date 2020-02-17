@@ -9,6 +9,8 @@ namespace System.Text.Json.Serialization
 	internal class JsonStringEnumMemberConverter<T> : JsonConverter<T>
 #pragma warning restore CA1812 // Remove class never instantiated
 	{
+		private const BindingFlags EnumBindings = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+
 #if NETSTANDARD2_0
 		private static readonly string[] s_Split = new string[] { ", " };
 #endif
@@ -28,8 +30,6 @@ namespace System.Text.Json.Serialization
 				RawValue = rawValue;
 			}
 		}
-
-		private const BindingFlags EnumBindings = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
 
 		private readonly bool _AllowIntegerValues;
 		private readonly Type? _UnderlyingType;

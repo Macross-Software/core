@@ -63,10 +63,10 @@ namespace Macross.Json.Extensions.Tests
 			{
 				Converters = { new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase) }
 			};
-			string json = JsonSerializer.Serialize(TestValues.First, options);
+			string json = JsonSerializer.Serialize(EnumDefinition.First, options);
 			Assert.AreEqual(@"""first""", json);
 
-			json = JsonSerializer.Serialize(TestValues.Second, options);
+			json = JsonSerializer.Serialize(EnumDefinition.Second, options);
 			Assert.AreEqual(@"""_second""", json);
 		}
 
@@ -77,11 +77,11 @@ namespace Macross.Json.Extensions.Tests
 			{
 				Converters = { new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase) }
 			};
-			TestValues Value = JsonSerializer.Deserialize<TestValues>(@"""first""", options);
-			Assert.AreEqual(TestValues.First, Value);
+			EnumDefinition Value = JsonSerializer.Deserialize<EnumDefinition>(@"""first""", options);
+			Assert.AreEqual(EnumDefinition.First, Value);
 
-			Value = JsonSerializer.Deserialize<TestValues>(@"""_second""", options);
-			Assert.AreEqual(TestValues.Second, Value);
+			Value = JsonSerializer.Deserialize<EnumDefinition>(@"""_second""", options);
+			Assert.AreEqual(EnumDefinition.Second, Value);
 		}
 
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
@@ -103,7 +103,7 @@ namespace Macross.Json.Extensions.Tests
 			Four = 0x08,
 		}
 
-		public enum TestValues
+		public enum EnumDefinition
 		{
 			First,
 
