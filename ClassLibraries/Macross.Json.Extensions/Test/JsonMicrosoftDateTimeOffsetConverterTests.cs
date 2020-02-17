@@ -9,15 +9,15 @@ namespace Macross.Json.Extensions.Tests
 	[TestClass]
 	public class JsonMicrosoftDateTimeOffsetConverterTests
 	{
+		private static readonly DateTimeOffset s_TestLocalDateTimeOffset = new DateTimeOffset(new DateTime(2020, 2, 4), TimeSpan.FromHours(-8));
+
 		[TestMethod]
 		public void DateTimeOffsetSerializationTest()
 		{
 			string Json = JsonSerializer.Serialize(
 				new TestClass
 				{
-					DateTimeOffset = new DateTimeOffset(
-						new DateTime(2020, 2, 4),
-						TimeSpan.FromHours(-8))
+					DateTimeOffset = s_TestLocalDateTimeOffset
 				});
 
 			Assert.AreEqual(@"{""DateTimeOffset"":""/Date(1580803200000-0800)/""}", Json);
@@ -29,9 +29,7 @@ namespace Macross.Json.Extensions.Tests
 			string Json = JsonSerializer.Serialize(
 				new NullableTestClass
 				{
-					DateTimeOffset = new DateTimeOffset(
-						new DateTime(2020, 2, 4),
-						TimeSpan.FromHours(-8))
+					DateTimeOffset = s_TestLocalDateTimeOffset
 				});
 
 			Assert.AreEqual(@"{""DateTimeOffset"":""/Date(1580803200000-0800)/""}", Json);
@@ -48,11 +46,9 @@ namespace Macross.Json.Extensions.Tests
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(
-				new DateTimeOffset(
-					new DateTime(2020, 2, 4),
-					TimeSpan.FromHours(-8)),
+				s_TestLocalDateTimeOffset,
 				Actual.DateTimeOffset);
-			Assert.AreEqual(new DateTime(2020, 2, 4).ToUniversalTime(), Actual.DateTimeOffset.UtcDateTime);
+			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTimeOffset.UtcDateTime);
 		}
 
 		[TestMethod]
@@ -62,11 +58,9 @@ namespace Macross.Json.Extensions.Tests
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(
-				new DateTimeOffset(
-					new DateTime(2020, 2, 4),
-					TimeSpan.FromHours(-8)),
+				s_TestLocalDateTimeOffset,
 				Actual.DateTimeOffset);
-			Assert.AreEqual(new DateTime(2020, 2, 4).ToUniversalTime(), Actual.DateTimeOffset!.Value.UtcDateTime);
+			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTimeOffset!.Value.UtcDateTime);
 
 			Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""DateTimeOffset"":null}");
 

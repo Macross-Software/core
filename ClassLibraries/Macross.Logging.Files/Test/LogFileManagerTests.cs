@@ -9,7 +9,7 @@ namespace Macross.Logging.Files.Tests
 	[TestClass]
 	public class LogFileManagerTests
 	{
-		private static readonly TestSystemTime s_DefaultSystemTime = new TestSystemTime(2020, 1, 20, 7, 0, 0);
+		private static readonly TestSystemTime s_DefaultSystemTime = new TestSystemTime(2020, 1, 19, 23, 0, 0, DateTimeKind.Local);
 
 		private static readonly FileLoggerOptions s_DefaultOptions = new FileLoggerOptions
 		{

@@ -9,7 +9,7 @@ namespace Macross.Json.Extensions.Tests
 	[TestClass]
 	public class JsonMicrosoftDateTimeConverterTests
 	{
-		private static readonly DateTime s_TestLocalDateTime = new DateTimeOffset(2020, 2, 4, 0, 0, 0, TimeSpan.FromHours(-8)).LocalDateTime;
+		private static readonly DateTimeOffset s_TestLocalDateTimeOffset = new DateTimeOffset(new DateTime(2020, 2, 4), TimeSpan.FromHours(-8));
 
 		[TestMethod]
 		public void DateTimeSerializationTest()
@@ -17,7 +17,7 @@ namespace Macross.Json.Extensions.Tests
 			string Json = JsonSerializer.Serialize(
 				new TestClass
 				{
-					DateTime = s_TestLocalDateTime
+					DateTime = s_TestLocalDateTimeOffset.LocalDateTime
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""/Date(1580803200000)/""}", Json);
@@ -25,7 +25,7 @@ namespace Macross.Json.Extensions.Tests
 			Json = JsonSerializer.Serialize(
 				new TestClass
 				{
-					DateTime = s_TestLocalDateTime.ToUniversalTime()
+					DateTime = s_TestLocalDateTimeOffset.UtcDateTime
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""/Date(1580803200000)/""}", Json);
@@ -37,7 +37,7 @@ namespace Macross.Json.Extensions.Tests
 			string Json = JsonSerializer.Serialize(
 				new NullableTestClass
 				{
-					DateTime = s_TestLocalDateTime
+					DateTime = s_TestLocalDateTimeOffset.LocalDateTime
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""/Date(1580803200000)/""}", Json);
@@ -54,7 +54,7 @@ namespace Macross.Json.Extensions.Tests
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(DateTimeKind.Utc, Actual.DateTime.Kind);
-			Assert.AreEqual(s_TestLocalDateTime.ToUniversalTime(), Actual.DateTime);
+			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTime);
 		}
 
 		[TestMethod]
@@ -65,7 +65,7 @@ namespace Macross.Json.Extensions.Tests
 			Assert.IsNotNull(Actual);
 			Assert.IsTrue(Actual.DateTime.HasValue);
 			Assert.AreEqual(DateTimeKind.Utc, Actual.DateTime!.Value.Kind);
-			Assert.AreEqual(s_TestLocalDateTime.ToUniversalTime(), Actual.DateTime);
+			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTime);
 
 			Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""DateTime"":null}");
 
