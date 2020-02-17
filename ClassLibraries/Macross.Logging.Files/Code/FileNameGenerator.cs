@@ -18,20 +18,20 @@ namespace Macross.Logging.Files
 
 		private static readonly Dictionary<string, TokenConverterFunc> s_FileNameTokenConverterFuncDictionary = new Dictionary<string, TokenConverterFunc>(StringComparer.OrdinalIgnoreCase)
 		{
-			["MachineName"] = (_, _, _, _) => Environment.MachineName,
-			["ApplicationName"] = (a, _, _, _) => a,
-			["GroupName"] = (_, _, g, _) => g,
-			["DateTimeUtc"] = (_, t, _, o) => t.UtcNow.ToString(o ?? "yyyyMMdd", CultureInfo.InvariantCulture),
-			["DateTime"] = (_, t, _, o) => t.Now.ToString(o ?? "yyyyMMdd", CultureInfo.InvariantCulture),
+			["MachineName"] = (a, t, g, o) => Environment.MachineName,
+			["ApplicationName"] = (a, t, g, o) => a,
+			["GroupName"] = (a, t, g, o) => g,
+			["DateTimeUtc"] = (a, t, g, o) => t.UtcNow.ToString(o ?? "yyyyMMdd", CultureInfo.InvariantCulture),
+			["DateTime"] = (a, t, g, o) => t.Now.ToString(o ?? "yyyyMMdd", CultureInfo.InvariantCulture),
 		};
 
 		private static readonly Dictionary<string, WildcardTokenConverterFunc> s_FileNameWildcardTokenConverterFuncDictionary = new Dictionary<string, WildcardTokenConverterFunc>(StringComparer.OrdinalIgnoreCase)
 		{
-			["MachineName"] = (_) => Environment.MachineName,
+			["MachineName"] = (a) => Environment.MachineName,
 			["ApplicationName"] = (a) => a,
-			["GroupName"] = (_) => "*",
-			["DateTimeUtc"] = (_) => "*",
-			["DateTime"] = (_) => "*",
+			["GroupName"] = (a) => "*",
+			["DateTimeUtc"] = (a) => "*",
+			["DateTime"] = (a) => "*",
 		};
 
 		public static string GenerateFileName(string applicationName, ISystemTime systemTime, string groupName, string fileNamePattern)
