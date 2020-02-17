@@ -84,7 +84,7 @@ namespace System.Text.Json.Serialization
 		{
 			JsonTokenType token = reader.TokenType;
 
-			// Note: There is no check for token == JsonTokenType.Null becaue Json serializer won't call the converter in that case.
+			// Note: There is no check for token == JsonTokenType.Null because Json serializer won't call the converter in that case.
 			if (token == JsonTokenType.String)
 			{
 				string enumString = reader.GetString();
@@ -124,29 +124,27 @@ namespace System.Text.Json.Serialization
 							}
 
 							if (!matched)
-								throw new NotSupportedException();
+								throw new JsonException($"Unknown flag value {flagValue}.");
 						}
 					}
 
 					return (T)Enum.ToObject(_EnumType, calculatedValue);
 				}
-				else
+
+				// Case insensitive search attempted second.
+				foreach (KeyValuePair<string, EnumInfo> enumItem in _TransformedToRaw)
 				{
-					// Case insensitive search attempted second.
-					foreach (KeyValuePair<string, EnumInfo> enumItem in _TransformedToRaw)
+					if (string.Equals(enumItem.Key, enumString, StringComparison.OrdinalIgnoreCase))
 					{
-						if (string.Equals(enumItem.Key, enumString, StringComparison.OrdinalIgnoreCase))
-						{
-							return (T)Enum.ToObject(_EnumType, enumItem.Value.RawValue);
-						}
+						return (T)Enum.ToObject(_EnumType, enumItem.Value.RawValue);
 					}
 				}
 
-				throw new NotSupportedException();
+				throw new JsonException($"Unknown value {enumString}.");
 			}
 
 			if (token != JsonTokenType.Number || !_AllowIntegerValues)
-				throw new NotSupportedException();
+				throw new JsonException();
 
 			switch (_EnumTypeCode)
 			{
@@ -202,12 +200,12 @@ namespace System.Text.Json.Serialization
 					break;
 			}
 
-			throw new NotSupportedException();
+			throw new JsonException();
 		}
 
 		public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
 		{
-			// Note: There is no check for value == null becaue Json serializer won't call the converter in that case.
+			// Note: There is no check for value == null because Json serializer won't call the converter in that case.
 			ulong rawValue = GetEnumValue(value!);
 
 			if (_RawToTransformed.TryGetValue(rawValue, out EnumInfo enumInfo))
@@ -245,7 +243,7 @@ namespace System.Text.Json.Serialization
 			}
 
 			if (!_AllowIntegerValues)
-				throw new NotSupportedException();
+				throw new JsonException();
 
 			switch (_EnumTypeCode)
 			{
@@ -274,7 +272,7 @@ namespace System.Text.Json.Serialization
 					writer.WriteNumberValue((sbyte)rawValue);
 					break;
 				default:
-					throw new NotSupportedException();
+					throw new JsonException();
 			}
 		}
 
