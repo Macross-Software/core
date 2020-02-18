@@ -10,6 +10,8 @@ namespace LoggingBenchmarks
 {
 	public static class SerilogProvider
 	{
+		public const string LogFileDirectoryPath = "C:\\LogsPerf\\Serilog\\";
+
 		public static (Action CleanupAction, ILoggerFactory LoggerFactory) CreateSerilogFactory()
 		{
 			Log.Logger = new LoggerConfiguration()
@@ -17,7 +19,7 @@ namespace LoggingBenchmarks
 				.Enrich.FromLogContext()
 				.WriteTo.File(
 					new JsonFormatter(),
-					"C:\\LogsPerf\\Serilog\\Log.json",
+					$"{LogFileDirectoryPath}Log.log",
 					rollingInterval: RollingInterval.Day,
 					fileSizeLimitBytes: null)
 				.CreateLogger();

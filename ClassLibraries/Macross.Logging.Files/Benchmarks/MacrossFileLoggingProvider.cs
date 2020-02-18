@@ -6,6 +6,8 @@ namespace LoggingBenchmarks
 {
 	public static class MacrossFileLoggingProvider
 	{
+		public const string LogFileDirectoryPath = "C:\\LogsPerf\\Macross\\";
+
 		public static (IHost Host, ILoggerProvider LoggerProvider) CreateMacrossProvider()
 		{
 			IHost host = Host
@@ -15,8 +17,8 @@ namespace LoggingBenchmarks
 					builder.ClearProviders();
 					builder.AddFiles(files =>
 					{
-						files.LogFileDirectory = "C:\\LogsPerf\\Macross";
-						files.LogFileArchiveDirectory = "C:\\LogsPerf\\Macross\\Archive";
+						files.LogFileDirectory = LogFileDirectoryPath;
+						files.LogFileArchiveDirectory = $"{LogFileDirectoryPath}Archive";
 						files.LogFileMaxSizeInKilobytes = 0;
 					});
 				}).Build();

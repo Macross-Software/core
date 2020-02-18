@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.ObjectModel;
 using System.Threading;
 
@@ -9,13 +10,14 @@ using BenchmarkDotNet.Attributes;
 
 namespace LoggingBenchmarks
 {
+#pragma warning disable SA1124 // Do not use regions
 	[MemoryDiagnoser]
 	[ThreadingDiagnoser]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
 	public class Benchmarks
 #pragma warning restore CA1001 // Types that own disposable fields should be disposable
 	{
-		private const int NumberOfLogMessagesToWrite = 5000;
+		private const int NumberOfLogMessagesToWrite = 15000;
 
 		private EventWaitHandle? _StartHandle;
 
@@ -68,8 +70,6 @@ namespace LoggingBenchmarks
 					break;
 				Thread.Sleep(200);
 			}
-
-			_StartHandle.Set();
 		}
 
 		private void WaitForThreads()
@@ -78,49 +78,128 @@ namespace LoggingBenchmarks
 			{
 				Thread.Join();
 			}
+		}
+
+		private void DestroyThreads()
+		{
+			foreach (Thread Thread in _Threads)
+			{
+				if (Thread.ThreadState != ThreadState.Stopped)
+					Thread.Abort();
+			}
 
 			_StartHandle.Dispose();
 		}
 
-#pragma warning disable CA1822 // Mark members as static
+		public static void VerifyAndDeleteFiles(string logFileDirectoryPath, int expectedNumberOfLogMessages)
+		{
+			foreach (string LogFile in Directory.EnumerateFiles(logFileDirectoryPath, "*.log", SearchOption.TopDirectoryOnly))
+			{
+				if (expectedNumberOfLogMessages != File.ReadAllLines(LogFile).Length)
+					throw new InvalidOperationException($"Log file [{LogFile}] did not match the expected size.");
+				File.Delete(LogFile);
+			}
+		}
+
+		#region NLog
+		private (ILoggerProvider LoggerProvider, NLog.LogFactory LogFactory) _NLog;
+
+		[IterationSetup(Target = nameof(NLogBenchmark))]
+		public void IterationSetupNLog()
+		{
+			_NLog = NLogProvider.CreateNLogProvider();
+
+			_Logger = _NLog.LoggerProvider.CreateLogger("LoggingBenchmarks.Benchmarks");
+
+			CreateThreads();
+		}
+
+		[IterationCleanup(Target = nameof(NLogBenchmark))]
+		public void IterationCleanupNLog()
+		{
+			_NLog.LoggerProvider.Dispose();
+
+			DestroyThreads();
+
+			VerifyAndDeleteFiles(NLogProvider.LogFileDirectoryPath, NumberOfThreads * NumberOfLogMessagesToWrite);
+		}
+
 		[Benchmark]
 		public void NLogBenchmark()
 		{
-			using ILoggerProvider Provider = NLogProvider.CreateNLogProvider();
-
-			_Logger = Provider.CreateLogger("LoggingBenchmarks.Benchmarks");
-
-			CreateThreads();
+			_StartHandle.Set();
 
 			WaitForThreads();
+
+			_NLog.LogFactory.Flush(TimeSpan.FromHours(1));
+		}
+		#endregion
+
+		#region Serilog
+		private (Action Cleanup, ILoggerFactory Factory) _Serilog;
+
+		[IterationSetup(Target = nameof(SerilogBenchmark))]
+		public void IterationSetupSerilog()
+		{
+			_Serilog = SerilogProvider.CreateSerilogFactory();
+
+			_Logger = _Serilog.Factory.CreateLogger("LoggingBenchmarks.Benchmarks");
+
+			CreateThreads();
+		}
+
+		[IterationCleanup(Target = nameof(IterationCleanupSerilog))]
+		public void IterationCleanupSerilog()
+		{
+			DestroyThreads();
+
+			VerifyAndDeleteFiles(SerilogProvider.LogFileDirectoryPath, NumberOfThreads * NumberOfLogMessagesToWrite);
 		}
 
 		[Benchmark]
 		public void SerilogBenchmark()
 		{
-			(Action Cleanup, ILoggerFactory Factory) = SerilogProvider.CreateSerilogFactory();
-
-			_Logger = Factory.CreateLogger("LoggingBenchmarks.Benchmarks");
-
-			CreateThreads();
+			_StartHandle.Set();
 
 			WaitForThreads();
 
-			Cleanup();
+			_Serilog.Cleanup();
+		}
+		#endregion
+
+		#region Macross
+		private (IHost Host, ILoggerProvider Provider) _MacrossFileLogging;
+
+		[IterationSetup(Target = nameof(MacrossFileLoggingBenchmark))]
+		public void IterationSetupMacrossFileLogging()
+		{
+			_MacrossFileLogging = MacrossFileLoggingProvider.CreateMacrossProvider();
+
+			_Logger = _MacrossFileLogging.Provider.CreateLogger("LoggingBenchmarks.Benchmarks");
+
+			CreateThreads();
+		}
+
+		[IterationCleanup(Target = nameof(MacrossFileLoggingBenchmark))]
+		public void IterationCleanupMacrossFileLogging()
+		{
+			_MacrossFileLogging.Host.Dispose();
+
+			DestroyThreads();
+
+			VerifyAndDeleteFiles(MacrossFileLoggingProvider.LogFileDirectoryPath, NumberOfThreads * NumberOfLogMessagesToWrite);
 		}
 
 		[Benchmark]
 		public void MacrossFileLoggingBenchmark()
 		{
-			(IHost Host, ILoggerProvider Provider) = MacrossFileLoggingProvider.CreateMacrossProvider();
-
-			_Logger = Provider.CreateLogger("LoggingBenchmarks.Benchmarks");
-
-			CreateThreads();
+			_StartHandle.Set();
 
 			WaitForThreads();
 
-			Host.Dispose();
+			_MacrossFileLogging.Provider.Dispose();
 		}
+		#endregion
 	}
 }
+#pragma warning restore SA1124 // Do not use regions

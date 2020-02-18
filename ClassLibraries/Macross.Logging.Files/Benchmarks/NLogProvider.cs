@@ -11,7 +11,9 @@ namespace LoggingBenchmarks
 #pragma warning disable CA2000 // Dispose objects before losing scope
 	public static class NLogProvider
 	{
-		public static ILoggerProvider CreateNLogProvider()
+		public const string LogFileDirectoryPath = "C:\\LogsPerf\\NLog\\";
+
+		public static (ILoggerProvider LogggerProvider, LogFactory LogFactory) CreateNLogProvider()
 		{
 			LoggingConfiguration Config = new LoggingConfiguration();
 
@@ -27,7 +29,7 @@ namespace LoggingBenchmarks
 
 			Target Target = new FileTarget("File")
 			{
-				FileName = "C:\\LogsPerf\\NLog\\nlog-${shortdate}.log",
+				FileName = $"{LogFileDirectoryPath}nlog -${{shortdate}}.log",
 				Layout = Layout
 			};
 
@@ -35,14 +37,16 @@ namespace LoggingBenchmarks
 
 			Config.AddRuleForAllLevels(Target, "*", true);
 
+			LogFactory LogFactory = new LogFactory(Config);
+
 			NLogLoggerProvider Provider = new NLogLoggerProvider(
 				new NLogProviderOptions
 				{
 					ShutdownOnDispose = true
 				},
-				new LogFactory(Config));
+				LogFactory);
 
-			return Provider;
+			return (Provider, LogFactory);
 		}
 	}
 #pragma warning restore CA2000 // Dispose objects before losing scope

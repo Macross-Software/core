@@ -63,6 +63,7 @@ namespace Macross.Logging.Files
 		private JsonSerializerOptions? _JsonOptions;
 		private LoggerGroupCache? _LoggerGroupCache;
 		private LogFileManagementSchedule? _ManagementSchedule;
+		private bool _Disposed;
 
 		public FileLoggerProvider(IHostEnvironment hostEnvironment, IOptionsMonitor<FileLoggerOptions> options)
 		{
@@ -96,6 +97,9 @@ namespace Macross.Logging.Files
 
 		protected virtual void Dispose(bool isDisposing)
 		{
+			if (_Disposed)
+				return;
+
 			_StopHandle.Set();
 
 			_LogMessageProcessingThread.Join();
@@ -109,6 +113,8 @@ namespace Macross.Logging.Files
 				_ArchiveNowHandle.Dispose();
 				_MessageReadyHandle.Dispose();
 			}
+
+			_Disposed = true;
 		}
 
 		/// <inheritdoc/>

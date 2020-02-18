@@ -16,6 +16,21 @@ Features:
 
 The flattened JSON and extension methods are all about making it easy to enrich log messages with important application information. The goal of the file logger is to get that to disk as quickly as possible, without disrupting the hosting application or taking up a ton of resources. The final part of the puzzle is to push those logs into `Splunk`, `Kibana`, `Azure Log Analytics`, or whatever, so our DevOps and support people can easily monitor and troubleshoot the internals of our systems.
 
+## Performance
+
+`Macross.Logging.Files` shines in high-throughput scenarios. Lots of threads, writing lots of log messages. Here's how it compares to some other popular logging frameworks:
+
+|                      Method | NumberOfThreads |        Mean |     Error |    StdDev |       Gen 0 |      Gen 1 |     Gen 2 | Allocated | Completed Work Items | Lock Contentions |
+|---------------------------- |---------------- |------------:|----------:|----------:|------------:|-----------:|----------:|----------:|---------------------:|-----------------:|
+|               NLogBenchmark |               1 |  5,195.8 ms | 103.51 ms | 106.29 ms |   9000.0000 |          - |         - |  79.31 MB |               3.0000 |                - |
+|            SerilogBenchmark |               1 |    192.9 ms |   4.49 ms |   6.00 ms |   4000.0000 |          - |         - |  32.52 MB |               1.0000 |                - |
+| MacrossFileLoggingBenchmark |               1 |    160.3 ms |   3.69 ms |   5.30 ms |   2000.0000 |  1000.0000 |         - |   21.2 MB |               2.0000 |                - |
+|               NLogBenchmark |              10 | 56,223.2 ms | 762.41 ms | 713.16 ms | 100000.0000 |  6000.0000 |         - | 793.08 MB |               3.0000 |        3428.0000 |
+|            SerilogBenchmark |              10 |  2,834.5 ms |  49.77 ms |  46.55 ms |  41000.0000 |  2000.0000 |         - | 325.05 MB |               2.0000 |       40395.0000 |
+| MacrossFileLoggingBenchmark |              10 |  1,688.8 ms |  33.75 ms |  38.86 ms |  28000.0000 | 10000.0000 | 2000.0000 | 213.49 MB |               4.0000 |          61.0000 |
+
+In the benchmark each thread is writing 15,000 log messages as fast as it can. Lower mean is better, lower allocation is better, fewer contentions is better.
+
 ## Usage
 
 When configuring your application Host use the `ConfigureLogging` delegate to call the `AddFiles` extensions:
