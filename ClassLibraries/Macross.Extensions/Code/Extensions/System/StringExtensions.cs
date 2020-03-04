@@ -184,6 +184,59 @@ namespace System
 			}
 		}
 
+		/// <summary>
+		/// Returns a value indicating whether a specified character occurs within this string, using the specified comparison rules.
+		/// </summary>
+		/// <param name="source">The string to search within.</param>
+		/// <param name="value">The character to seek.</param>
+		/// <param name="comparisonType">One of the enumeration values that specifies the rules to use in the comparison.</param>
+		/// <returns><see langword='true'/> if the <paramref name="value"/> parameter occurs within this string; otherwise, <see langword='false'/>.</returns>
+		public static bool Contains(this string source, char value, StringComparison comparisonType)
+			=> IndexOf(source, value, comparisonType) != -1;
+
+		/// <summary>
+		/// Reports the zero-based index of the first occurrence of the specified Unicode character in this string. A parameter specifies the type of search to use for the specified character.
+		/// </summary>
+		/// <param name="source">The string to search within.</param>
+		/// <param name="value">The character to seek.</param>
+		/// <param name="comparisonType">An enumeration value that specifies the rules for the search.</param>
+		/// <returns>The zero-based index of <paramref name="value"/> if that character is found, or -1 if it is not.</returns>
+		public static int IndexOf(this string source, string value, StringComparison comparisonType)
+		{
+			if (string.IsNullOrEmpty(source))
+				throw new ArgumentNullException(nameof(source));
+
+			switch (comparisonType)
+			{
+				case StringComparison.CurrentCulture:
+				case StringComparison.CurrentCultureIgnoreCase:
+					return CultureInfo.CurrentCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType));
+
+				case StringComparison.InvariantCulture:
+				case StringComparison.InvariantCultureIgnoreCase:
+					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType));
+
+				case StringComparison.Ordinal:
+					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.Ordinal);
+
+				case StringComparison.OrdinalIgnoreCase:
+					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.OrdinalIgnoreCase);
+
+				default:
+					throw new ArgumentException($"StringComparison [{comparisonType}] is not supported.", nameof(comparisonType));
+			}
+		}
+
+		/// <summary>
+		/// Returns a value indicating whether a specified string occurs within this string, using the specified comparison rules.
+		/// </summary>
+		/// <param name="source">The string to search within.</param>
+		/// <param name="value">The string to seek.</param>
+		/// <param name="comparisonType">One of the enumeration values that specifies the rules to use in the comparison.</param>
+		/// <returns><see langword='true'/> if the <paramref name="value"/> parameter occurs within this string; otherwise, <see langword='false'/>.</returns>
+		public static bool Contains(this string source, string value, StringComparison comparisonType)
+			=> IndexOf(source, value, comparisonType) >= 0;
+
 		private static CompareOptions GetCaseCompareOfComparisonCulture(StringComparison comparisonType)
 			=> (CompareOptions)((int)comparisonType & (int)CompareOptions.IgnoreCase);
 #endif
