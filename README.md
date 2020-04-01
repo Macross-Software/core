@@ -16,13 +16,14 @@ This repo contains open source Macross Software projects.
 ## Released Projects
 
 * [Macross.Windows.Debugging](./ClassLibraries/Macross.Windows.Debugging/README.md) - Debugging UI.
-* [Macross.Json.Extensions](./ClassLibraries/Macross.Json.Extensions/README.md) - System.Text.Json extensions and libraries.
-* [Macross.Logging.Abstractions](./ClassLibraries/Macross.Logging.Abstractions/README.md) - Logging extensions and helpers.
+* [Macross.Json.Extensions](./ClassLibraries/Macross.Json.Extensions/README.md) - System.Text.Json & System.Net.Http extensions and utilities.
+* [Macross.Logging.Abstractions](./ClassLibraries/Macross.Logging.Abstractions/README.md) - Logging extensions and utilities.
 * [Macross.Logging.Files](./ClassLibraries/Macross.Logging.Files/README.md) - File logging.
 * [Macross.ServiceModel.Extensions](./ClassLibraries/Macross.ServiceModel.Extensions/README.md) - System.ServiceModel extensions and libraries.
  
 ## Pre-release Projects
 
+* [Macross.Performance.Extensions](./ClassLibraries/Macross.Performance.Extensions/README.md) - Performance extensions and utilities.
 * [Macross.CommandLine](./ClassLibraries/Macross.CommandLine/README.md) - Simple command-line parsing.
 * [Macross.Extensions](./ClassLibraries/Macross.Extensions/README.md) - Random types, helper methods, and utilities.
 * [Macross.Windows.Impersonation](./ClassLibraries/Macross.Windows.Impersonation/README.md) - Windows impersonation library.

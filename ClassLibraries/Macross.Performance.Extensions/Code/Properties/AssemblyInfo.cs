@@ -5,6 +5,6 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 [assembly: CLSCompliant(false)]
 
-[assembly: Guid("46de8812-8b05-40b9-8012-7702f9f31506")]
+[assembly: Guid("4f5d8ace-4162-4655-9055-d237e86a8dbd")]
 
-[assembly: AssemblyVersion("1.3.0.20090")]
+[assembly: AssemblyVersion("0.0.1.20071")]

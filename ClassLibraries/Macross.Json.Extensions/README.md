@@ -2,7 +2,7 @@
 
 [![nuget](https://img.shields.io/nuget/v/Macross.Json.Extensions.svg)](https://www.nuget.org/packages/Macross.Json.Extensions/)
 
-[Macross.Json.Extensions](https://www.nuget.org/packages/Macross.Json.Extensions/) is a .NET Standard 2.0+ library for augmenting what is provided out of the box by the System.Text.Json API.
+[Macross.Json.Extensions](https://www.nuget.org/packages/Macross.Json.Extensions/) is a .NET Standard 2.0+ library for augmenting what is provided out of the box by the System.Text.Json & System.Net.Http APIs.
 
 Hopefully by .NET 5 this library will no longer be needed.
 
