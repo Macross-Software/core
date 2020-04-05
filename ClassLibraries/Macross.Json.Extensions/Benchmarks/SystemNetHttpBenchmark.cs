@@ -2,8 +2,10 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 using System.Text.Json;
 
 using BenchmarkDotNet.Attributes;
@@ -32,6 +34,11 @@ namespace JsonBenchmarks
 			Timestamp = DateTime.UtcNow,
 			Id = Guid.NewGuid(),
 			LargeData = new byte[1024 * 8]
+		};
+
+		private static readonly MediaTypeHeaderValue s_JsonContentType = new MediaTypeHeaderValue("application/json")
+		{
+			CharSet = "utf-8",
 		};
 
 		private HttpListener? _Server;
@@ -70,6 +77,7 @@ namespace JsonBenchmarks
 					HttpListenerContext Context = _Server!.GetContext();
 
 					Context.Response.StatusCode = 200;
+					Context.Request.InputStream.CopyTo(Context.Response.OutputStream); // Echo back the JSON that was sent.
 					Context.Response.Close();
 				}
 			}
@@ -85,13 +93,16 @@ namespace JsonBenchmarks
 		{
 			string Json = JsonSerializer.Serialize(s_Instance);
 
-			using StringContent Content = new StringContent(Json);
+			using StringContent Content = new StringContent(Json, Encoding.UTF8, "application/json");
 
 			using HttpResponseMessage response = await _Client!.PostAsync(
 				new Uri("http://localhost:8018/benchmark/"),
 				Content).ConfigureAwait(false);
 
 			response.EnsureSuccessStatusCode();
+
+			using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+			await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
 		}
 
 		[Benchmark]
@@ -101,13 +112,20 @@ namespace JsonBenchmarks
 
 			await JsonSerializer.SerializeAsync(Stream, s_Instance).ConfigureAwait(false);
 
+			Stream.Seek(0, SeekOrigin.Begin);
+
 			using StreamContent Content = new StreamContent(Stream);
+
+			Content.Headers.ContentType = s_JsonContentType;
 
 			using HttpResponseMessage response = await _Client!.PostAsync(
 				new Uri("http://localhost:8018/benchmark/"),
 				Content).ConfigureAwait(false);
 
 			response.EnsureSuccessStatusCode();
+
+			using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+			await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
 		}
 
 		[Benchmark]
@@ -120,6 +138,9 @@ namespace JsonBenchmarks
 				Content).ConfigureAwait(false);
 
 			response.EnsureSuccessStatusCode();
+
+			using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+			await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
 		}
 	}
 }

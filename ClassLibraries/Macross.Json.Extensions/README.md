@@ -113,6 +113,8 @@ public class TestClass
 
 ## DateTimes
 
+Blog: https://blog.macrosssoftware.com/index.php/2020/02/20/system-text-json-datetime-datetimeoffset-date-serialization/
+
 Some of the older Microsoft JSON serialization libraries handle `DateTime`s differently than System.Text.Json does. If you are talking to an older API and it returns JSON like this...
 
 ```/Date(1580803200000-0800)/``` or ```/Date(1580803200000)/```
@@ -137,3 +139,17 @@ public class TestClass
 	public DateTimeOffset? NullableDateTimeOffset { get; set; }
 }
 ```
+
+## PushStreamContent & JsonContent
+
+Blog: https://blog.macrosssoftware.com/index.php/2020/04/02/efficient-posting-of-json-to-request-streams/
+
+A port to .NET Standard 2.0+ of the old [PushStreamContent](https://docs.microsoft.com/en-us/previous-versions/aspnet/hh995285(v%3Dvs.118)) class and a `JsonContent` helper for writing JSON content to `HttpClient` requests more efficiently than using the built-in `StringContent` or `StreamContent` types.
+
+|                     Method |     Mean |   Error |   StdDev |   Median |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
+|--------------------------- |---------:|--------:|---------:|---------:|--------:|-------:|------:|----------:|
+| PostJsonUsingStringContent | 156.1 us | 5.33 us | 15.04 us | 149.8 us | 10.2539 | 0.9766 |     - |  77.79 KB |
+| PostJsonUsingStreamContent | 140.1 us | 3.05 us |  6.83 us | 137.0 us |  7.5684 | 0.7324 |     - |  56.03 KB |
+|   PostJsonUsingJsonContent | 137.1 us | 1.30 us |  1.15 us | 136.8 us |  5.6152 | 0.2441 |     - |  45.83 KB |
+
+Lower allocations is better.
