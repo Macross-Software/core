@@ -146,6 +146,19 @@ Blog: https://blog.macrosssoftware.com/index.php/2020/04/02/efficient-posting-of
 
 A port to .NET Standard 2.0+ of the old [PushStreamContent](https://docs.microsoft.com/en-us/previous-versions/aspnet/hh995285(v%3Dvs.118)) class and a `JsonContent` helper for writing JSON content to `HttpClient` requests more efficiently than using the built-in `StringContent` or `StreamContent` types.
 
+```csharp
+public async Task SendRequestToService(HttpClient client, Uri requestUri, RequestObject request)
+{
+	using JsonContent<RequestObject> jsonContent = new JsonContent<RequestObject>(request);
+
+	using HttpResponseMessage response = await client.PostAsync(requestUri, jsonContent).ConfigureAwait(false);
+
+	response.EnsureSuccessStatusCode();
+}
+```
+
+Performance benchmark:
+
 |                     Method |     Mean |   Error |   StdDev |   Median |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
 |--------------------------- |---------:|--------:|---------:|---------:|--------:|-------:|------:|----------:|
 | PostJsonUsingStringContent | 156.1 us | 5.33 us | 15.04 us | 149.8 us | 10.2539 | 0.9766 |     - |  77.79 KB |
