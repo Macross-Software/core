@@ -43,7 +43,6 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				// Note: There is no check for token == JsonTokenType.Null because Json serializer won't call the converter in that case.
 				if (reader.TokenType != JsonTokenType.String)
 					throw new JsonException();
 
@@ -52,10 +51,7 @@ namespace System.Text.Json.Serialization
 
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
-			{
-				// Note: There is no check for value == null because Json serializer won't call the converter in that case.
-				writer.WriteStringValue(value.ToString("c", CultureInfo.InvariantCulture));
-			}
+				=> writer.WriteStringValue(value.ToString("c", CultureInfo.InvariantCulture));
 		}
 
 		internal class JsonNullableTimeSpanConverter : JsonConverter<TimeSpan?>
@@ -72,10 +68,7 @@ namespace System.Text.Json.Serialization
 
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, TimeSpan? value, JsonSerializerOptions options)
-			{
-				// Note: There is no check for value == null because Json serializer won't call the converter in that case.
-				writer.WriteStringValue(value!.Value.ToString("c", CultureInfo.InvariantCulture));
-			}
+				=> writer.WriteStringValue(value!.Value.ToString("c", CultureInfo.InvariantCulture)); // Note: There is no check for value == null because Json serializer won't call the converter in that case.
 		}
 	}
 }

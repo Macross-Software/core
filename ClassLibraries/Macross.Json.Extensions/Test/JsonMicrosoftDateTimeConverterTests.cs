@@ -57,6 +57,18 @@ namespace Macross.Json.Extensions.Tests
 			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTime);
 		}
 
+		[ExpectedException(typeof(JsonException))]
+		[TestMethod]
+		public void DateTimeInvalidTypeDeserializationTest() => JsonSerializer.Deserialize<TestClass>(@"{""DateTime"":null}");
+
+		[ExpectedException(typeof(JsonException))]
+		[TestMethod]
+		public void DateTimeInvalidValueDeserializationTest() => JsonSerializer.Deserialize<TestClass>(@"{""DateTime"":""invalid_string""}");
+
+		[ExpectedException(typeof(JsonException))]
+		[TestMethod]
+		public void DateTimeInvalidPayloadDeserializationTest() => JsonSerializer.Deserialize<TestClass>(@"{""DateTime"":""/Date(invalid_value)/""}");
+
 		[TestMethod]
 		public void NullableDateTimeDeserializationTest()
 		{

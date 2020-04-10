@@ -46,6 +46,10 @@ namespace Macross.Json.Extensions.Tests
 			Assert.AreEqual(new TimeSpan(1, 2, 3), Actual.TimeSpan);
 		}
 
+		[ExpectedException(typeof(JsonException))]
+		[TestMethod]
+		public void TimeSpanInvalidDeserializationTest() => JsonSerializer.Deserialize<TestClass>(@"{""TimeSpan"":null}");
+
 		[TestMethod]
 		public void NullableTimeSpanDeserializationTest()
 		{
@@ -60,6 +64,10 @@ namespace Macross.Json.Extensions.Tests
 			Assert.IsNotNull(Actual);
 			Assert.IsFalse(Actual.TimeSpan.HasValue);
 		}
+
+		[ExpectedException(typeof(JsonException))]
+		[TestMethod]
+		public void NullableTimeSpanInvalidDeserializationTest() => JsonSerializer.Deserialize<NullableTestClass>(@"{""TimeSpan"":1}");
 
 		private class TestClass
 		{

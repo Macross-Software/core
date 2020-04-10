@@ -31,9 +31,13 @@ namespace System.ServiceModel
 
 				ChannelFactory ChannelFactory = Options.CreateChannelFactory(_ServiceProvider, this);
 
+				EnsureChannelFactoryState<TChannel>(ChannelFactory);
+
 				foreach (Action<IServiceProvider, ChannelFactory> ChannelFactoryConfigurationAction in Options.ChannelFactoryConfigurationActions)
 				{
 					ChannelFactoryConfigurationAction(_ServiceProvider, ChannelFactory);
+
+					EnsureChannelFactoryState<TChannel>(ChannelFactory);
 				}
 
 				return ChannelFactory;
@@ -43,5 +47,11 @@ namespace System.ServiceModel
 		}
 
 		public void Invalidate<TChannel>() => _ChannelFactoryCache.TryRemove(typeof(TChannel).FullName, out _);
+
+		private void EnsureChannelFactoryState<TChannel>(ChannelFactory channelFactory)
+		{
+			if (channelFactory.State != CommunicationState.Created)
+				throw new NotSupportedException($"The ChannelFactory provided to manage SoapClients of '{typeof(TChannel).FullName}' type is in an unexpected state.");
+		}
 	}
 }

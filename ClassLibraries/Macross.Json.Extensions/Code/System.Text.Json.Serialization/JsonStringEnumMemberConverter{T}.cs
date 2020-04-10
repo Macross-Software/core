@@ -77,7 +77,6 @@ namespace System.Text.Json.Serialization
 		{
 			JsonTokenType token = reader.TokenType;
 
-			// Note: There is no check for token == JsonTokenType.Null because Json serializer won't call the converter in that case.
 			if (token == JsonTokenType.String)
 			{
 				string enumString = reader.GetString();

@@ -82,7 +82,7 @@ namespace System.Text.Json.Serialization
 				}
 
 				int sign = match.Groups[2].Value[0] == '+' ? 1 : -1;
-				TimeSpan utcOffset = new TimeSpan(hours * sign, minutes * sign, 0);
+				TimeSpan utcOffset = TimeSpan.FromMinutes((sign * hours * 60) + minutes);
 
 				return s_Epoch.AddMilliseconds(unixTime).ToOffset(utcOffset);
 			}

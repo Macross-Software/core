@@ -140,6 +140,34 @@ public class TestClass
 }
 ```
 
+## IP Address & Port Types
+
+Blog: https://blog.macrosssoftware.com/index.php/2020/04/10/system-text-json-ip-address-port-serialization/
+
+[JsonIPAddressConverter](./Code/JsonIPAddressConverter.cs) and [JsonIPEndPointConverter](./Code/JsonIPEndPointConverter.cs) are provided to add in support for serialization of the System.Net `IPAddress` and `IPEndPoint` primitives. They will serialize using the `ToString` logic of each respective type.
+
+Usage example:
+```csharp
+public class TestClass
+{
+	[JsonConverter(typeof(JsonIPAddressConverter))]
+	public IPAddress IPAddress { get; set; }
+
+	[JsonConverter(typeof(JsonIPEndPointConverter))]
+	public IPEndPoint IPEndPoint { get; set; }
+}
+```
+
+Serialization output example:
+```json
+{
+	"IPv4Address": "127.0.0.1",
+	"IPv6Address": "::1",
+	"IPv4EndPoint": "127.0.0.1:443",
+	"IPv6EndPoint": "[::1]:443"
+}
+```
+
 ## PushStreamContent & JsonContent
 
 Blog: https://blog.macrosssoftware.com/index.php/2020/04/02/efficient-posting-of-json-to-request-streams/
