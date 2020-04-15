@@ -149,7 +149,25 @@ namespace System.Collections.Generic
 
 		/// <inheritdoc/>
 		public bool Equals(StructPoolBackedCollection<T> other)
-			=> other.Count == Count && other._Buffer == _Buffer;
+		{
+			if (Count != other.Count)
+				return false;
+
+			for (int i = 0; i < Count; i++)
+			{
+				T left = _Buffer![i];
+				T right = other._Buffer![i];
+
+				bool LeftIsNull = left is null;
+				if (LeftIsNull != (right is null))
+					return false;
+
+				if (!LeftIsNull && !left!.Equals(right))
+					return false;
+			}
+
+			return true;
+		}
 
 		/// <inheritdoc/>
 		public override int GetHashCode()
