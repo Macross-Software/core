@@ -38,6 +38,8 @@ namespace System.Collections.Generic
 			{
 				if (_Buffer == null)
 					throw new InvalidOperationException("Items cannot be read from an empty pool instance.");
+				if (index < 0 || index >= Count)
+					throw new ArgumentOutOfRangeException(nameof(index));
 				return ref _Buffer[index];
 			}
 		}
@@ -63,6 +65,32 @@ namespace System.Collections.Generic
 			_Buffer = buffer;
 			Count = count;
 		}
+
+#if NETSTANDARD2_1
+		/// <summary>
+		/// Return a <see cref="Span{T}" /> instance for the items in the collection.
+		/// </summary>
+		/// <returns>Created <see cref="Span{T}" />.</returns>
+		public Span<T> ToSpan()
+		{
+			if (_Buffer == null)
+				throw new InvalidOperationException("Items cannot be read from an empty pool instance.");
+
+			return new Span<T>(_Buffer, 0, Count);
+		}
+
+		/// <summary>
+		/// Return a <see cref="Memory{T}" /> instance for the items in the collection.
+		/// </summary>
+		/// <returns>Created <see cref="Memory{T}" />.</returns>
+		public Memory<T> ToMemory()
+		{
+			if (_Buffer == null)
+				throw new InvalidOperationException("Items cannot be read from an empty pool instance.");
+
+			return new Memory<T>(_Buffer, 0, Count);
+		}
+#endif
 
 		/// <summary>
 		/// Compares two <see cref="StructPoolBackedCollection{T}" /> instances for equality.
