@@ -18,7 +18,7 @@ namespace System.Net.Http
 		/// <param name="onStreamAvailable">Callback function to write to the stream once it is available.</param>
 		public PushStreamContent(Func<Stream, Task> onStreamAvailable)
 		{
-			_OnStreamAvailable = onStreamAvailable;
+			_OnStreamAvailable = onStreamAvailable ?? throw new ArgumentNullException(nameof(onStreamAvailable));
 		}
 
 		/// <inheritdoc/>
