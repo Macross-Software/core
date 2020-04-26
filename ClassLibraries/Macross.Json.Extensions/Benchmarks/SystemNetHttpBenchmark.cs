@@ -3,7 +3,6 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
@@ -12,6 +11,7 @@ using BenchmarkDotNet.Attributes;
 
 namespace JsonBenchmarks
 {
+	[MinIterationTime(1000)]
 	[MemoryDiagnoser]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
 	public class SystemNetHttpBenchmark
@@ -25,15 +25,23 @@ namespace JsonBenchmarks
 
 			public Guid Id { get; set; }
 
-			public byte[]? LargeData { get; set; }
+			public byte[]? Data { get; set; }
 		}
 
-		private static readonly Schema s_Instance = new Schema
+		private static readonly Schema s_LargeInstance = new Schema
 		{
-			Name = "Test Instance",
+			Name = "Test Large Instance",
 			Timestamp = DateTime.UtcNow,
 			Id = Guid.NewGuid(),
-			LargeData = new byte[1024 * 8]
+			Data = new byte[1024 * 8]
+		};
+
+		private static readonly Schema s_SmallInstance = new Schema
+		{
+			Name = "Test Small Instance",
+			Timestamp = DateTime.UtcNow,
+			Id = Guid.NewGuid(),
+			Data = new byte[32]
 		};
 
 		private static readonly MediaTypeHeaderValue s_JsonContentType = new MediaTypeHeaderValue("application/json")
@@ -44,16 +52,22 @@ namespace JsonBenchmarks
 		private HttpListener? _Server;
 		private HttpClient? _Client;
 
+		[Params(1000)]
+		public int NumberOfRequestsPerIteration { get; set; }
+
 		[GlobalSetup]
 		public void GlobalSetup()
 		{
+			// Warm up Json engine internal type cache.
+			JsonSerializer.Serialize(s_LargeInstance);
+
 			_Server = new HttpListener();
 			_Server.Prefixes.Add("http://localhost:8018/benchmark/");
 			_Server.Start();
 
 			_Client = new HttpClient();
 
-			ThreadPool.QueueUserWorkItem(ProcessRequests, null);
+			_ = Task.Run(ProcessRequests);
 		}
 
 		[GlobalCleanup]
@@ -68,13 +82,13 @@ namespace JsonBenchmarks
 			_Client?.Dispose();
 		}
 
-		private void ProcessRequests(object? state)
+		private async Task ProcessRequests()
 		{
 			try
 			{
 				while (true)
 				{
-					HttpListenerContext Context = _Server!.GetContext();
+					HttpListenerContext Context = await _Server!.GetContextAsync().ConfigureAwait(false);
 
 					Context.Response.StatusCode = 200;
 					Context.Request.InputStream.CopyTo(Context.Response.OutputStream); // Echo back the JSON that was sent.
@@ -91,56 +105,80 @@ namespace JsonBenchmarks
 		[Benchmark]
 		public async Task PostJsonUsingStringContent()
 		{
-			string Json = JsonSerializer.Serialize(s_Instance);
+			for (int i = 0; i < NumberOfRequestsPerIteration; i++)
+			{
+				Schema instance = i % 2 == 0 ? s_LargeInstance : s_SmallInstance;
 
-			using StringContent Content = new StringContent(Json, Encoding.UTF8, "application/json");
+				string Json = JsonSerializer.Serialize(instance);
 
-			using HttpResponseMessage response = await _Client!.PostAsync(
-				new Uri("http://localhost:8018/benchmark/"),
-				Content).ConfigureAwait(false);
+				using StringContent Content = new StringContent(Json, Encoding.UTF8, "application/json");
 
-			response.EnsureSuccessStatusCode();
+				using HttpResponseMessage response = await _Client!.PostAsync(
+					new Uri("http://localhost:8018/benchmark/"),
+					Content).ConfigureAwait(false);
 
-			using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-			await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+				response.EnsureSuccessStatusCode();
+
+				using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+				Schema responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+
+				if (instance.Id != responseObject.Id || instance.Data?.Length != responseObject.Data?.Length)
+					throw new InvalidOperationException();
+			}
 		}
 
 		[Benchmark]
 		public async Task PostJsonUsingStreamContent()
 		{
-			using MemoryStream Stream = new MemoryStream();
+			for (int i = 0; i < NumberOfRequestsPerIteration; i++)
+			{
+				Schema instance = i % 2 == 0 ? s_LargeInstance : s_SmallInstance;
 
-			await JsonSerializer.SerializeAsync(Stream, s_Instance).ConfigureAwait(false);
+				using MemoryStream Stream = new MemoryStream();
 
-			Stream.Seek(0, SeekOrigin.Begin);
+				await JsonSerializer.SerializeAsync(Stream, instance).ConfigureAwait(false);
 
-			using StreamContent Content = new StreamContent(Stream);
+				Stream.Seek(0, SeekOrigin.Begin);
 
-			Content.Headers.ContentType = s_JsonContentType;
+				using StreamContent Content = new StreamContent(Stream);
 
-			using HttpResponseMessage response = await _Client!.PostAsync(
-				new Uri("http://localhost:8018/benchmark/"),
-				Content).ConfigureAwait(false);
+				Content.Headers.ContentType = s_JsonContentType;
 
-			response.EnsureSuccessStatusCode();
+				using HttpResponseMessage response = await _Client!.PostAsync(
+					new Uri("http://localhost:8018/benchmark/"),
+					Content).ConfigureAwait(false);
 
-			using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-			await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+				response.EnsureSuccessStatusCode();
+
+				using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+				Schema responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+
+				if (instance.Id != responseObject.Id || instance.Data?.Length != responseObject.Data?.Length)
+					throw new InvalidOperationException();
+			}
 		}
 
 		[Benchmark]
 		public async Task PostJsonUsingJsonContent()
 		{
-			using JsonContent<Schema> Content = new JsonContent<Schema>(s_Instance);
+			for (int i = 0; i < NumberOfRequestsPerIteration; i++)
+			{
+				Schema instance = i % 2 == 0 ? s_LargeInstance : s_SmallInstance;
 
-			using HttpResponseMessage response = await _Client!.PostAsync(
-				new Uri("http://localhost:8018/benchmark/"),
-				Content).ConfigureAwait(false);
+				using JsonContent<Schema> Content = new JsonContent<Schema>(instance);
 
-			response.EnsureSuccessStatusCode();
+				using HttpResponseMessage response = await _Client!.PostAsync(
+					new Uri("http://localhost:8018/benchmark/"),
+					Content).ConfigureAwait(false);
 
-			using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-			await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+				response.EnsureSuccessStatusCode();
+
+				using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+				Schema responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+
+				if (instance.Id != responseObject.Id || instance.Data?.Length != responseObject.Data?.Length)
+					throw new InvalidOperationException();
+			}
 		}
 	}
 }

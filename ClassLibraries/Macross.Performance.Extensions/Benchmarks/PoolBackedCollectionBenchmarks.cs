@@ -10,7 +10,7 @@ namespace PerformanceBenchmarks
 #if NETCOREAPP3_1
 	[ThreadingDiagnoser]
 #endif
-	public class StructPoolBackedCollectionBenchmarks
+	public class PoolBackedCollectionBenchmarks
 	{
 		[Params(500)]
 		public int NumberOfLists { get; set; }

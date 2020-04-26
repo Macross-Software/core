@@ -187,10 +187,10 @@ public async Task SendRequestToService(HttpClient client, Uri requestUri, Reques
 
 Performance benchmark:
 
-|                     Method |     Mean |   Error |   StdDev |   Median |   Gen 0 |  Gen 1 | Gen 2 | Allocated |
-|--------------------------- |---------:|--------:|---------:|---------:|--------:|-------:|------:|----------:|
-| PostJsonUsingStringContent | 156.1 us | 5.33 us | 15.04 us | 149.8 us | 10.2539 | 0.9766 |     - |  77.79 KB |
-| PostJsonUsingStreamContent | 140.1 us | 3.05 us |  6.83 us | 137.0 us |  7.5684 | 0.7324 |     - |  56.03 KB |
-|   PostJsonUsingJsonContent | 137.1 us | 1.30 us |  1.15 us | 136.8 us |  5.6152 | 0.2441 |     - |  45.83 KB |
+|                     Method | NumberOfRequestsPerIteration |     Mean |   Error |  StdDev |     Gen 0 |    Gen 1 | Gen 2 | Allocated |
+|--------------------------- |----------------------------- |---------:|--------:|--------:|----------:|---------:|------:|----------:|
+| PostJsonUsingStringContent |                         1000 | 123.1 ms | 2.70 ms | 7.48 ms | 5625.0000 | 500.0000 |     - |  43.05 MB |
+| PostJsonUsingStreamContent |                         1000 | 124.5 ms | 2.46 ms | 3.82 ms | 4222.2222 | 333.3333 |     - |  32.18 MB |
+|   PostJsonUsingJsonContent |                         1000 | 122.0 ms | 3.02 ms | 8.85 ms | 3500.0000 | 166.6667 |     - |  27.32 MB |
 
 Lower allocations is better.

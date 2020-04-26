@@ -141,6 +141,66 @@ _Logger.LogInformation("Logical process complete.");
 
 In the above example everything that happens under the "Group" scope will be grouped together and written with `LogicalProcess` applied as the `{GroupName}` token.
 
+#### Grouping Application Startup Messages and Logging Top-level Exceptions
+
+The following code uses the `BeginGroup` extension to collect all startup messages into a "Main" log file and logs any top-level unhandled exceptions thrown:
+
+```csharp
+public static class Program
+{
+	public static async Task Main(string[] args)
+	{
+		IHost host = CreateHostBuilder(args).Build();
+
+		ILogger log = host.Services.GetRequiredService<ILoggerFactory>()
+			.CreateLogger(typeof(Program).FullName);
+
+		using IDisposable group = log.BeginGroup("Main");
+
+		try
+		{
+			await host.StartAsync().ConfigureAwait(false);
+
+			await host.WaitForShutdownAsync().ConfigureAwait(false);
+		}
+		catch (Exception runException)
+		{
+			log.WriteCritical(runException, "Process Main unhandled Exception thrown.");
+			throw;
+		}
+		finally
+		{
+			if (host is IAsyncDisposable asyncDisposable)
+			{
+				await asyncDisposable.DisposeAsync().ConfigureAwait(false);
+			}
+			else
+			{
+				host.Dispose();
+			}
+		}
+	}
+
+	public static IHostBuilder CreateHostBuilder(string[] args)
+	{
+		return Host
+			.CreateDefaultBuilder(args)
+			.ConfigureLogging(loggingBuilder =>
+			{
+				loggingBuilder
+					.ClearProviders()
+					.AddFiles(options =>
+					{
+						options.ApplicationName = "MyApplication";
+						options.IncludeGroupNameInFileName = true;
+					});
+			})
+			.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
+			.ConfigureDebugWindow(options => options.WindowTitle = "MyApplication");
+	}
+}
+```
+
 ### Json Options
 
 The default `JsonOptions` look like this:
