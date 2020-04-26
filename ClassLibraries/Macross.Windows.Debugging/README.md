@@ -181,7 +181,9 @@ There are different ways to configure the [DebugWindowLoggerOptions](./Code/Debu
 	_Logger.LogInformation("Logical process complete.");
 	```
 
-	For more information on `BeginGroup` see [Macross.Logging.Abstractions](../Macross.Logging.Abstractions/README.md).
+If multiple groups are found for a log message than the last one applied will be selected. To customize this behavior a `Priority` parameter is available, the highest priority group will always be selected over lower priority grouping.
+
+For more information on `BeginGroup` see [Macross.Logging.Abstractions](../Macross.Logging.Abstractions/README.md).
 
 ## Grouping messages by Controller...
 

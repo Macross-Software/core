@@ -13,15 +13,26 @@ namespace Microsoft.Extensions.Logging
 		public string GroupName { get; }
 
 		/// <summary>
+		/// Gets the priority of the group.
+		/// </summary>
+		/// <remarks>
+		/// When multiple <see cref="LoggerGroup"/>s are applied the highest priority group will be selected.
+		/// When multiple <see cref="LoggerGroup"/>s with the same priority are found, the last one applied will be selected.
+		/// </remarks>
+		public int Priority { get; }
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="LoggerGroup"/> class.
 		/// </summary>
 		/// <param name="groupName">Group name.</param>
-		public LoggerGroup(string groupName)
+		/// <param name="priority">Group priority.</param>
+		public LoggerGroup(string groupName, int priority = 0)
 		{
 			if (string.IsNullOrEmpty(groupName))
 				throw new ArgumentNullException(nameof(groupName));
 
 			GroupName = groupName;
+			Priority = priority;
 		}
 
 		/// <inheritdoc/>

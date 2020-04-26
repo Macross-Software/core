@@ -141,6 +141,10 @@ _Logger.LogInformation("Logical process complete.");
 
 In the above example everything that happens under the "Group" scope will be grouped together and written with `LogicalProcess` applied as the `{GroupName}` token.
 
+If multiple groups are found for a log message than the last one applied will be selected. To customize this behavior a `Priority` parameter is available, the highest priority group will always be selected over lower priority grouping.
+
+For more information on `BeginGroup` see [Macross.Logging.Abstractions](../Macross.Logging.Abstractions/README.md).
+
 #### Grouping Application Startup Messages and Logging Top-level Exceptions
 
 The following code uses the `BeginGroup` extension to collect all startup messages into a "Main" log file and logs any top-level unhandled exceptions thrown:

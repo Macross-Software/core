@@ -37,9 +37,10 @@ namespace Macross.Logging.Files
 			ScopeProvider?.ForEachScope(
 				(scope, state) =>
 				{
-					if (Group == null && scope is LoggerGroup LoggerGroup)
+					if (scope is LoggerGroup LoggerGroup)
 					{
-						Group = LoggerGroup;
+						if (Group == null || LoggerGroup.Priority >= Group.Priority)
+							Group = LoggerGroup;
 						return;
 					}
 					if (Scopes == null)

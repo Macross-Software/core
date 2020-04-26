@@ -14,15 +14,20 @@ namespace Microsoft.Extensions.Logging
 		/// <summary>
 		/// Begins a logical operation group.
 		/// </summary>
+		/// <remarks>
+		/// When multiple <see cref="LoggerGroup"/>s are applied the highest priority group will be selected.
+		/// When multiple <see cref="LoggerGroup"/>s with the same priority are found, the last one applied will be selected.
+		/// </remarks>
 		/// <param name="logger">The <see cref="ILogger"/> to write to.</param>
 		/// <param name="groupName">Group name.</param>
+		/// <param name="priority">Group priority.</param>
 		/// <returns>An <see cref="IDisposable"/> that ends the logical operation group on dispose.</returns>
-		public static IDisposable BeginGroup(this ILogger logger, string groupName)
+		public static IDisposable BeginGroup(this ILogger logger, string groupName, int priority = 0)
 		{
 			if (logger == null)
 				throw new ArgumentNullException(nameof(logger));
 
-			return logger.BeginScope(new LoggerGroup(groupName));
+			return logger.BeginScope(new LoggerGroup(groupName, priority));
 		}
 
 		/// <summary>
