@@ -237,6 +237,21 @@ namespace System
 		public static bool Contains(this string source, string value, StringComparison comparisonType)
 			=> IndexOf(source, value, comparisonType) >= 0;
 
+		/// <summary>
+		/// Determines whether the end of this string instance matches the specified character.
+		/// </summary>
+		/// <param name="source">The string to search within.</param>
+		/// <param name="value">The character to compare to the character at the end of this instance.</param>
+		/// <returns><see langword='true'/> if <paramref name="value"/> matches the end of this instance; otherwise, <see langword='false'/>.</returns>
+		public static bool EndsWith(this string source, char value)
+		{
+			if (string.IsNullOrEmpty(source))
+				throw new ArgumentNullException(nameof(source));
+
+			int lastPos = source.Length - 1;
+			return ((uint)lastPos < (uint)source.Length) && source[lastPos] == value;
+		}
+
 		private static CompareOptions GetCaseCompareOfComparisonCulture(StringComparison comparisonType)
 			=> (CompareOptions)((int)comparisonType & (int)CompareOptions.IgnoreCase);
 #endif
