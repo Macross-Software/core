@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Channels;
+using System.Threading.Tasks;
 
 using Macross.Logging;
 
@@ -22,8 +23,12 @@ namespace Macross.Windows.Debugging
 		{
 			ChannelWriter<LoggerJsonMessage> Writer = Messages.Writer;
 
-			while (Writer.WaitToWriteAsync(token).GetAwaiter().GetResult())
+			while (true)
 			{
+				ValueTask<bool> Task = Writer.WaitToWriteAsync(token);
+				if (!(Task.IsCompleted ? Task.Result : Task.AsTask().GetAwaiter().GetResult()))
+					break;
+
 				if (Writer.TryWrite(message))
 					return;
 			}

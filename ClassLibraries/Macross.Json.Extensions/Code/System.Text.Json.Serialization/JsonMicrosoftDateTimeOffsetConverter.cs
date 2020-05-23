@@ -30,7 +30,7 @@ namespace System.Text.Json.Serialization
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
 
-		private bool IsNullableDateTimeOffset(Type typeToConvert)
+		private static bool IsNullableDateTimeOffset(Type typeToConvert)
 		{
 			Type? UnderlyingType = Nullable.GetUnderlyingType(typeToConvert);
 
@@ -64,7 +64,7 @@ namespace System.Text.Json.Serialization
 			private static readonly DateTimeOffset s_Epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
 			private static readonly Regex s_Regex = new Regex("^/Date\\(([^+-]+)([+-])(\\d{2})(\\d{2})\\)/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-			public DateTimeOffset ReadDateTimeOffset(ref Utf8JsonReader reader)
+			public static DateTimeOffset ReadDateTimeOffset(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
 					throw new JsonException();
@@ -87,7 +87,7 @@ namespace System.Text.Json.Serialization
 				return s_Epoch.AddMilliseconds(unixTime).ToOffset(utcOffset);
 			}
 
-			public void WriteDateTimeOffset(Utf8JsonWriter writer, DateTimeOffset value)
+			public static void WriteDateTimeOffset(Utf8JsonWriter writer, DateTimeOffset value)
 			{
 				long unixTime = Convert.ToInt64((value - s_Epoch).TotalMilliseconds);
 				TimeSpan utcOffset = value.Offset;

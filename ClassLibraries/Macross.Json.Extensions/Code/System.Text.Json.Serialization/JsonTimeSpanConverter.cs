@@ -31,7 +31,7 @@ namespace System.Text.Json.Serialization
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
 
-		private bool IsNullableTimeSpan(Type typeToConvert)
+		private static bool IsNullableTimeSpan(Type typeToConvert)
 		{
 			Type? UnderlyingType = Nullable.GetUnderlyingType(typeToConvert);
 
@@ -43,10 +43,9 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				if (reader.TokenType != JsonTokenType.String)
-					throw new JsonException();
-
-				return TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
+				return reader.TokenType != JsonTokenType.String
+					? throw new JsonException()
+					: TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
 			}
 
 			/// <inheritdoc/>
@@ -59,16 +58,14 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				// Note: There is no check for token == JsonTokenType.Null because Json serializer won't call the converter in that case.
-				if (reader.TokenType != JsonTokenType.String)
-					throw new JsonException();
-
-				return TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
+				return reader.TokenType != JsonTokenType.String
+					? throw new JsonException()
+					: TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
 			}
 
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, TimeSpan? value, JsonSerializerOptions options)
-				=> writer.WriteStringValue(value!.Value.ToString("c", CultureInfo.InvariantCulture)); // Note: There is no check for value == null because Json serializer won't call the converter in that case.
+				=> writer.WriteStringValue(value!.Value.ToString("c", CultureInfo.InvariantCulture));
 		}
 	}
 }

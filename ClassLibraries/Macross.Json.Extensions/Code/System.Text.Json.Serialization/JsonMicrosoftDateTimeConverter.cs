@@ -30,7 +30,7 @@ namespace System.Text.Json.Serialization
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
 
-		private bool IsNullableDateTime(Type typeToConvert)
+		private static bool IsNullableDateTime(Type typeToConvert)
 		{
 			Type? UnderlyingType = Nullable.GetUnderlyingType(typeToConvert);
 
@@ -64,7 +64,7 @@ namespace System.Text.Json.Serialization
 			private static readonly DateTime s_Epoch = DateTime.SpecifyKind(new DateTime(1970, 1, 1, 0, 0, 0), DateTimeKind.Utc);
 			private static readonly Regex s_Regex = new Regex("^/Date\\(([^+-]+)\\)/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-			public DateTime ReadDateTime(ref Utf8JsonReader reader)
+			public static DateTime ReadDateTime(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
 					throw new JsonException();
@@ -72,17 +72,13 @@ namespace System.Text.Json.Serialization
 				string formatted = reader.GetString();
 				Match match = s_Regex.Match(formatted);
 
-				if (
-						!match.Success
-						|| !long.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unixTime))
-				{
-					throw new JsonException("Unexpected value format, unable to parse DateTime.");
-				}
-
-				return s_Epoch.AddMilliseconds(unixTime);
+				return !match.Success
+					|| !long.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unixTime)
+					? throw new JsonException("Unexpected value format, unable to parse DateTime.")
+					: s_Epoch.AddMilliseconds(unixTime);
 			}
 
-			public void WriteDateTime(Utf8JsonWriter writer, DateTime value)
+			public static void WriteDateTime(Utf8JsonWriter writer, DateTime value)
 			{
 				long unixTime = Convert.ToInt64((value.ToUniversalTime() - s_Epoch).TotalMilliseconds);
 
