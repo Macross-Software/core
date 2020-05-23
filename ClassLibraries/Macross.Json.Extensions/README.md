@@ -194,3 +194,45 @@ Performance benchmark:
 |   PostJsonUsingJsonContent |                         1000 | 122.0 ms | 3.02 ms | 8.85 ms | 3500.0000 | 166.6667 |     - |  27.32 MB |
 
 Lower allocations is better.
+
+## Dynamic Conversion
+
+[JsonDelegatedStringConverter](./Code/JsonDelegatedStringConverter.cs) is added to support creating converters from simple `ToString`/`FromString` function pairs that can be defined without the overhead of creating a full converter.
+
+Usage example:
+
+```csharp
+JsonSerializerOptions options = new JsonSerializerOptions();
+options.Converters.Add(
+	new JsonDelegatedStringConverter<TimeSpan>(
+		value => TimeSpan.ParseExact(value, "c", CultureInfo.InvariantCulture),
+		value => value.ToString("c", CultureInfo.InvariantCulture)));
+
+string Json = JsonSerializer.Serialize(new TimeSpan(1, 2, 3), options);
+
+TimeSpan Value = JsonSerializer.Deserialize<TimeSpan>(Json, options);
+```
+
+The catch is `JsonDelegatedStringConverter` cannot be used with `JsonConverterAttribute` because C# doesn't support generic attribues. [Maybe someday it will](https://github.com/dotnet/csharplang/issues/124).
+
+To get around that you can derive from `JsonDelegatedStringConverter` to create a type without generics, like this:
+
+```csharp
+public class JsonTimeSpanConverter : JsonDelegatedStringConverter<TimeSpan>
+{
+	public JsonTimeSpanConverter()
+		: base(
+			value => TimeSpan.ParseExact(value, "c", CultureInfo.InvariantCulture),
+			value => value.ToString("c", CultureInfo.InvariantCulture))
+	{
+	}
+}
+
+public class TestClass
+{
+	[JsonConverter(typeof(JsonTimeSpanConverter))]
+	public TimeSpan TimeSpan { get; set; }
+}
+```
+
+BUT watch out for `Nullable<T>` value types when you do that, they won't work correctly until .NET 5. [There is a bug in System.Text.Json](https://github.com/dotnet/runtime/pull/32006).
