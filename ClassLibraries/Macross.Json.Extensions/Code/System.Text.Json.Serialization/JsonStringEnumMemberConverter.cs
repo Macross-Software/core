@@ -40,7 +40,8 @@ namespace System.Text.Json.Serialization
 		{
 			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
 #pragma warning disable CA1062 // Validate arguments of public methods
-			return typeToConvert.IsEnum || (typeToConvert.IsGenericType && TestNullableEnum(typeToConvert).IsNullableEnum);
+			return typeToConvert.IsEnum
+				|| (typeToConvert.IsGenericType && TestNullableEnum(typeToConvert).IsNullableEnum);
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
 
@@ -57,7 +58,7 @@ namespace System.Text.Json.Serialization
 				culture: null);
 		}
 
-		private (bool IsNullableEnum, Type? UnderlyingType) TestNullableEnum(Type typeToConvert)
+		private static (bool IsNullableEnum, Type? UnderlyingType) TestNullableEnum(Type typeToConvert)
 		{
 			Type? UnderlyingType = Nullable.GetUnderlyingType(typeToConvert);
 
