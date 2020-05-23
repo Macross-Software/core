@@ -18,6 +18,7 @@
       System.Text.Json.Serialization.JsonMicrosoftDateTimeOffsetConverter
       System.Text.Json.Serialization.JsonIPAddressConverter
       System.Text.Json.Serialization.JsonIPEndPointConverter
+      System.Text.Json.Serialization.JsonDelegatedStringConverter
       System.Net.Http.JsonContent
       System.Net.Http.PushStreamContent
     </Description>
@@ -27,7 +28,7 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <VersionPrefix>1.4.1</VersionPrefix>
+    <VersionPrefix>1.5.0</VersionPrefix>
     <VersionSuffix></VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>
