@@ -8,7 +8,7 @@ namespace LoggingBenchmarks
 	{
 		public const string LogFileDirectoryPath = "C:\\LogsPerf\\Macross\\";
 
-		public static (IHost Host, ILoggerProvider LoggerProvider) CreateMacrossProvider()
+		public static (IHost Host, ILoggerProvider LoggerProvider) CreateMacrossProvider(bool useGroupNaming = false)
 		{
 			IHost host = Host
 				.CreateDefaultBuilder()
@@ -17,9 +17,10 @@ namespace LoggingBenchmarks
 					builder.ClearProviders();
 					builder.AddFiles(files =>
 					{
+						files.IncludeGroupNameInFileName = useGroupNaming;
 						files.LogFileDirectory = LogFileDirectoryPath;
 						files.LogFileArchiveDirectory = $"{LogFileDirectoryPath}Archive";
-						files.LogFileMaxSizeInKilobytes = 0;
+						files.LogFileMaxSizeInKilobytes = ProviderComparisonBenchmarks.LogFileMaxSizeInBytes / 1024;
 					});
 				}).Build();
 

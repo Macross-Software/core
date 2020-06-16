@@ -17,11 +17,15 @@ namespace LoggingBenchmarks
 			Log.Logger = new LoggerConfiguration()
 				.MinimumLevel.Debug()
 				.Enrich.FromLogContext()
+				.Enrich.WithThreadId()
 				.WriteTo.File(
-					new JsonFormatter(),
+					new JsonFormatter(renderMessage: true),
 					$"{LogFileDirectoryPath}Log.log",
 					rollingInterval: RollingInterval.Day,
-					fileSizeLimitBytes: null)
+					fileSizeLimitBytes: ProviderComparisonBenchmarks.LogFileMaxSizeInBytes,
+					rollOnFileSizeLimit: true,
+					retainedFileCountLimit: null,
+					buffered: false)
 				.CreateLogger();
 
 			return (Log.CloseAndFlush, new SerilogLoggerFactory());

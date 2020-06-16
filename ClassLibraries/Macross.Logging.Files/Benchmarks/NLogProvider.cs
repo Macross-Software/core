@@ -29,8 +29,14 @@ namespace LoggingBenchmarks
 
 			Target Target = new FileTarget("File")
 			{
-				FileName = $"{LogFileDirectoryPath}nlog -${{shortdate}}.log",
-				Layout = Layout
+				FileName = $"{LogFileDirectoryPath}Log${{shortdate}}.log",
+				Layout = Layout,
+				KeepFileOpen = true,       // Default for Serilog, but not for NLog
+				ConcurrentWrites = false,  // Matches Serilog Shared
+				AutoFlush = true,          // Matches Serilog Buffered
+				ArchiveEvery = FileArchivePeriod.Day,
+				ArchiveAboveSize = ProviderComparisonBenchmarks.LogFileMaxSizeInBytes,
+				ArchiveNumbering = ArchiveNumberingMode.Sequence,
 			};
 
 			Config.AddTarget("File", Target);

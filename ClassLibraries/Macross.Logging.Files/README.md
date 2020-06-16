@@ -20,16 +20,16 @@ The flattened JSON and extension methods are all about making it easy to enrich 
 
 `Macross.Logging.Files` shines in high-throughput scenarios. Lots of threads, writing lots of log messages. Here's how it compares to some other popular logging frameworks:
 
-|                      Method | NumberOfThreads |        Mean |     Error |    StdDev |       Gen 0 |      Gen 1 |     Gen 2 | Allocated | Completed Work Items | Lock Contentions |
-|---------------------------- |---------------- |------------:|----------:|----------:|------------:|-----------:|----------:|----------:|---------------------:|-----------------:|
-|               NLogBenchmark |               1 |  5,195.8 ms | 103.51 ms | 106.29 ms |   9000.0000 |          - |         - |  79.31 MB |               3.0000 |                - |
-|            SerilogBenchmark |               1 |    192.9 ms |   4.49 ms |   6.00 ms |   4000.0000 |          - |         - |  32.52 MB |               1.0000 |                - |
-| MacrossFileLoggingBenchmark |               1 |    160.3 ms |   3.69 ms |   5.30 ms |   2000.0000 |  1000.0000 |         - |   21.2 MB |               2.0000 |                - |
-|               NLogBenchmark |              10 | 56,223.2 ms | 762.41 ms | 713.16 ms | 100000.0000 |  6000.0000 |         - | 793.08 MB |               3.0000 |        3428.0000 |
-|            SerilogBenchmark |              10 |  2,834.5 ms |  49.77 ms |  46.55 ms |  41000.0000 |  2000.0000 |         - | 325.05 MB |               2.0000 |       40395.0000 |
-| MacrossFileLoggingBenchmark |              10 |  1,688.8 ms |  33.75 ms |  38.86 ms |  28000.0000 | 10000.0000 | 2000.0000 | 213.49 MB |               4.0000 |          61.0000 |
+|                      Method | NumberOfThreads |       Mean |     Error |    StdDev |     Median | Completed Work Items | Lock Contentions |      Gen 0 |     Gen 1 | Gen 2 | Allocated |
+|---------------------------- |---------------- |-----------:|----------:|----------:|-----------:|---------------------:|-----------------:|-----------:|----------:|------:|----------:|
+|               NLogBenchmark |               1 |   367.7 ms |  24.57 ms |  70.90 ms |   334.2 ms |              69.0000 |                - |  1000.0000 |         - |     - |  11.67 MB |
+|            SerilogBenchmark |               1 |   223.0 ms |   4.44 ms |   7.42 ms |   223.2 ms |               2.0000 |                - |  2000.0000 |         - |     - |  18.81 MB |
+| MacrossFileLoggingBenchmark |               1 |   171.4 ms |   3.62 ms |   8.46 ms |   169.8 ms |               2.0000 |                - |          - |         - |     - |   6.79 MB |
+|               NLogBenchmark |               4 | 1,799.8 ms |  47.11 ms | 137.43 ms | 1,736.2 ms |             269.0000 |        5277.0000 | 11000.0000 | 1000.0000 |     - |  88.29 MB |
+|            SerilogBenchmark |               4 | 1,549.7 ms | 231.07 ms | 681.31 ms | 1,137.1 ms |               2.0000 |       13237.0000 | 16000.0000 | 1000.0000 |     - | 128.14 MB |
+| MacrossFileLoggingBenchmark |               4 |   538.6 ms |  16.53 ms |  42.68 ms |   528.9 ms |               3.0000 |           6.0000 |  3000.0000 | 1000.0000 |     - |  27.14 MB |
 
-In the benchmark each thread is writing 15,000 log messages as fast as it can. Lower mean is better, lower allocation is better, fewer contentions is better.
+In the benchmark each thread is writing 5,000 log messages as fast as it can. Lower mean is better, lower allocation is better, fewer contentions is better.
 
 ## Usage
 
@@ -234,3 +234,7 @@ The following tokens are defined for directory and file name patterns:
 ## Message Structure
 
 For details on the flattened message JSON structure see: [Macross.Logging.Abstractions](../Macross.Logging.Abstractions/README.md).
+
+## Deferred JSON Serialization
+
+It is important to note that the objects you are logging won't be serialized immediately after you write to an `ILogger` instance. When you log a [LoggerJsonMessage](../Macross.Logging.Abstractions/Code/LoggerJsonMessage.cs) instance is created to store the details of your message and put on a queue to be written out to disk. A background thread monitoring the queue will pick up pending messages, serialize them, and then write the final output either directly to disk or to a buffer (depending on configuration). This deferral helps with performance but can lead to inconsistent log data if you change your objects quickly after logging them. It is best to log immutable structures or copies of the things that will be changing very quickly after being logged.

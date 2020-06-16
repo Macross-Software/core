@@ -14,10 +14,12 @@ namespace LoggingBenchmarks
 	[MemoryDiagnoser]
 	[ThreadingDiagnoser]
 #pragma warning disable CA1001 // Types that own disposable fields should be disposable
-	public class Benchmarks
+	public class ProviderComparisonBenchmarks
 #pragma warning restore CA1001 // Types that own disposable fields should be disposable
 	{
-		private const int NumberOfLogMessagesToWrite = 15000;
+		public const int LogFileMaxSizeInBytes = 1024 * 16;
+
+		private const int NumberOfLogMessagesToWrite = 5000;
 
 		private EventWaitHandle? _StartHandle;
 
@@ -25,7 +27,7 @@ namespace LoggingBenchmarks
 
 		private ILogger? _Logger;
 
-		[Params(1, 10)]
+		[Params(1, 4)]
 		public int NumberOfThreads { get; set; }
 
 		private void ProcessLogMessageThreadBody(object? state)
@@ -93,12 +95,14 @@ namespace LoggingBenchmarks
 
 		public static void VerifyAndDeleteFiles(string logFileDirectoryPath, int expectedNumberOfLogMessages)
 		{
+			int NumberOfLinesReadOutOfLogFiles = 0;
 			foreach (string LogFile in Directory.EnumerateFiles(logFileDirectoryPath, "*.log", SearchOption.TopDirectoryOnly))
 			{
-				if (expectedNumberOfLogMessages != File.ReadAllLines(LogFile).Length)
-					throw new InvalidOperationException($"Log file [{LogFile}] did not match the expected size.");
+				NumberOfLinesReadOutOfLogFiles += File.ReadAllLines(LogFile).Length;
 				File.Delete(LogFile);
 			}
+			if (expectedNumberOfLogMessages != NumberOfLinesReadOutOfLogFiles)
+				throw new InvalidOperationException("An unexpected number of log messages were found.");
 		}
 
 		#region NLog
@@ -118,6 +122,7 @@ namespace LoggingBenchmarks
 		public void IterationCleanupNLog()
 		{
 			_NLog.LoggerProvider.Dispose();
+			_NLog.LogFactory.Dispose();
 
 			DestroyThreads();
 
@@ -148,7 +153,7 @@ namespace LoggingBenchmarks
 			CreateThreads();
 		}
 
-		[IterationCleanup(Target = nameof(IterationCleanupSerilog))]
+		[IterationCleanup(Target = nameof(SerilogBenchmark))]
 		public void IterationCleanupSerilog()
 		{
 			DestroyThreads();

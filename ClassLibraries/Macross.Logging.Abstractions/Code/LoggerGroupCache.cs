@@ -82,22 +82,30 @@ namespace Macross.Logging
 			if (string.IsNullOrEmpty(categoryName))
 				categoryName = "Uncategorized";
 
-			return _CategoryGroupCache.GetOrAdd(categoryName, _ =>
+			if (!_CategoryGroupCache.TryGetValue(categoryName, out string groupName))
 			{
-				if (_GroupFilters == null)
-					return categoryName;
+				groupName = ResolveGroupNameForCategoryNameCore(categoryName);
+				_CategoryGroupCache.TryAdd(categoryName, groupName);
+			}
 
-				foreach (GroupFilter GroupFilter in _GroupFilters)
-				{
-					foreach (Regex Filter in GroupFilter)
-					{
-						if (Filter.IsMatch(categoryName))
-							return GroupFilter.GroupName;
-					}
-				}
+			return groupName;
+		}
 
+		private string ResolveGroupNameForCategoryNameCore(string categoryName)
+		{
+			if (_GroupFilters == null)
 				return categoryName;
-			});
+
+			foreach (GroupFilter GroupFilter in _GroupFilters)
+			{
+				foreach (Regex Filter in GroupFilter)
+				{
+					if (Filter.IsMatch(categoryName))
+						return GroupFilter.GroupName;
+				}
+			}
+
+			return categoryName;
 		}
 	}
 }

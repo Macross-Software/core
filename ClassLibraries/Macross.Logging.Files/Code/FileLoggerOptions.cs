@@ -102,17 +102,17 @@ namespace Macross.Logging.Files
 		public string? ApplicationName { get; set; }
 
 		/// <summary>
-		/// Gets or sets the directory used to store log files.
+		/// Gets or sets the directory used to store log files. Default value: <see cref="DefaultLogFileDirectory"/>.
 		/// </summary>
 		public string? LogFileDirectory { get; set; }
 
 		/// <summary>
-		/// Gets or sets the directory used to store archived log files.
+		/// Gets or sets the directory used to store archived log files. Default value: <see cref="DefaultLogFileArchiveDirectory"/>.
 		/// </summary>
 		public string? LogFileArchiveDirectory { get; set; }
 
 		/// <summary>
-		/// Gets or sets a value indicating whether or not group name should be part of the log file name.
+		/// Gets or sets a value indicating whether or not group name should be part of the log file name. Default value: false.
 		/// </summary>
 		public bool IncludeGroupNameInFileName { get; set; } = false;
 
@@ -122,7 +122,7 @@ namespace Macross.Logging.Files
 		public int LogFileMaxSizeInKilobytes { get; set; } = 1024 * 20; // 20 Mb default file size.
 
 		/// <summary>
-		/// Gets or sets the log file naming pattern to use.
+		/// Gets or sets the log file naming pattern to use. Default value: Either <see cref="DefaultLogFileNamePattern"/> or <see cref="DefaultGroupLogFileNamePattern"/>.
 		/// </summary>
 		public string? LogFileNamePattern { get; set; }
 
@@ -143,13 +143,13 @@ namespace Macross.Logging.Files
 		public DateTimeKind CutoverAndArchiveTimeZoneMode { get; set; } = DateTimeKind.Local;
 
 		/// <summary>
-		/// Gets or sets the time of day to cutover log files.
+		/// Gets or sets the time of day to cutover log files. Default value: <see cref="DefaultLogFileCutoverTime"/>.
 		/// </summary>
 		[JsonConverter(typeof(JsonTimeSpanConverter))]
 		public TimeSpan? LogFileCutoverTime { get; set; }
 
 		/// <summary>
-		/// Gets or sets the time of day to archive log files.
+		/// Gets or sets the time of day to archive log files. Default value: <see cref="DefaultLogFileArchiveTime"/>.
 		/// </summary>
 		[JsonConverter(typeof(JsonTimeSpanConverter))]
 		public TimeSpan? LogFileArchiveTime { get; set; }

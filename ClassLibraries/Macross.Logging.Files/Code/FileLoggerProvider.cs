@@ -20,7 +20,6 @@ namespace Macross.Logging.Files
 	{
 		private static readonly ISystemTime s_DefaultSystemTime = new SystemTime();
 		private static readonly byte[] s_NewLine = Encoding.UTF8.GetBytes(Environment.NewLine);
-		private static readonly BufferWriter s_Buffer = new BufferWriter(16 * 1024);
 
 		private static void TestDiskPermissions(string logFileDirectory, string logFileArchiveDirectory, string testFileName)
 		{
@@ -45,6 +44,7 @@ namespace Macross.Logging.Files
 			}
 		}
 
+		private readonly BufferWriter _Buffer = new BufferWriter(16 * 1024);
 		private readonly LogFileManager _LogFileManager = new LogFileManager(new FileSystem(), s_DefaultSystemTime);
 		private readonly ConcurrentDictionary<string, FileLogger> _Loggers = new ConcurrentDictionary<string, FileLogger>();
 		private readonly ConcurrentQueue<LoggerJsonMessage> _Messages = new ConcurrentQueue<LoggerJsonMessage>();
@@ -55,6 +55,7 @@ namespace Macross.Logging.Files
 		private readonly IHostEnvironment _HostEnvironment;
 		private readonly IOptionsMonitor<FileLoggerOptions> _Options;
 		private readonly IDisposable _OptionsReloadToken;
+		private readonly Func<FileLoggerOptions> _GetOptionsFunc;
 		private Timer? _Timer;
 		private IExternalScopeProvider? _ScopeProvider;
 		private string? _ApplicationName;
@@ -72,6 +73,8 @@ namespace Macross.Logging.Files
 
 			ApplyOptions(options.CurrentValue);
 			_OptionsReloadToken = _Options.OnChange(ApplyOptions);
+
+			_GetOptionsFunc = () => _Options.CurrentValue;
 
 			_LogMessageProcessingThread = new Thread(LogMessageProcessingThreadBody)
 			{
@@ -120,12 +123,15 @@ namespace Macross.Logging.Files
 		/// <inheritdoc/>
 		public ILogger CreateLogger(string categoryName)
 		{
-			return _Loggers.GetOrAdd(
-				categoryName,
-				_ => new FileLogger(categoryName, AddMessage)
+			if (!_Loggers.TryGetValue(categoryName, out FileLogger logger))
+			{
+				logger = new FileLogger(categoryName, AddMessage)
 				{
 					ScopeProvider = _ScopeProvider
-				});
+				};
+				_Loggers.TryAdd(categoryName, logger);
+			}
+			return logger;
 		}
 
 		/// <inheritdoc/>
@@ -265,7 +271,7 @@ namespace Macross.Logging.Files
 				LogFile? LogFile = _LogFileManager.FindLogFile(
 					_ApplicationName!,
 					Message.GroupName!,
-					() => _Options.CurrentValue,
+					_GetOptionsFunc,
 					_LogFileNamePattern!,
 					_LogFileMaxSizeInKilobytes,
 					_ManagementSchedule!);
@@ -291,7 +297,7 @@ namespace Macross.Logging.Files
 		{
 			try
 			{
-				using (Utf8JsonWriter Writer = new Utf8JsonWriter(s_Buffer))
+				using (Utf8JsonWriter Writer = new Utf8JsonWriter(_Buffer))
 				{
 					try
 					{
@@ -315,13 +321,13 @@ namespace Macross.Logging.Files
 							_JsonOptions);
 					}
 				}
-				s_Buffer.WriteToStream(stream);
+				_Buffer.WriteToStream(stream);
 				stream.Write(s_NewLine, 0, s_NewLine.Length);
 				stream.Flush();
 			}
 			finally
 			{
-				s_Buffer.Clear();
+				_Buffer.Clear();
 			}
 		}
 	}
