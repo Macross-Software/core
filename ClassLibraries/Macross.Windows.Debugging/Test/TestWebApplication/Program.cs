@@ -13,11 +13,13 @@ namespace TestWebApplication
 		{
 			return Host
 				.CreateDefaultBuilder(args)
-				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
+#if WINDOWS && DEBUG
 				.ConfigureDebugWindow(
 					options => options.WindowTitle = "My Application DebugWindow Title",
 					(window) => window.BackColor = Color.Red,
-					(tab) => tab.BackColor = Color.Blue);
+					(tab) => tab.BackColor = Color.Blue)
+#endif
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
 		}
 	}
 }

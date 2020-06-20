@@ -7,14 +7,16 @@ A simple demo application using [Macross.Logging.Files](../../Macross.Logging.Fi
 * Feature registration is done via `ConfigureLogging` and `ConfigureDebugWindow` called in `Program.cs`:
 
 	```csharp
-	public static IHostBuilder CreateHostBuilder(string[] args)
-	{
-		return Host
-			.CreateDefaultBuilder(args)
-			.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
-			.ConfigureLogging((builder) => builder.AddFiles(options => options.IncludeGroupNameInFileName = true))
-			.ConfigureDebugWindow();
-	}
+		public static IHostBuilder CreateHostBuilder(string[] args)
+		{
+			return Host
+				.CreateDefaultBuilder(args)
+				#if WINDOWS && DEBUG
+				.ConfigureDebugWindow()
+				#endif
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
+				.ConfigureLogging((builder) => builder.AddFiles(options => options.IncludeGroupNameInFileName = true));
+		}
 	```
 
 	Logging into files by group is turned on.

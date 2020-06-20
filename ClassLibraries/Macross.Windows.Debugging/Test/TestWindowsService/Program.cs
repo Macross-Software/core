@@ -11,7 +11,9 @@ namespace TestWindowsService
 		{
 			return Host.CreateDefaultBuilder(args)
 				.ConfigureServices((hostContext, services) => services.AddHostedService<MessageSpamBackgroundService>())
+#if WINDOWS && DEBUG
 				.ConfigureDebugWindow()
+#endif
 				.UseWindowsService();
 		}
 	}

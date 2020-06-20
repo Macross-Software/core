@@ -11,9 +11,13 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+    <DefineConstants>WINDOWS</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\..\Macross.Logging.Files\Code\Macross.Logging.Files.csproj" />
-    <ProjectReference Include="..\Code\Macross.Windows.Debugging.csproj" />
+    <ProjectReference Include="..\Code\Macross.Windows.Debugging.csproj" Condition="$(OS) == 'Windows_NT'" />
   </ItemGroup>
 
 </Project>

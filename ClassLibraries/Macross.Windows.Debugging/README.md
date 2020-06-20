@@ -28,22 +28,38 @@ Example:
 
 ## Usage
 
-Getting the `DebugWindow` integrated into your application is incredibly simple, just add a call to `ConfigureDebugWindow` in your bootstrap:
+Getting the `DebugWindow` integrated into your application is simple, but some care has to be taken to compile it just for Windows.
 
-```csharp
-internal class Program
-{
-	public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+* In your `csproj` add a `WINDOWS` constant and conditional target on your `Macross.Windows.Debugging` reference:
 
-	public static IHostBuilder CreateHostBuilder(string[] args)
+	```xml
+	  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+		<DefineConstants>WINDOWS</DefineConstants>
+	  </PropertyGroup>
+
+	  <ItemGroup>
+		<PackageReference Include="Macross.Windows.Debugging" Version="1.2.0" Condition="$(OS) == 'Windows_NT'" />
+	  </ItemGroup>
+	```
+
+* In your bootstrap add a call to `ConfigureDebugWindow` using `WINDOWS` & `DEBUG` conditions:
+
+	```csharp
+	internal class Program
 	{
-		return Host
-			.CreateDefaultBuilder(args)
-			.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
-			.ConfigureDebugWindow();
+		public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
+
+		public static IHostBuilder CreateHostBuilder(string[] args)
+		{
+			return Host
+				.CreateDefaultBuilder(args)
+				#if WINDOWS && DEBUG
+				.ConfigureDebugWindow()
+				#endif
+				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>());
+		}
 	}
-}
-```
+	```
 
 ## Visual Studio Launch Settings
 

@@ -51,9 +51,11 @@ namespace DemoWebApplication
 		{
 			return Host
 				.CreateDefaultBuilder(args)
+#if WINDOWS && DEBUG
+				.ConfigureDebugWindow()
+#endif
 				.ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
-				.ConfigureLogging((builder) => builder.AddFiles(options => options.IncludeGroupNameInFileName = true))
-				.ConfigureDebugWindow();
+				.ConfigureLogging((builder) => builder.AddFiles(options => options.IncludeGroupNameInFileName = true));
 		}
 	}
 }

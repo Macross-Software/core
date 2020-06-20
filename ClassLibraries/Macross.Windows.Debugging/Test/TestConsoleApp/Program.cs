@@ -1,6 +1,4 @@
-﻿using System;
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace TestConsoleApp
@@ -12,8 +10,10 @@ namespace TestConsoleApp
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
 			return Host.CreateDefaultBuilder(args)
-				.ConfigureServices((hostContext, services) => services.AddHostedService<MessageSpamBackgroundService>())
-				.ConfigureDebugWindow();
+#if WINDOWS && DEBUG
+				.ConfigureDebugWindow()
+#endif
+				.ConfigureServices((hostContext, services) => services.AddHostedService<MessageSpamBackgroundService>());
 		}
 	}
 }
