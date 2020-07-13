@@ -124,6 +124,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{B385A7A3
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JsonBenchmarks", "ClassLibraries\Macross.Json.Extensions\Benchmarks\JsonBenchmarks.csproj", "{5B9495C9-A74D-4028-918E-CFCC3975C75A}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Performance.Extensions.Tests", "ClassLibraries\Macross.Performance.Extensions\Test\Macross.Performance.Extensions.Tests.csproj", "{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -226,6 +228,10 @@ Global
 		{5B9495C9-A74D-4028-918E-CFCC3975C75A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B9495C9-A74D-4028-918E-CFCC3975C75A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B9495C9-A74D-4028-918E-CFCC3975C75A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -256,6 +262,7 @@ Global
 		{9D942AFE-6409-4DB1-A52A-0B01E7154C48} = {0A5507A8-7905-43BC-BEF6-4A03F1A03056}
 		{B385A7A3-E7B8-469E-8BB4-48A12A6031A1} = {57E682E8-B415-492D-9AE0-7D5D5FC58230}
 		{5B9495C9-A74D-4028-918E-CFCC3975C75A} = {FC997E0B-C1FC-4D96-80E7-AB3F358B5632}
+		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF} = {0A5507A8-7905-43BC-BEF6-4A03F1A03056}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8D27B7B0-BD74-4094-96C3-490528274426}

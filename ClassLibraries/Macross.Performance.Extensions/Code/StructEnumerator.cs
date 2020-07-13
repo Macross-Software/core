@@ -33,7 +33,13 @@ namespace System.Collections.Generic
 		private static readonly ConcurrentDictionary<Type, AllocationFreeForEachDelegate> s_AllocationFreeForEachDelegates = new ConcurrentDictionary<Type, AllocationFreeForEachDelegate>();
 		private static readonly Func<Type, AllocationFreeForEachDelegate> s_BuildAllocationFreeForEachDelegateRef = BuildAllocationFreeForEachDelegate;
 
-		private delegate void AllocationFreeForEachDelegate(TEnumerable instance, ref TState state, StructEnumeratorForEachDelegate<TItem, TState> itemCallback);
+		/// <summary>
+		/// A delegate that can be reused to enumerate over an <see cref="IEnumerable{TItem}" /> instance without allocation if a struct GetEnumerator is available.
+		/// </summary>
+		/// <param name="instance">The enumerable instance.</param>
+		/// <param name="state">State to be passed on each call.</param>
+		/// <param name="itemCallback">Delegate to be called as items are retrieved from the enumerator.</param>
+		public delegate void AllocationFreeForEachDelegate(TEnumerable instance, ref TState state, StructEnumeratorForEachDelegate<TItem, TState> itemCallback);
 
 		/// <summary>
 		/// Enumerates over an <see cref="IEnumerable{TItem}" /> instance without allocation if a struct GetEnumerator is available.
@@ -45,21 +51,41 @@ namespace System.Collections.Generic
 		public static void AllocationFreeForEach(TEnumerable instance, ref TState state, StructEnumeratorForEachDelegate<TItem, TState> itemCallback)
 #pragma warning restore CA1000 // Do not declare static members on generic types
 		{
-			Debug.Assert(instance != null && itemCallback != null);
+			Debug.Assert(itemCallback != null);
 
-			Type type = instance.GetType();
-
-			StructEnumerator<TEnumerable, TItem, TState>.AllocationFreeForEachDelegate allocationFreeForEachDelegate = s_AllocationFreeForEachDelegates.GetOrAdd(
-				type,
-				s_BuildAllocationFreeForEachDelegateRef);
+			StructEnumerator<TEnumerable, TItem, TState>.AllocationFreeForEachDelegate allocationFreeForEachDelegate = FindAllocationFreeForEachDelegate(
+				instance);
 
 			allocationFreeForEachDelegate(instance, ref state, itemCallback);
 		}
 
+		/// <summary>
+		/// Returns a delegate that can be reused to enumerate over an <see cref="IEnumerable{TItem}" /> instance without allocation if a struct GetEnumerator is available.
+		/// </summary>
+		/// <remarks>
+		/// A delegate can be reused only when the run-time type of the instance is going to be the same. For example, you will always enumerate using an IEnumerable{T} over a List{T}.
+		/// If the run-time is unknown, or could change, use <see cref="AllocationFreeForEach(TEnumerable, ref TState, StructEnumeratorForEachDelegate{TItem, TState})"/> which
+		/// will do a type check each invocation.
+		/// </remarks>
+		/// <param name="instance">The enumerable instance.</param>
+		/// <returns><see cref="AllocationFreeForEach(TEnumerable, ref TState, StructEnumeratorForEachDelegate{TItem, TState})"/>.</returns>
+#pragma warning disable CA1000 // Do not declare static members on generic types
+		public static StructEnumerator<TEnumerable, TItem, TState>.AllocationFreeForEachDelegate FindAllocationFreeForEachDelegate(TEnumerable instance)
+#pragma warning restore CA1000 // Do not declare static members on generic types
+		{
+			Debug.Assert(instance != null);
+
+			Type type = instance.GetType();
+
+			return s_AllocationFreeForEachDelegates.GetOrAdd(
+				type,
+				s_BuildAllocationFreeForEachDelegateRef);
+		}
+
 		/* We want to do this type of logic...
-			public static void AllocationFreeForEach(Dictionary<string, int> dictionary, ref TState state, ForEachDelegate itemCallback)
+			public static void AllocationFreeForEach(List<int> list, ref TState state, ForEachDelegate itemCallback)
 			{
-				using (Dictionary<string, int>.Enumerator enumerator = dictionary.GetEnumerator())
+				using (Enumerator<int>.Enumerator enumerator = list.GetEnumerator())
 				{
 					while (enumerator.MoveNext())
 					{
@@ -83,6 +109,7 @@ namespace System.Collections.Generic
 			}
 
 			Type enumeratorType = getEnumeratorMethod.ReturnType;
+			bool isDisposable = typeof(IDisposable).IsAssignableFrom(enumeratorType);
 
 			DynamicMethod dynamicMethod = new DynamicMethod(
 				nameof(AllocationFreeForEach),
@@ -98,56 +125,58 @@ namespace System.Collections.Generic
 			Label beginLoopLabel = generator.DefineLabel();
 			Label processCurrentLabel = generator.DefineLabel();
 			Label returnLabel = generator.DefineLabel();
-			Label breakLoopLabel = generator.DefineLabel();
 
 			generator.Emit(OpCodes.Ldarg_0);
 			generator.Emit(OpCodes.Callvirt, getEnumeratorMethod);
 			generator.Emit(OpCodes.Stloc_0);
 
 			// try
-			generator.BeginExceptionBlock();
+			if (isDisposable)
 			{
-				generator.Emit(OpCodes.Br_S, beginLoopLabel);
-
-				generator.MarkLabel(processCurrentLabel);
-
-				generator.Emit(OpCodes.Ldarg_2);
-				generator.Emit(OpCodes.Ldarg_1);
-				generator.Emit(OpCodes.Ldloca_S, 0);
-				generator.Emit(OpCodes.Constrained, enumeratorType);
-				generator.Emit(OpCodes.Callvirt, s_GeneircCurrentGetMethod);
-
-				generator.Emit(OpCodes.Callvirt, itemCallbackType.GetMethod("Invoke"));
-
-				generator.Emit(OpCodes.Brtrue_S, beginLoopLabel);
-
-				generator.Emit(OpCodes.Leave_S, returnLabel);
-
-				generator.MarkLabel(beginLoopLabel);
-
-				generator.Emit(OpCodes.Ldloca_S, 0);
-				generator.Emit(OpCodes.Constrained, enumeratorType);
-				generator.Emit(OpCodes.Callvirt, s_MoveNextMethod);
-
-				generator.Emit(OpCodes.Brtrue_S, processCurrentLabel);
-
-				generator.MarkLabel(breakLoopLabel);
-
-				generator.Emit(OpCodes.Leave_S, returnLabel);
+				generator.BeginExceptionBlock();
 			}
 
-			// finally
-			generator.BeginFinallyBlock();
+			generator.Emit(OpCodes.Br_S, beginLoopLabel);
+
+			generator.MarkLabel(processCurrentLabel);
+
+			generator.Emit(OpCodes.Ldarg_2);
+			generator.Emit(OpCodes.Ldarg_1);
+			generator.Emit(OpCodes.Ldloca_S, 0);
+			generator.Emit(OpCodes.Constrained, enumeratorType);
+			generator.Emit(OpCodes.Callvirt, s_GeneircCurrentGetMethod);
+
+			generator.Emit(OpCodes.Callvirt, itemCallbackType.GetMethod("Invoke"));
+
+			generator.Emit(OpCodes.Brtrue_S, beginLoopLabel);
+
+			if (isDisposable)
+				generator.Emit(OpCodes.Leave_S, returnLabel);
+			else
+				generator.Emit(OpCodes.Br_S, returnLabel);
+
+			generator.MarkLabel(beginLoopLabel);
+
+			generator.Emit(OpCodes.Ldloca_S, 0);
+			generator.Emit(OpCodes.Constrained, enumeratorType);
+			generator.Emit(OpCodes.Callvirt, s_MoveNextMethod);
+
+			generator.Emit(OpCodes.Brtrue_S, processCurrentLabel);
+
+			if (isDisposable)
 			{
-				if (typeof(IDisposable).IsAssignableFrom(enumeratorType))
+				generator.Emit(OpCodes.Leave_S, returnLabel);
+
+				// finally
+				generator.BeginFinallyBlock();
 				{
 					generator.Emit(OpCodes.Ldloca_S, 0);
 					generator.Emit(OpCodes.Constrained, enumeratorType);
 					generator.Emit(OpCodes.Callvirt, s_DisposeMethod);
 				}
-			}
 
-			generator.EndExceptionBlock();
+				generator.EndExceptionBlock();
+			}
 
 			generator.MarkLabel(returnLabel);
 
@@ -163,7 +192,7 @@ namespace System.Collections.Generic
 			foreach (MethodInfo method in methods)
 			{
 				if (method.Name == "GetEnumerator"
-					&& !method.ReturnType.IsInterface
+					&& method.ReturnType.IsValueType
 					&& typeof(IEnumerator<TItem>).IsAssignableFrom(method.ReturnType)
 					&& method.GetParameters().Length == 0)
 				{
