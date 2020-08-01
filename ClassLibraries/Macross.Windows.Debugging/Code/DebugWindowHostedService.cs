@@ -34,6 +34,8 @@ namespace Macross.Windows.Debugging
 			_DebugWindowLoggerProvider = debugWindowLoggerProvider ?? throw new ArgumentNullException(nameof(debugWindowLoggerProvider));
 			_DebugWindowFactory = debugWindowFactory ?? throw new ArgumentNullException(nameof(debugWindowFactory));
 			_Options = options ?? throw new ArgumentNullException(nameof(options));
+
+			CreateDebugWindow();
 		}
 
 		/// <inheritdoc />
@@ -52,16 +54,6 @@ namespace Macross.Windows.Debugging
 					if (_ConsoleWindowHandle != IntPtr.Zero)
 						NativeMethods.ShowWindow(_ConsoleWindowHandle, NativeMethods.SW_HIDE);
 				}
-
-				// This is done here and not in "ConfigureLogging" so we don't pay a performance penalty in prod when not using the UI.
-				_LoggerFactory.AddProvider(_DebugWindowLoggerProvider);
-
-				_FormThread = new Thread(FormThreadBody)
-				{
-					Priority = ThreadPriority.Normal,
-					Name = "DebugWindow UI"
-				};
-				_FormThread.Start();
 			}
 
 			return Task.CompletedTask;
@@ -74,6 +66,24 @@ namespace Macross.Windows.Debugging
 				NativeMethods.ShowWindow(_ConsoleWindowHandle, NativeMethods.SW_SHOW);
 
 			return Task.CompletedTask;
+		}
+
+		private void CreateDebugWindow()
+		{
+			DebugWindowLoggerOptions Options = _Options.CurrentValue;
+
+			if (Options.ShowDebugWindow)
+			{
+				// This is done here and not in "ConfigureLogging" so we don't pay a performance penalty in prod when not using the UI.
+				_LoggerFactory.AddProvider(_DebugWindowLoggerProvider);
+
+				_FormThread = new Thread(FormThreadBody)
+				{
+					Priority = ThreadPriority.Normal,
+					Name = "DebugWindow UI"
+				};
+				_FormThread.Start();
+			}
 		}
 
 		private void FormThreadBody()

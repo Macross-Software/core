@@ -14,6 +14,8 @@ namespace DemoWebApplication
 		public MessageSpamBackgroundService(ILogger<MessageSpamBackgroundService> logger)
 		{
 			_Log = logger ?? throw new ArgumentNullException(nameof(logger));
+
+			_Log.LogInformation("MessageSpamBackgroundService created.");
 		}
 
 		protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -25,11 +27,11 @@ namespace DemoWebApplication
 			while (!stoppingToken.IsCancellationRequested)
 			{
 				if (MessageIndex % 7 == 0)
-					_Log.LogDebug("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
+					_Log.LogInformation("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
 				else if (MessageIndex % 10 == 0)
 					_Log.LogWarning("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
 				else
-					_Log.LogInformation("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
+					_Log.LogDebug("Message {Index}. We're not in \"Kansas\" no' mo'!", MessageIndex++);
 
 				await Task.Delay(100, stoppingToken).ConfigureAwait(false);
 			}

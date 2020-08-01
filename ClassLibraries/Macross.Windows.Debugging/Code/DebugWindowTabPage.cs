@@ -131,7 +131,7 @@ namespace Macross.Windows.Debugging
 				_ = int.TryParse(MessagesToShowTextBox.Text, out _MaxNumberOfDisplayedMessages);
 		}
 
-		private void OnTailCheckBoxCheckedChanged(object? sender, System.EventArgs e)
+		private void OnTailCheckBoxCheckedChanged(object? sender, EventArgs e)
 		{
 			if (TailCheckBox.Checked)
 			{
