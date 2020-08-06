@@ -4,8 +4,6 @@
     <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Description>
       Macross Software Json extensions library.
 
@@ -23,8 +21,6 @@
       System.Net.Http.PushStreamContent
     </Description>
     <Product>Macross.Json.Extensions</Product>
-    <Company>Macross Software</Company>
-    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
@@ -32,7 +28,6 @@
     <VersionSuffix></VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(VersionSuffix)'==''">
@@ -42,16 +37,9 @@
     <AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
-    <TreatSpecificWarningsAsErrors />
-    <OutputPath>..\..\..\_build\DLLs\Release\</OutputPath>
-    <DocumentationFile>..\..\..\_build\DLLs\Release\Macross.Json.Extensions.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>..\..\..\_build\DLLs\Debug\</OutputPath>
-    <DocumentationFile>..\..\..\_build\DLLs\Debug\Macross.Json.Extensions.xml</DocumentationFile>
+  <PropertyGroup>
+    <OutputPath>..\..\..\_build\DLLs\$(Configuration)\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\$(Configuration)\Macross.Json.Extensions.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

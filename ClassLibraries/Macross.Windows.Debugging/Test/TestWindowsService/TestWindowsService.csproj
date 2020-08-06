@@ -3,8 +3,6 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <UserSecretsId>dotnet-TestWindowsService-4EBCCC36-B9E6-4521-ACE1-F23FE7A84DBE</UserSecretsId>
-    <Company>Macross Software</Company>
-    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>

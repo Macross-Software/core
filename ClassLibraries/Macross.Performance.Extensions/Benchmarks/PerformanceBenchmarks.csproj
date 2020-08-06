@@ -3,8 +3,6 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>netcoreapp3.1;netcoreapp2.1;net48</TargetFrameworks>
-    <Company>Macross Software</Company>
-    <Copyright>Copyright © $([System.DateTime]::Now.ToString(yyyy))</Copyright>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
