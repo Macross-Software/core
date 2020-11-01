@@ -75,7 +75,7 @@ namespace Macross.Windows.ServiceManagement
 		/// <param name="machineName">The name of the computer being managed.</param>
 		public ServiceController(string? machineName)
 		{
-			MachineName = string.IsNullOrEmpty(machineName) ? "." : machineName;
+			MachineName = string.IsNullOrEmpty(machineName) ? "." : machineName!;
 		}
 
 		/// <summary>
