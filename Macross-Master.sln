@@ -106,7 +106,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.ServiceModel.Extens
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.ServiceModel.Extensions.Tests", "ClassLibraries\Macross.ServiceModel.Extensions\Test\Macross.ServiceModel.Extensions.Tests.csproj", "{FB40FBF0-8A32-42EF-AD59-54586D5A90D5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LoggingBenchmarks", "ClassLibraries\Macross.Logging.Files\Benchmarks\LoggingBenchmarks.csproj", "{43B4D6A6-A9B3-45B0-AC59-2D8055E36472}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.Files.Benchmarks", "ClassLibraries\Macross.Logging.Files\Benchmarks\Macross.Logging.Files.Benchmarks.csproj", "{43B4D6A6-A9B3-45B0-AC59-2D8055E36472}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Performance.Extensions", "Macross.Performance.Extensions", "{0A5507A8-7905-43BC-BEF6-4A03F1A03056}"
 	ProjectSection(SolutionItems) = preProject
@@ -125,6 +125,15 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JsonBenchmarks", "ClassLibraries\Macross.Json.Extensions\Benchmarks\JsonBenchmarks.csproj", "{5B9495C9-A74D-4028-918E-CFCC3975C75A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Performance.Extensions.Tests", "ClassLibraries\Macross.Performance.Extensions\Test\Macross.Performance.Extensions.Tests.csproj", "{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging.StandardOutput", "Macross.Logging.StandardOutput", "{BB4BBB29-7C73-43A0-9715-AC47C0C14642}"
+	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Logging.StandardOutput\README.md = ClassLibraries\Macross.Logging.StandardOutput\README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.StandardOutput", "ClassLibraries\Macross.Logging.StandardOutput\Code\Macross.Logging.StandardOutput.csproj", "{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.StandardOutput.Benchmarks", "ClassLibraries\Macross.Logging.StandardOutput\Benchmarks\Macross.Logging.StandardOutput.Benchmarks.csproj", "{576563CB-FE9A-4482-97B3-571F6C479F9E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -232,6 +241,14 @@ Global
 		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{576563CB-FE9A-4482-97B3-571F6C479F9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{576563CB-FE9A-4482-97B3-571F6C479F9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{576563CB-FE9A-4482-97B3-571F6C479F9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{576563CB-FE9A-4482-97B3-571F6C479F9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -263,6 +280,8 @@ Global
 		{B385A7A3-E7B8-469E-8BB4-48A12A6031A1} = {57E682E8-B415-492D-9AE0-7D5D5FC58230}
 		{5B9495C9-A74D-4028-918E-CFCC3975C75A} = {FC997E0B-C1FC-4D96-80E7-AB3F358B5632}
 		{E1D29AFA-F163-4A29-A3B8-C474DB496BCF} = {0A5507A8-7905-43BC-BEF6-4A03F1A03056}
+		{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25} = {BB4BBB29-7C73-43A0-9715-AC47C0C14642}
+		{576563CB-FE9A-4482-97B3-571F6C479F9E} = {BB4BBB29-7C73-43A0-9715-AC47C0C14642}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8D27B7B0-BD74-4094-96C3-490528274426}

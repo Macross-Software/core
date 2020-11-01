@@ -19,6 +19,7 @@ This repo contains open source Macross Software projects.
 * [Macross.Json.Extensions](./ClassLibraries/Macross.Json.Extensions/README.md) - System.Text.Json & System.Net.Http extensions and utilities.
 * [Macross.Logging.Abstractions](./ClassLibraries/Macross.Logging.Abstractions/README.md) - Logging extensions and utilities.
 * [Macross.Logging.Files](./ClassLibraries/Macross.Logging.Files/README.md) - File logging.
+* [Macross.Logging.StandardOutput](./ClassLibraries/Macross.Logging.StandardOutput/README.md) - `stdout` logging.
 * [Macross.ServiceModel.Extensions](./ClassLibraries/Macross.ServiceModel.Extensions/README.md) - System.ServiceModel extensions and libraries.
  
 ## Pre-release Projects
