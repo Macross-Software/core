@@ -176,7 +176,7 @@ namespace System.Collections.Generic
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void Clear()
 		{
-			if (Count != 0)
+			if (!IsEmpty)
 			{
 #if !NETSTANDARD2_1
 				Array.Clear(_Buffer, 0, Count);
@@ -192,7 +192,7 @@ namespace System.Collections.Generic
 		}
 
 		/// <inheritdoc/>
-		public bool Contains(T item) => Count != 0 && IndexOf(item) != -1;
+		public bool Contains(T item) => !IsEmpty && IndexOf(item) != -1;
 
 		/// <summary>
 		/// Searches for the specified object and returns the zero-based index of the first occurrence within the entire <see cref="PoolBackedCollection{T}"/>.
@@ -350,7 +350,7 @@ namespace System.Collections.Generic
 				_Buffer = list?._Buffer ?? Array.Empty<T>();
 				_Count = list?.Count ?? 0;
 				_Index = 0;
-				Current = default;
+				Current = default!;
 			}
 
 			/// <inheritdoc/>

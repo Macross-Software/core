@@ -156,7 +156,7 @@ namespace System.Collections.Generic
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public StructPoolBackedCollection<T> Clear()
 		{
-			if (Count != 0)
+			if (!IsEmpty)
 			{
 				ClearInternal();
 				return new StructPoolBackedCollection<T>(_Buffer, 0);
@@ -197,7 +197,7 @@ namespace System.Collections.Generic
 		/// </summary>
 		/// <param name="item">The object to locate in the <see cref="StructPoolBackedCollection{T}" />. The value can be <see langword="null"/> for reference types.</param>
 		/// <returns><see langword="true"/> if <paramref name="item"/> is found in the <see cref="StructPoolBackedCollection{T}" />; otherwise, <see langword="false"/>.</returns>
-		public bool Contains(T item) => Count != 0 && IndexOf(item) != -1;
+		public bool Contains(T item) => !IsEmpty && IndexOf(item) != -1;
 
 		/// <summary>
 		/// Searches for the specified object and returns the zero-based index of the first occurrence within the entire <see cref="StructPoolBackedCollection{T}"/>.
@@ -359,7 +359,7 @@ namespace System.Collections.Generic
 				_Buffer = list._Buffer;
 				_Count = list.Count;
 				_Index = 0;
-				Current = default;
+				Current = default!;
 			}
 
 			/// <inheritdoc/>

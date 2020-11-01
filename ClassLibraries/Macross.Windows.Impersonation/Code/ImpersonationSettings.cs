@@ -101,7 +101,9 @@ namespace Macross.Impersonation
 					IntPtr IdentityToken = LogonUser(Domain, Username, Password, NetOnly);
 					try
 					{
+#pragma warning disable CA2000 // Dispose objects before losing scope
 						Identity = new WindowsIdentity(IdentityToken);
+#pragma warning restore CA2000 // Dispose objects before losing scope
 						Context = new ImpersonationContext(Identity, PreviousIdentityToken, applyToAllThreads);
 						Identity = null;
 					}
@@ -131,21 +133,17 @@ namespace Macross.Impersonation
 			IntPtr LogonToken = IntPtr.Zero;
 			try
 			{
-				if (!NativeMethods.LogonUser(
+				return !NativeMethods.LogonUser(
 						username,
 						domain,
 						password,
 						netOnly ? NativeMethods.LogonType.NEW_CREDENTIALS : NativeMethods.LogonType.INTERACTIVE,
 						NativeMethods.LogonProviderType.WINNT50,
-						out LogonToken))
-				{
-					throw new Win32Exception(Marshal.GetLastWin32Error());
-				}
-
-				if (!NativeMethods.DuplicateToken(LogonToken, netOnly ? NativeMethods.ImpersonationLevel.SECURITY_DELEGATION : NativeMethods.ImpersonationLevel.SECURITY_IMPERSONATION, out IntPtr IdentityToken))
-					throw new Win32Exception(Marshal.GetLastWin32Error());
-
-				return IdentityToken;
+						out LogonToken)
+					? throw new Win32Exception(Marshal.GetLastWin32Error())
+					: !NativeMethods.DuplicateToken(LogonToken, netOnly ? NativeMethods.ImpersonationLevel.SECURITY_DELEGATION : NativeMethods.ImpersonationLevel.SECURITY_IMPERSONATION, out IntPtr IdentityToken)
+						? throw new Win32Exception(Marshal.GetLastWin32Error())
+						: IdentityToken;
 			}
 			finally
 			{
@@ -162,21 +160,17 @@ namespace Macross.Impersonation
 			{
 				PasswordPointer = Marshal.SecureStringToGlobalAllocUnicode(password);
 
-				if (!NativeMethods.LogonUser(
+				return !NativeMethods.LogonUser(
 					username,
 					domain,
 					PasswordPointer,
 					netOnly ? NativeMethods.LogonType.NEW_CREDENTIALS : NativeMethods.LogonType.INTERACTIVE,
 					NativeMethods.LogonProviderType.WINNT50,
-					out LogonToken))
-				{
-					throw new Win32Exception(Marshal.GetLastWin32Error());
-				}
-
-				if (!NativeMethods.DuplicateToken(LogonToken, netOnly ? NativeMethods.ImpersonationLevel.SECURITY_DELEGATION : NativeMethods.ImpersonationLevel.SECURITY_IMPERSONATION, out IntPtr IdentityToken))
-					throw new Win32Exception(Marshal.GetLastWin32Error());
-
-				return IdentityToken;
+					out LogonToken)
+					? throw new Win32Exception(Marshal.GetLastWin32Error())
+					: !NativeMethods.DuplicateToken(LogonToken, netOnly ? NativeMethods.ImpersonationLevel.SECURITY_DELEGATION : NativeMethods.ImpersonationLevel.SECURITY_IMPERSONATION, out IntPtr IdentityToken)
+						? throw new Win32Exception(Marshal.GetLastWin32Error())
+						: IdentityToken;
 			}
 			finally
 			{
@@ -206,9 +200,9 @@ namespace Macross.Impersonation
 			if (!NativeMethods.OpenThreadToken(threadHandle, NativeMethods.TokenAccess.READ | NativeMethods.TokenAccess.IMPERSONATE, true, out IntPtr ThreadToken))
 			{
 				int LastErrorCode = Marshal.GetLastWin32Error();
-				if (LastErrorCode == NativeMethods.ERROR_NO_TOKEN)
-					return IntPtr.Zero;
-				throw new Win32Exception(LastErrorCode);
+				return LastErrorCode == NativeMethods.ERROR_NO_TOKEN
+					? IntPtr.Zero
+					: throw new Win32Exception(LastErrorCode);
 			}
 
 			return ThreadToken;

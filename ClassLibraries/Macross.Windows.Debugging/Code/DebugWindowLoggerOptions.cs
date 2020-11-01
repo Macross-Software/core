@@ -108,12 +108,12 @@ namespace Macross.Windows.Debugging
 		/// <summary>
 		/// Gets or sets a value indicating whether or not the <see cref="DebugWindow"/> should start minimized. Default value: False.
 		/// </summary>
-		public bool StartMinimized { get; set; } = false;
+		public bool StartMinimized { get; set; }
 
 		/// <summary>
 		/// Gets or sets a value indicating whether or not the <see cref="DebugWindow"/> should minimize to the system tray. Default value: False.
 		/// </summary>
-		public bool MinimizeToSystemTray { get; set; } = false;
+		public bool MinimizeToSystemTray { get; set; }
 
 		/// <summary>
 		/// Gets or sets the filters to use to group log messages by category.

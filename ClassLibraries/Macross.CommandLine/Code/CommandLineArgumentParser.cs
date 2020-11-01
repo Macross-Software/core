@@ -34,12 +34,22 @@ namespace Macross.CommandLine
 					continue;
 				}
 
+#if NETSTANDARD2_0
 				Argument = Argument.Substring(1);
 				if (Argument.StartsWith("-", StringComparison.OrdinalIgnoreCase)) // Double-dash case (--ArgName)
 					Argument = Argument.Substring(1);
+#else
+				Argument = Argument[1..];
+				if (Argument.StartsWith("-", StringComparison.OrdinalIgnoreCase)) // Double-dash case (--ArgName)
+					Argument = Argument[1..];
+#endif
 
 				string? ArgumentValue;
+#if NETSTANDARD2_0
 				if (Argument.IndexOf("=", StringComparison.OrdinalIgnoreCase) >= 0) // ArgName=ArgValue case
+#else
+				if (Argument.Contains("=", StringComparison.OrdinalIgnoreCase)) // ArgName=ArgValue case
+#endif
 				{
 					string[] ArgumentComponents = Argument.Split('=');
 					Argument = ArgumentComponents[0].Trim();

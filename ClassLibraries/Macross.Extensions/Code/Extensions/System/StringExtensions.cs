@@ -19,10 +19,9 @@ namespace System
 		/// <returns>String built by repeating the specified character.</returns>
 		public static string Repeat(this char value, int repetitions)
 		{
-			if (repetitions >= int.MaxValue)
-				throw new ArgumentOutOfRangeException(nameof(repetitions));
-
-			return new string(value, repetitions + 1);
+			return repetitions >= int.MaxValue
+				? throw new ArgumentOutOfRangeException(nameof(repetitions))
+				: new string(value, repetitions + 1);
 		}
 
 		/// <summary>
@@ -65,6 +64,8 @@ namespace System
 		{
 			if (string.IsNullOrEmpty(value))
 				throw new ArgumentNullException(nameof(value));
+			if (predicate == null)
+				throw new ArgumentNullException(nameof(predicate));
 
 			int SubstringStartIndex = 0;
 
@@ -84,7 +85,11 @@ namespace System
 				}
 			}
 
+#if NETSTANDARD2_0
 			yield return value.Substring(SubstringStartIndex);
+#else
+			yield return value[SubstringStartIndex..];
+#endif
 		}
 
 		/// <summary>
@@ -160,28 +165,16 @@ namespace System
 		/// <returns>The zero-based index of <paramref name="value"/> if that character is found, or -1 if it is not.</returns>
 		public static int IndexOf(this string source, char value, StringComparison comparisonType)
 		{
-			if (string.IsNullOrEmpty(source))
-				throw new ArgumentNullException(nameof(source));
-
-			switch (comparisonType)
-			{
-				case StringComparison.CurrentCulture:
-				case StringComparison.CurrentCultureIgnoreCase:
-					return CultureInfo.CurrentCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType));
-
-				case StringComparison.InvariantCulture:
-				case StringComparison.InvariantCultureIgnoreCase:
-					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType));
-
-				case StringComparison.Ordinal:
-					return source.IndexOf(value);
-
-				case StringComparison.OrdinalIgnoreCase:
-					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.OrdinalIgnoreCase);
-
-				default:
-					throw new ArgumentException($"StringComparison [{comparisonType}] is not supported.", nameof(comparisonType));
-			}
+			return string.IsNullOrEmpty(source)
+				? throw new ArgumentNullException(nameof(source))
+				: comparisonType switch
+				{
+					StringComparison.CurrentCulture or StringComparison.CurrentCultureIgnoreCase => CultureInfo.CurrentCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType)),
+					StringComparison.InvariantCulture or StringComparison.InvariantCultureIgnoreCase => CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType)),
+					StringComparison.Ordinal => source.IndexOf(value),
+					StringComparison.OrdinalIgnoreCase => CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.OrdinalIgnoreCase),
+					_ => throw new ArgumentException($"StringComparison [{comparisonType}] is not supported.", nameof(comparisonType)),
+				};
 		}
 
 		/// <summary>
@@ -203,28 +196,16 @@ namespace System
 		/// <returns>The zero-based index of <paramref name="value"/> if that character is found, or -1 if it is not.</returns>
 		public static int IndexOf(this string source, string value, StringComparison comparisonType)
 		{
-			if (string.IsNullOrEmpty(source))
-				throw new ArgumentNullException(nameof(source));
-
-			switch (comparisonType)
-			{
-				case StringComparison.CurrentCulture:
-				case StringComparison.CurrentCultureIgnoreCase:
-					return CultureInfo.CurrentCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType));
-
-				case StringComparison.InvariantCulture:
-				case StringComparison.InvariantCultureIgnoreCase:
-					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType));
-
-				case StringComparison.Ordinal:
-					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.Ordinal);
-
-				case StringComparison.OrdinalIgnoreCase:
-					return CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.OrdinalIgnoreCase);
-
-				default:
-					throw new ArgumentException($"StringComparison [{comparisonType}] is not supported.", nameof(comparisonType));
-			}
+			return string.IsNullOrEmpty(source)
+				? throw new ArgumentNullException(nameof(source))
+				: comparisonType switch
+				{
+					StringComparison.CurrentCulture or StringComparison.CurrentCultureIgnoreCase => CultureInfo.CurrentCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType)),
+					StringComparison.InvariantCulture or StringComparison.InvariantCultureIgnoreCase => CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, GetCaseCompareOfComparisonCulture(comparisonType)),
+					StringComparison.Ordinal => CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.Ordinal),
+					StringComparison.OrdinalIgnoreCase => CultureInfo.InvariantCulture.CompareInfo.IndexOf(source, value, CompareOptions.OrdinalIgnoreCase),
+					_ => throw new ArgumentException($"StringComparison [{comparisonType}] is not supported.", nameof(comparisonType)),
+				};
 		}
 
 		/// <summary>

@@ -16,7 +16,7 @@ namespace System.IO
 
 			StringBuilder regexPattern = new StringBuilder(pattern.Length * 3);
 
-			regexPattern.Append("^");
+			regexPattern.Append('^');
 
 			foreach (char c in pattern)
 			{
@@ -26,17 +26,17 @@ namespace System.IO
 						regexPattern.Append(".*");
 						break;
 					case '?':
-						regexPattern.Append(".");
+						regexPattern.Append('.');
 						break;
 					default:
-						regexPattern.Append("[");
+						regexPattern.Append('[');
 						regexPattern.Append(c);
-						regexPattern.Append("]");
+						regexPattern.Append(']');
 						break;
 				}
 			}
 
-			regexPattern.Append("$");
+			regexPattern.Append('$');
 
 			return new Regex(regexPattern.ToString(), RegexOptions.IgnoreCase);
 		}

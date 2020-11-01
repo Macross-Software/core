@@ -114,7 +114,7 @@ namespace Macross.Logging.Files
 		/// <summary>
 		/// Gets or sets a value indicating whether or not group name should be part of the log file name. Default value: false.
 		/// </summary>
-		public bool IncludeGroupNameInFileName { get; set; } = false;
+		public bool IncludeGroupNameInFileName { get; set; }
 
 		/// <summary>
 		/// Gets or sets the maximum file size in kilobytes of log files. Use 0 to indicate no maxium size. Default value: 20 Mb.

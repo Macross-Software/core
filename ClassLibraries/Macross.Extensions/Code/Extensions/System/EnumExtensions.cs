@@ -59,9 +59,9 @@ namespace System
 			where TValue : struct
 			where TEnum : struct, Enum
 		{
-			if (!TryToEnum(value, out TEnum result))
-				throw new ArgumentException($"Value [{value}] cannot be converted to [{typeof(TEnum).FullName}] Enum Type.");
-			return result;
+			return !TryToEnum(value, out TEnum result)
+				? throw new ArgumentException($"Value [{value}] cannot be converted to [{typeof(TEnum).FullName}] Enum Type.")
+				: result;
 		}
 
 		/// <summary>
@@ -113,9 +113,9 @@ namespace System
 		public static T ToEnum<T>(this string value)
 			where T : struct, Enum
 		{
-			if (!TryToEnum(value, out T result))
-				throw new ArgumentException($"Value [{value}] cannot be converted to [{typeof(T).FullName}] Enum Type.");
-			return result;
+			return !TryToEnum(value, out T result)
+				? throw new ArgumentException($"Value [{value}] cannot be converted to [{typeof(T).FullName}] Enum Type.")
+				: result;
 		}
 
 		/// <summary>
@@ -203,7 +203,8 @@ namespace System
 						Values.Add(Enum.GetName(EnumType, Flag));
 					continue;
 				}
-				if (value.HasFlag((Enum)Enum.ToObject(EnumType, Flag)))
+				Enum enumValue = (Enum)Enum.ToObject(EnumType, Flag);
+				if (value.HasFlag(enumValue))
 					Values.Add(Enum.GetName(EnumType, Flag));
 			}
 			return Values;

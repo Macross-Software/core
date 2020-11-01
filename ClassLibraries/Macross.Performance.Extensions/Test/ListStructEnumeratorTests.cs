@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -34,6 +35,7 @@ namespace Macross.Performance.Extensions.Tests
 				private readonly List<T> _List;
 				private int _Index;
 
+				[AllowNull]
 				public T Current { get; private set; }
 
 				object? IEnumerator.Current => Current;
