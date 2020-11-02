@@ -134,7 +134,7 @@ namespace Macross.Logging.StandardOutput
 				DrainMessages();
 			}
 
-			// When exiting make sure anything remaining in the queue is pumped to files.
+			// When exiting make sure anything remaining in the queue is pumped to stdout.
 			DrainMessages();
 		}
 
