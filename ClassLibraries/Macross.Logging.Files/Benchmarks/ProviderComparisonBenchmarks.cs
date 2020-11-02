@@ -30,6 +30,9 @@ namespace LoggingBenchmarks
 		[Params(1, 4)]
 		public int NumberOfThreads { get; set; }
 
+		[Params(false, true)]
+		public bool IncludeFlushTime { get; set; }
+
 		private void ProcessLogMessageThreadBody(object? state)
 		{
 			int ThreadId = (int)state!;
@@ -121,6 +124,9 @@ namespace LoggingBenchmarks
 		[IterationCleanup(Target = nameof(NLogBenchmark))]
 		public void IterationCleanupNLog()
 		{
+			if (!IncludeFlushTime)
+				_NLog.LogFactory.Flush(TimeSpan.FromHours(1));
+
 			_NLog.LoggerProvider.Dispose();
 			_NLog.LogFactory.Dispose();
 
@@ -136,7 +142,8 @@ namespace LoggingBenchmarks
 
 			WaitForThreads();
 
-			_NLog.LogFactory.Flush(TimeSpan.FromHours(1));
+			if (IncludeFlushTime)
+				_NLog.LogFactory.Flush(TimeSpan.FromHours(1));
 		}
 		#endregion
 
@@ -156,6 +163,9 @@ namespace LoggingBenchmarks
 		[IterationCleanup(Target = nameof(SerilogBenchmark))]
 		public void IterationCleanupSerilog()
 		{
+			if (!IncludeFlushTime)
+				_Serilog.Cleanup();
+
 			DestroyThreads();
 
 			VerifyAndDeleteFiles(SerilogProvider.LogFileDirectoryPath, NumberOfThreads * NumberOfLogMessagesToWrite);
@@ -168,7 +178,8 @@ namespace LoggingBenchmarks
 
 			WaitForThreads();
 
-			_Serilog.Cleanup();
+			if (IncludeFlushTime)
+				_Serilog.Cleanup();
 		}
 		#endregion
 
@@ -188,6 +199,9 @@ namespace LoggingBenchmarks
 		[IterationCleanup(Target = nameof(MacrossFileLoggingBenchmark))]
 		public void IterationCleanupMacrossFileLogging()
 		{
+			if (!IncludeFlushTime)
+				_MacrossFileLogging.Provider.Dispose();
+
 			_MacrossFileLogging.Host.Dispose();
 
 			DestroyThreads();
@@ -202,7 +216,8 @@ namespace LoggingBenchmarks
 
 			WaitForThreads();
 
-			_MacrossFileLogging.Provider.Dispose();
+			if (IncludeFlushTime)
+				_MacrossFileLogging.Provider.Dispose();
 		}
 		#endregion
 	}
