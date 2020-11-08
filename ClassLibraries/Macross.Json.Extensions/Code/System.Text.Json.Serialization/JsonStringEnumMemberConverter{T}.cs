@@ -116,7 +116,7 @@ namespace System.Text.Json.Serialization
 							}
 
 							if (!matched)
-								throw new JsonException($"Unknown flag value {flagValue}.");
+								ThrowUnableToConvertValueJsonException(flagValue);
 						}
 					}
 
@@ -132,7 +132,7 @@ namespace System.Text.Json.Serialization
 					}
 				}
 
-				throw new JsonException($"Unknown value {enumString}.");
+				ThrowUnableToConvertValueJsonException(enumString);
 			}
 
 			if (token != JsonTokenType.Number || !_AllowIntegerValues)
@@ -193,6 +193,39 @@ namespace System.Text.Json.Serialization
 			}
 
 			throw new JsonException();
+		}
+
+		// Unfortunately, System.Text.Json.ThrowHelper is internal so we have to use reflection to throw a good exception
+		// that includes the JSONPath, line number and byte position in line of where the conversion error occurred.
+		private static readonly MethodInfo? _ThrowJsonExceptionDeserializeUnableToConvertValue =
+			typeof(JsonException).Assembly?.GetType("System.Text.Json.ThrowHelper")?.GetMethod("ThrowJsonException_DeserializeUnableToConvertValue", new[] { typeof(Type) });
+
+		/// <summary>
+		/// Throw a <see cref="JsonException"/> using the internal <c>System.Text.Json.ThrowHelper</c> class that will eventually include
+		/// the JSONPath, line number and byte position in line.
+		/// <para>
+		/// If the internal <c>System.Text.Json.ThrowHelper</c> method is not available or throws an error, a standard <see cref="JsonException"/>
+		/// that does not include additional information will be thrown instead.
+		/// Here is what the final message of the exception looks like:
+		/// The JSON value could not be converted to {0}. Path: $.{JSONPath} | LineNumber: {LineNumber} | BytePositionInLine: {BytePositionInLine}.
+		/// </para>
+		/// </summary>
+		private void ThrowUnableToConvertValueJsonException(string enumString)
+		{
+			string fallbackMessage = $"The JSON value \"{enumString}\" could not be converted to {_EnumType}.";
+			try
+			{
+				_ThrowJsonExceptionDeserializeUnableToConvertValue?.Invoke(null, new object[] { _EnumType });
+			}
+			catch (TargetInvocationException targetInvocationException) when (targetInvocationException.InnerException is JsonException)
+			{
+				throw targetInvocationException.InnerException;
+			}
+			catch
+			{
+				throw new JsonException(fallbackMessage);
+			}
+			throw new JsonException(fallbackMessage);
 		}
 
 		public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
