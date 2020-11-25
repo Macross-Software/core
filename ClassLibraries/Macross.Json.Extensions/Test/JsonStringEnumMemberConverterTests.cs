@@ -143,6 +143,54 @@ namespace Macross.Json.Extensions.Tests
 			JsonSerializer.Deserialize<EnumDefinition>(@"255", options);
 		}
 
+		[TestMethod]
+		public void EnumMemberInvalidDeserializationIncludesJsonPathInMessageTest()
+		{
+			JsonSerializerOptions options = new JsonSerializerOptions
+			{
+				Converters = { new JsonStringEnumMemberConverter() }
+			};
+
+			try
+			{
+				JsonSerializer.Deserialize<EnumDefinition>(@"""invalid_value""", options);
+				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown.");
+			}
+			catch (JsonException jsonException)
+			{
+				StringAssert.Contains(jsonException.Message, ". Path: $");
+			}
+			catch (Exception exception)
+			{
+				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown but a {exception.GetType().FullName} was thrown.");
+				throw;
+			}
+		}
+
+		[TestMethod]
+		public void EnumMemberFlagInvalidDeserializationIncludesJsonPathInMessageTest()
+		{
+			JsonSerializerOptions options = new JsonSerializerOptions
+			{
+				Converters = { new JsonStringEnumMemberConverter() }
+			};
+
+			try
+			{
+				JsonSerializer.Deserialize<FlagDefinitions>(@"""invalid_value""", options);
+				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown.");
+			}
+			catch (JsonException jsonException)
+			{
+				StringAssert.Contains(jsonException.Message, ". Path: $");
+			}
+			catch (Exception exception)
+			{
+				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown but a {exception.GetType().FullName} was thrown.");
+				throw;
+			}
+		}
+
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
 		[Flags]
 		public enum FlagDefinitions
