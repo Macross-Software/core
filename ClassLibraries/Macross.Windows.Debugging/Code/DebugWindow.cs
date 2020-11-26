@@ -131,11 +131,12 @@ namespace Macross.Windows.Debugging
 			}
 		}
 
-		private void OnNotifyIconMouseDoubleClick(object sender, MouseEventArgs? e)
+		private void OnNotifyIconMouseDoubleClick(object? sender, MouseEventArgs? e)
 		{
 			Show();
 			WindowState = FormWindowState.Normal;
-			NotifyIcon.Visible = false;
+			if (NotifyIcon != null)
+				NotifyIcon.Visible = false;
 		}
 
 		private void ApplyOptions(DebugWindowLoggerOptions options)
@@ -171,14 +172,14 @@ namespace Macross.Windows.Debugging
 
 				while (await MessageReader.WaitToReadAsync(_CloseCancellationToken.Token).ConfigureAwait(false))
 				{
-					while (MessageReader.TryRead(out LoggerJsonMessage Message))
+					while (MessageReader.TryRead(out LoggerJsonMessage? Message))
 					{
 						if (_CloseCancellationToken.IsCancellationRequested)
 							return;
 
-						string TabTitle = Message.GroupName ?? _LoggerGroupCache.ResolveGroupNameForCategoryName(Message.CategoryName);
+						string TabTitle = Message.GroupName ?? _LoggerGroupCache!.ResolveGroupNameForCategoryName(Message.CategoryName);
 
-						if (!_Tabs.TryGetValue(TabTitle, out DebugWindowTabPage Tab))
+						if (!_Tabs.TryGetValue(TabTitle, out DebugWindowTabPage? Tab))
 						{
 							lock (_Tabs)
 							{

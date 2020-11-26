@@ -25,12 +25,16 @@ namespace TestWebApplication
 			RouteValueDictionary? RouteValues = context?.Request.RouteValues;
 
 			IDisposable? Group = null;
-			if (RouteValues != null && RouteValues.TryGetValue("controller", out object ControllerName))
-				Group = _Logger.BeginGroup(ControllerName.ToString());
+			if (RouteValues != null && RouteValues.TryGetValue("controller", out object? ControllerName))
+			{
+				string? controllerName = ControllerName?.ToString();
+				if (!string.IsNullOrEmpty(controllerName))
+					Group = _Logger.BeginGroup(controllerName);
+			}
 
 			try
 			{
-				await _Next(context).ConfigureAwait(false);
+				await _Next(context!).ConfigureAwait(false);
 			}
 			finally
 			{

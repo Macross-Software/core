@@ -125,7 +125,7 @@ namespace Macross.Windows.Debugging
 
 		private void OnLogMessageTextBoxScroll(object? sender, EventArgs e) => TailEnabled = false;
 
-		private void OnMessagesToShowTextBoxKeyPress(object sender, KeyPressEventArgs e)
+		private void OnMessagesToShowTextBoxKeyPress(object? sender, KeyPressEventArgs e)
 		{
 			if (e.KeyChar == (char)Keys.Enter)
 				_ = int.TryParse(MessagesToShowTextBox.Text, out _MaxNumberOfDisplayedMessages);

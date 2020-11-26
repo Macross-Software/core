@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Microsoft.Extensions.Logging;
@@ -31,30 +32,34 @@ namespace DemoWebApplication
 						: Segments[1];
 		}
 
-		private static Task<string> ReadBodyAsString(HttpRequest request)
+		private static async Task<string?> ReadBodyAsString(HttpRequest request)
 		{
-			request.EnableBuffering();
-			using StreamReader reader = new StreamReader(request.Body, leaveOpen: true);
-			return reader.ReadToEndAsync();
-		}
+			string? MediaType = request.ContentType?.Split(';')[0];
 
-		private static async Task<string?> FlushResponseAndReadBodyAsString(string contentType, Stream originalResponseBody, Stream redirectedResponseBody)
-		{
-			redirectedResponseBody.Position = 0;
-			await redirectedResponseBody.CopyToAsync(originalResponseBody).ConfigureAwait(false);
-
-			string MediaType = contentType?.Split(';')[0];
-
-			if (MediaType == "application/json" || MediaType == "application/xml" || MediaType == "text/plain")
+			if (MediaType == "application/json" || MediaType == "application/xml" || MediaType == "application/soap+xml" || MediaType == "text/plain")
 			{
-				redirectedResponseBody.Position = 0;
-				using StreamReader reader = new StreamReader(redirectedResponseBody);
+				request.EnableBuffering();
+				using StreamReader reader = new StreamReader(request.Body, leaveOpen: true);
 				string Body = await reader.ReadToEndAsync().ConfigureAwait(false);
-				redirectedResponseBody.Position = 0;
+				request.Body.Position = 0;
 				return Body;
 			}
 
 			return null;
+		}
+
+		private static async Task<string?> FlushResponseAndReadBodyAsString(string contentType, Stream originalResponseBody, MemoryStream redirectedResponseBody)
+		{
+			if (!redirectedResponseBody.TryGetBuffer(out ArraySegment<byte> responseBody))
+				throw new InvalidOperationException("Response body was not accessible on buffered response stream.");
+
+			await originalResponseBody.WriteAsync(responseBody).ConfigureAwait(false);
+
+			string? MediaType = contentType?.Split(';')[0];
+
+			return MediaType == "application/json" || MediaType == "application/xml" || MediaType == "application/soap+xml" || MediaType == "text/plain"
+				? Encoding.UTF8.GetString(responseBody)
+				: null;
 		}
 
 		private readonly ILogger<RequestTraceMiddleware> _Log;
@@ -85,10 +90,19 @@ namespace DemoWebApplication
 
 			bool IsDebugging = _Log.IsEnabled(LogLevel.Debug) || Debugger.IsAttached;
 
-			context.TraceIdentifier = Activity.Current.TraceId.ToString();
+			string TraceId;
+			Activity? activity = Activity.Current;
+			if (activity != null)
+			{
+				context.TraceIdentifier = TraceId = activity.TraceId.ToString();
+			}
+			else
+			{
+				TraceId = context.TraceIdentifier;
+			}
 
 			Stream? OriginalResponseBody;
-			Stream? RedirectedResponseBody;
+			MemoryStream? RedirectedResponseBody;
 			if (IsDebugging)
 			{
 				OriginalResponseBody = Response.Body;
@@ -129,15 +143,15 @@ namespace DemoWebApplication
 						Response.StatusCode,
 						Headers = Response.Headers.ToDictionary(i => i.Key, i => (string)i.Value),
 						Response.Cookies,
-						Body = IsDebugging ? await FlushResponseAndReadBodyAsString(Response.ContentType, OriginalResponseBody, RedirectedResponseBody).ConfigureAwait(false) : null,
+						Body = IsDebugging ? await FlushResponseAndReadBodyAsString(Response.ContentType, OriginalResponseBody!, RedirectedResponseBody!).ConfigureAwait(false) : null,
 						ElapsedMilliseconds = Stopwatch.Elapsed.TotalMilliseconds
 					},
 					"RSP");
 
 				if (IsDebugging)
 				{
-					Response.Body = OriginalResponseBody;
-					RedirectedResponseBody.Dispose();
+					Response.Body = OriginalResponseBody!;
+					RedirectedResponseBody!.Dispose();
 				}
 			}
 		}

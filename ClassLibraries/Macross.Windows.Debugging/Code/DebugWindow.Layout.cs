@@ -100,7 +100,8 @@ namespace Macross.Windows.Debugging
 			Menu.Items.Add("Show").Click += (sender, eventArgs) => OnNotifyIconMouseDoubleClick(sender, null);
 			Menu.Items.Add("Exit").Click += (sender, eventArgs) =>
 			{
-				NotifyIcon.Visible = false;
+				if (NotifyIcon != null)
+					NotifyIcon.Visible = false;
 				Close();
 			};
 

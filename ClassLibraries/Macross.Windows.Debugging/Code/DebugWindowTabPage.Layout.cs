@@ -62,7 +62,6 @@ namespace Macross.Windows.Debugging
 			Margin = new Padding(0)
 		};
 
-#pragma warning disable CA2000 // Dispose objects before losing scope
 		private void InitializeControls()
 		{
 			Padding = new Padding(3);
@@ -146,6 +145,5 @@ namespace Macross.Windows.Debugging
 
 			return NumberOfLogMessagesTableLayoutPanel;
 		}
-#pragma warning restore CA2000 // Dispose objects before losing scope
 	}
 }
