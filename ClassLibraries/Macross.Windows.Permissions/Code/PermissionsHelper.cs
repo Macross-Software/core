@@ -45,8 +45,8 @@ namespace Macross.Windows.Permissions
 						IntPtr lpCurrentUserRight = lpUserRights;
 						for (int index = 0; index < RightsCount; ++index)
 						{
-							NativeMethods.LsaUnicodeString UserPermission = Marshal.PtrToStructure<NativeMethods.LsaUnicodeString>(lpCurrentUserRight);
-							if (!string.IsNullOrEmpty(UserPermission.lpBuffer))
+							NativeMethods.LsaUnicodeString? UserPermission = Marshal.PtrToStructure<NativeMethods.LsaUnicodeString>(lpCurrentUserRight);
+							if (!string.IsNullOrEmpty(UserPermission?.lpBuffer))
 								GrantedAccountPermissions.Add(UserPermission.lpBuffer);
 							lpCurrentUserRight = (IntPtr)((long)lpCurrentUserRight + NativeMethods.LsaUnicodeString.SizeOf);
 						}

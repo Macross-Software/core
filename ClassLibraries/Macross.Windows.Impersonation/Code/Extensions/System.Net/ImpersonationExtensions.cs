@@ -11,6 +11,8 @@ namespace System.Net
 	/// </summary>
 	public static class ImpersonationExtensions
 	{
+		private static readonly Uri s_HttpLocalhost = new Uri("http://localhost/");
+
 		/// <summary>
 		/// Executes a function while impersonating a user.
 		/// </summary>
@@ -24,7 +26,9 @@ namespace System.Net
 			if (credentials == null)
 				throw new ArgumentNullException(nameof(credentials));
 
-			NetworkCredential Credentials = credentials.GetCredential(null, null);
+			NetworkCredential? Credentials = credentials.GetCredential(s_HttpLocalhost, string.Empty);
+			if (Credentials == null)
+				throw new UnauthorizedAccessException();
 
 			using SafeAccessTokenHandle Token = new SafeAccessTokenHandle(ImpersonationSettings.LogonUser(Credentials.Domain, Credentials.UserName, Credentials.SecurePassword, netOnly));
 
@@ -42,7 +46,9 @@ namespace System.Net
 			if (credentials == null)
 				throw new ArgumentNullException(nameof(credentials));
 
-			NetworkCredential Credentials = credentials.GetCredential(null, null);
+			NetworkCredential? Credentials = credentials.GetCredential(s_HttpLocalhost, string.Empty);
+			if (Credentials == null)
+				throw new UnauthorizedAccessException();
 
 			using SafeAccessTokenHandle Token = new SafeAccessTokenHandle(ImpersonationSettings.LogonUser(Credentials.Domain, Credentials.UserName, Credentials.SecurePassword, netOnly));
 
