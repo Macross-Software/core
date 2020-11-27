@@ -46,11 +46,11 @@ namespace LoggingBenchmarks
 		{
 			int ThreadId = (int)state!;
 
-			_StartHandle.WaitOne();
+			_StartHandle!.WaitOne();
 
 			for (int i = 0; i < NumberOfLogMessagesToWrite; i++)
 			{
-				_Logger.WriteInfo(
+				_Logger!.WriteInfo(
 					new { CounterValue = i, ThreadId, ContextId = Guid.NewGuid() },
 					"Hello world.{UserId}",
 					0);
@@ -76,7 +76,7 @@ namespace LoggingBenchmarks
 		[GlobalCleanup]
 		public void GlobalCleanup()
 		{
-			_OutFileStream.Dispose();
+			_OutFileStream!.Dispose();
 			if (SetStdHandle(-11, _StdoutHandle!.Value) == 0)
 				throw new InvalidOperationException();
 			_StdoutHandle = null;
@@ -113,7 +113,7 @@ namespace LoggingBenchmarks
 
 		private void WaitForThreads()
 		{
-			foreach (Thread Thread in _Threads)
+			foreach (Thread Thread in _Threads!)
 			{
 				Thread.Join();
 			}
@@ -121,14 +121,14 @@ namespace LoggingBenchmarks
 
 		private void DestroyThreads()
 		{
-			foreach (Thread Thread in _Threads)
+			foreach (Thread Thread in _Threads!)
 			{
 				if (Thread.ThreadState != ThreadState.Stopped)
 					throw new InvalidOperationException("Thread could not be stopped.");
 			}
 
-			_StartHandle.Dispose();
-			_OutFileStream.Position = 0;
+			_StartHandle!.Dispose();
+			_OutFileStream!.Position = 0;
 			int lineCounter = 0;
 			using (StreamReader reader = new StreamReader(_OutFileStream, leaveOpen: true))
 			{
@@ -170,7 +170,7 @@ namespace LoggingBenchmarks
 		[Benchmark]
 		public void NLogBenchmark()
 		{
-			_StartHandle.Set();
+			_StartHandle!.Set();
 
 			WaitForThreads();
 
@@ -204,7 +204,7 @@ namespace LoggingBenchmarks
 		[Benchmark]
 		public void SerilogBenchmark()
 		{
-			_StartHandle.Set();
+			_StartHandle!.Set();
 
 			WaitForThreads();
 
@@ -240,7 +240,7 @@ namespace LoggingBenchmarks
 		[Benchmark]
 		public void MacrossStandardOutputLoggingBenchmark()
 		{
-			_StartHandle.Set();
+			_StartHandle!.Set();
 
 			WaitForThreads();
 

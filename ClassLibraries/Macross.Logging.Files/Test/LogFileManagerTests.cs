@@ -298,6 +298,7 @@ namespace Macross.Logging.Files.Tests
 				1,
 				s_DefaultManagementSchedule);
 
+			Assert.IsNotNull(LogFile);
 			Assert.AreEqual($"{Environment.MachineName}.20200119.1.log", LogFile.FinalFileName);
 
 			Assert.AreEqual(16, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileDirectory).Count());
