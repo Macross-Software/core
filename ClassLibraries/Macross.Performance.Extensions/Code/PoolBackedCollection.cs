@@ -94,7 +94,7 @@ namespace System.Collections.Generic
 			}
 		}
 
-#if NETSTANDARD2_1
+#if !NETSTANDARD2_0
 		/// <summary>
 		/// Return a <see cref="Span{T}" /> instance for the items in the collection.
 		/// </summary>
@@ -159,7 +159,7 @@ namespace System.Collections.Generic
 			if (newBuffer.Length > s_LastAllocatedSize)
 				Interlocked.CompareExchange(ref s_LastAllocatedSize, newBuffer.Length, s_LastAllocatedSize);
 
-#if !NETSTANDARD2_1
+#if NETSTANDARD2_0
 			Array.Copy(_Buffer, newBuffer, count);
 #else
 			Span<T> span = _Buffer.AsSpan(0, count);
@@ -178,7 +178,7 @@ namespace System.Collections.Generic
 		{
 			if (!IsEmpty)
 			{
-#if !NETSTANDARD2_1
+#if NETSTANDARD2_0
 				Array.Clear(_Buffer, 0, Count);
 #else
 				if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
@@ -311,7 +311,7 @@ namespace System.Collections.Generic
 
 		/// <inheritdoc/>
 		public override int GetHashCode()
-#if !NETSTANDARD2_1
+#if NETSTANDARD2_0
 		{
 			int result = 1;
 			result = (31 * result) + Count;
@@ -354,7 +354,7 @@ namespace System.Collections.Generic
 			}
 
 			/// <inheritdoc/>
-#if NETSTANDARD2_1
+#if !NETSTANDARD2_0
 			[AllowNull]
 #endif
 			public T Current { get; private set; }

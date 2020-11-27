@@ -17,7 +17,7 @@ namespace Macross.Logging.Files.Tests
 				""LogFileArchiveTime"": null
 			}";
 
-			FileLoggerOptions Options = JsonSerializer.Deserialize<FileLoggerOptions>(json);
+			FileLoggerOptions? Options = JsonSerializer.Deserialize<FileLoggerOptions>(json);
 
 			Assert.IsNotNull(Options);
 			Assert.AreEqual(DateTimeKind.Local, Options.CutoverAndArchiveTimeZoneMode);

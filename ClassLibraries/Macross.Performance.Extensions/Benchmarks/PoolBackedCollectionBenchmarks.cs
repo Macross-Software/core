@@ -7,7 +7,7 @@ namespace PerformanceBenchmarks
 {
 	[MinIterationTime(8000)]
 	[MemoryDiagnoser]
-#if NETCOREAPP3_1
+#if !NETFRAMEWORK
 	[ThreadingDiagnoser]
 #endif
 	public class PoolBackedCollectionBenchmarks

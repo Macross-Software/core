@@ -61,7 +61,7 @@ namespace System.IO
 					while (true)
 					{
 						PathNodes.Add(CurrentDirectory.Name);
-						if (CurrentDirectory.Parent.Name == RootDirectoryName)
+						if (CurrentDirectory.Parent == null || CurrentDirectory.Parent.Name == RootDirectoryName)
 							break;
 						CurrentDirectory = CurrentDirectory.Parent;
 					}
@@ -107,7 +107,7 @@ namespace System.IO
 
 				if (file.Content.HasValue)
 				{
-					Write(file.Content.Value.Array, file.Content.Value.Offset, file.Content.Value.Count);
+					Write(file.Content.Value.Array!, file.Content.Value.Offset, file.Content.Value.Count);
 					Position = 0;
 				}
 			}
@@ -138,7 +138,7 @@ namespace System.IO
 
 		public void DeleteDirectory(string path, bool recursive)
 		{
-			TestDirectory TestDirectory = FindDirectory(path, false);
+			TestDirectory? TestDirectory = FindDirectory(path, false);
 			if (TestDirectory == null)
 				throw new DirectoryNotFoundException();
 
@@ -149,14 +149,14 @@ namespace System.IO
 				throw new IOException("Directory is not empty");
 			}
 
-			TestDirectory.Parent.Directories.Remove(TestDirectory.Name.ToUpperInvariant());
+			TestDirectory.Parent?.Directories.Remove(TestDirectory.Name.ToUpperInvariant());
 		}
 
 		public bool DirectoryExists(string path) => FindDirectory(path, false) != null;
 
 		public IEnumerable<string> EnumerateDirectories(string path)
 		{
-			TestDirectory TestDirectory = FindDirectory(path, false);
+			TestDirectory? TestDirectory = FindDirectory(path, false);
 			if (TestDirectory == null)
 				throw new DirectoryNotFoundException();
 
@@ -169,7 +169,7 @@ namespace System.IO
 
 		public IEnumerable<string> EnumerateDirectories(string path, string searchPattern, SearchOption searchOption)
 		{
-			TestDirectory TestDirectory = FindDirectory(path, false);
+			TestDirectory? TestDirectory = FindDirectory(path, false);
 			if (TestDirectory == null)
 				throw new DirectoryNotFoundException();
 
@@ -203,9 +203,9 @@ namespace System.IO
 			if (mode == FileMode.Open && !FileExists(path))
 				throw new FileNotFoundException();
 
-			TestFile File = FindFile(path, true);
+			TestFile? File = FindFile(path, true);
 
-			if (File.Content.HasValue && mode == FileMode.Truncate)
+			if (File!.Content.HasValue && mode == FileMode.Truncate)
 				File.Content = null;
 
 			TestFileStream Stream = new TestFileStream(File);
@@ -218,7 +218,7 @@ namespace System.IO
 
 		public void DeleteFile(string path)
 		{
-			TestFile TestFile = FindFile(path, false);
+			TestFile? TestFile = FindFile(path, false);
 			if (TestFile == null)
 				throw new FileNotFoundException();
 
@@ -227,7 +227,7 @@ namespace System.IO
 
 		public IEnumerable<string> EnumerateFiles(string path)
 		{
-			TestDirectory TestDirectory = FindDirectory(path, false);
+			TestDirectory? TestDirectory = FindDirectory(path, false);
 			if (TestDirectory == null)
 				throw new DirectoryNotFoundException();
 
@@ -240,7 +240,7 @@ namespace System.IO
 
 		public IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
 		{
-			TestDirectory TestDirectory = FindDirectory(path, false);
+			TestDirectory? TestDirectory = FindDirectory(path, false);
 			if (TestDirectory == null)
 				throw new DirectoryNotFoundException();
 
@@ -253,12 +253,12 @@ namespace System.IO
 			return Matches;
 		}
 
-		internal TestDirectory FindDirectory(string path, bool createIfNotFound)
+		internal TestDirectory? FindDirectory(string path, bool createIfNotFound)
 		{
 			if (string.IsNullOrEmpty(path))
 				throw new ArgumentNullException(nameof(path));
 
-			TestDirectory Directory = null;
+			TestDirectory? Directory = null;
 			TestDirectory SearchLocation = _Root;
 			foreach (string PathNode in path.Split(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries))
 			{
@@ -277,16 +277,16 @@ namespace System.IO
 			return Directory;
 		}
 
-		internal TestFile FindFile(string path, bool createIfNotFound)
+		internal TestFile? FindFile(string path, bool createIfNotFound)
 		{
-			TestDirectory Directory = FindDirectory(Path.GetDirectoryName(path), false);
+			TestDirectory? Directory = FindDirectory(Path.GetDirectoryName(path)!, false);
 			if (Directory == null)
 				throw new DirectoryNotFoundException();
 
 			string FileName = Path.GetFileName(path);
 			string FileNameUpperInvariant = FileName.ToUpperInvariant();
 
-			if (!Directory.Files.TryGetValue(FileNameUpperInvariant, out TestFile file))
+			if (!Directory.Files.TryGetValue(FileNameUpperInvariant, out TestFile? file))
 			{
 				if (!createIfNotFound)
 					return null;

@@ -163,6 +163,7 @@ namespace Macross.Logging.Abstractions.Tests
 					IgnoreNullValues = true
 				});
 
+			Assert.IsNotNull(Logger.Message);
 			Assert.AreEqual(@$"{{""TimestampUtc"":{JsonSerializer.Serialize(Logger.Message.TimestampUtc)},""ThreadId"":{Logger.Message.ThreadId},""LogLevel"":""Information"",""CategoryName"":""Category"",""Content"":""Hello world.""}}", json);
 		}
 

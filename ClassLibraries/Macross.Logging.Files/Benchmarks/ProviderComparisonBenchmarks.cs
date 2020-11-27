@@ -90,7 +90,7 @@ namespace LoggingBenchmarks
 			foreach (Thread Thread in _Threads)
 			{
 				if (Thread.ThreadState != ThreadState.Stopped)
-					Thread.Abort();
+					throw new InvalidOperationException("Thread could not be stopped.");
 			}
 
 			_StartHandle.Dispose();

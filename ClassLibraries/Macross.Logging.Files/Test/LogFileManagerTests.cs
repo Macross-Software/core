@@ -34,7 +34,7 @@ namespace Macross.Logging.Files.Tests
 				CreateDefaultFileSystem(),
 				s_DefaultSystemTime);
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
@@ -53,7 +53,7 @@ namespace Macross.Logging.Files.Tests
 				CreateDefaultFileSystem(),
 				s_DefaultSystemTime);
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
@@ -80,13 +80,15 @@ namespace Macross.Logging.Files.Tests
 				CreateDefaultFileSystem(),
 				s_DefaultSystemTime);
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
 				FileLoggerOptions.DefaultLogFileNamePattern,
 				null,
 				s_DefaultManagementSchedule);
+
+			Assert.IsNotNull(LogFile);
 
 			LogFile.Toxic = true;
 
@@ -111,7 +113,7 @@ namespace Macross.Logging.Files.Tests
 
 			using LogFileManager Manager = new LogFileManager(FileSystem, SystemTime);
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
@@ -148,7 +150,7 @@ namespace Macross.Logging.Files.Tests
 
 			using LogFileManager Manager = new LogFileManager(FileSystem, SystemTime);
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
@@ -199,7 +201,7 @@ namespace Macross.Logging.Files.Tests
 
 			Assert.AreEqual(10, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileDirectory).Count());
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
@@ -233,7 +235,7 @@ namespace Macross.Logging.Files.Tests
 
 			Assert.AreEqual(9, FileSystem.EnumerateFiles(FileLoggerOptions.DefaultLogFileDirectory).Count());
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
@@ -274,9 +276,9 @@ namespace Macross.Logging.Files.Tests
 					? BaseFileName + ".log"
 					: BaseFileName + $".{i}.log";
 
-				TestFileSystem.TestFile TestFile = FileSystem.FindFile(FileName, true);
+				TestFileSystem.TestFile? TestFile = FileSystem.FindFile(FileName, true);
 
-				TestFile.CreatedAtUtc = SystemTime.UtcNow.AddDays(-1);
+				TestFile!.CreatedAtUtc = SystemTime.UtcNow.AddDays(-1);
 			}
 
 			FileSystem.FindFile($"{FileLoggerOptions.DefaultLogFileDirectory}SomeRandomFile.txt", true);
@@ -288,7 +290,7 @@ namespace Macross.Logging.Files.Tests
 				FullFile.Write(new byte[1024], 0, 1024);
 			}
 
-			LogFile LogFile = Manager.FindLogFile(
+			LogFile? LogFile = Manager.FindLogFile(
 				"AppName",
 				"Group",
 				() => s_DefaultOptions,
