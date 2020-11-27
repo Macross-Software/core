@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Text;
 using System.Text.Json;
@@ -120,9 +121,9 @@ namespace JsonBenchmarks
 				response.EnsureSuccessStatusCode();
 
 				using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-				Schema responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+				Schema? responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
 
-				if (instance.Id != responseObject.Id || instance.Data?.Length != responseObject.Data?.Length)
+				if (instance.Id != responseObject?.Id || instance.Data?.Length != responseObject.Data?.Length)
 					throw new InvalidOperationException();
 			}
 		}
@@ -151,9 +152,9 @@ namespace JsonBenchmarks
 				response.EnsureSuccessStatusCode();
 
 				using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-				Schema responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+				Schema? responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
 
-				if (instance.Id != responseObject.Id || instance.Data?.Length != responseObject.Data?.Length)
+				if (instance.Id != responseObject?.Id || instance.Data?.Length != responseObject.Data?.Length)
 					throw new InvalidOperationException();
 			}
 		}
@@ -165,7 +166,7 @@ namespace JsonBenchmarks
 			{
 				Schema instance = i % 2 == 0 ? s_LargeInstance : s_SmallInstance;
 
-				using JsonContent<Schema> Content = new JsonContent<Schema>(instance);
+				using JsonContent Content = JsonContent.Create(instance);
 
 				using HttpResponseMessage response = await _Client!.PostAsync(
 					new Uri("http://localhost:8018/benchmark/"),
@@ -174,9 +175,9 @@ namespace JsonBenchmarks
 				response.EnsureSuccessStatusCode();
 
 				using Stream responseStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-				Schema responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
+				Schema? responseObject = await JsonSerializer.DeserializeAsync<Schema>(responseStream).ConfigureAwait(false);
 
-				if (instance.Id != responseObject.Id || instance.Data?.Length != responseObject.Data?.Length)
+				if (instance.Id != responseObject?.Id || instance.Data?.Length != responseObject.Data?.Length)
 					throw new InvalidOperationException();
 			}
 		}

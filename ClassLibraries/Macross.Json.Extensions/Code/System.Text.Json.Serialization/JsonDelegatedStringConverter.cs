@@ -26,7 +26,7 @@
 		{
 			return reader.TokenType != JsonTokenType.String
 				? throw new JsonException()
-				: _ConvertValueFromStringFunc(reader.GetString());
+				: _ConvertValueFromStringFunc(reader.GetString()!);
 		}
 
 		/// <inheritdoc/>

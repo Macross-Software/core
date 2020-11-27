@@ -15,7 +15,7 @@ namespace System.Text.Json.Serialization
 
 			try
 			{
-				return IPAddress.Parse(reader.GetString());
+				return IPAddress.Parse(reader.GetString()!);
 			}
 			catch (Exception ex)
 			{

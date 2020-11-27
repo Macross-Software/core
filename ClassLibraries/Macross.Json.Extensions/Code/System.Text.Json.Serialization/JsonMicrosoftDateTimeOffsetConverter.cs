@@ -69,7 +69,7 @@ namespace System.Text.Json.Serialization
 				if (reader.TokenType != JsonTokenType.String)
 					throw new JsonException();
 
-				string formatted = reader.GetString();
+				string formatted = reader.GetString()!;
 				Match match = s_Regex.Match(formatted);
 
 				if (

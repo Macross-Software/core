@@ -45,7 +45,7 @@ namespace System.Text.Json.Serialization
 			{
 				return reader.TokenType != JsonTokenType.String
 					? throw new JsonException()
-					: TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
+					: TimeSpan.ParseExact(reader.GetString()!, "c", CultureInfo.InvariantCulture);
 			}
 
 			/// <inheritdoc/>
@@ -60,7 +60,7 @@ namespace System.Text.Json.Serialization
 			{
 				return reader.TokenType != JsonTokenType.String
 					? throw new JsonException()
-					: TimeSpan.ParseExact(reader.GetString(), "c", CultureInfo.InvariantCulture);
+					: TimeSpan.ParseExact(reader.GetString()!, "c", CultureInfo.InvariantCulture);
 			}
 
 			/// <inheritdoc/>

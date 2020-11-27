@@ -22,7 +22,7 @@ namespace System.Net.Http
 		}
 
 		/// <inheritdoc/>
-		protected override async Task SerializeToStreamAsync(Stream stream, TransportContext context)
+		protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
 			=> await _OnStreamAvailable(stream).ConfigureAwait(false);
 
 		/// <inheritdoc/>

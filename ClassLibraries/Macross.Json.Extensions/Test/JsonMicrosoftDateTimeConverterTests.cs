@@ -50,7 +50,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void DateTimeDeserializationTest()
 		{
-			TestClass Actual = JsonSerializer.Deserialize<TestClass>(@"{""DateTime"":""/Date(1580803200000)/""}");
+			TestClass? Actual = JsonSerializer.Deserialize<TestClass>(@"{""DateTime"":""/Date(1580803200000)/""}");
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(DateTimeKind.Utc, Actual.DateTime.Kind);
@@ -72,7 +72,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void NullableDateTimeDeserializationTest()
 		{
-			NullableTestClass Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""DateTime"":""/Date(1580803200000)/""}");
+			NullableTestClass? Actual = JsonSerializer.Deserialize<NullableTestClass>(@"{""DateTime"":""/Date(1580803200000)/""}");
 
 			Assert.IsNotNull(Actual);
 			Assert.IsTrue(Actual.DateTime.HasValue);

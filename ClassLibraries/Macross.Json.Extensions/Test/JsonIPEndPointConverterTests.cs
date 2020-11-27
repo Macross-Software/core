@@ -41,7 +41,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void IPEndPointDeserializationTest()
 		{
-			TestClass Actual = JsonSerializer.Deserialize<TestClass>(@"{""IPEndPoint"":""127.0.0.1:18""}");
+			TestClass? Actual = JsonSerializer.Deserialize<TestClass>(@"{""IPEndPoint"":""127.0.0.1:18""}");
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(new IPEndPoint(IPAddress.Loopback, 18), Actual.IPEndPoint);

@@ -79,10 +79,10 @@ namespace System.Text.Json.Serialization
 
 			if (token == JsonTokenType.String)
 			{
-				string enumString = reader.GetString();
+				string enumString = reader.GetString()!;
 
 				// Case sensitive search attempted first.
-				if (_TransformedToRaw.TryGetValue(enumString, out EnumInfo enumInfo))
+				if (_TransformedToRaw.TryGetValue(enumString, out EnumInfo? enumInfo))
 					return (T)Enum.ToObject(_EnumType, enumInfo.RawValue);
 
 				if (_IsFlags)
@@ -233,7 +233,7 @@ namespace System.Text.Json.Serialization
 			// Note: There is no check for value == null because Json serializer won't call the converter in that case.
 			ulong rawValue = GetEnumValue(value!);
 
-			if (_RawToTransformed.TryGetValue(rawValue, out EnumInfo enumInfo))
+			if (_RawToTransformed.TryGetValue(rawValue, out EnumInfo? enumInfo))
 			{
 				writer.WriteStringValue(enumInfo.Name);
 				return;

@@ -17,7 +17,7 @@ namespace System.Text.Json.Serialization
 			if (reader.TokenType != JsonTokenType.String)
 				throw new JsonException();
 
-			Match match = s_IPEndPointRegex.Match(reader.GetString());
+			Match match = s_IPEndPointRegex.Match(reader.GetString()!);
 			if (!match.Success)
 				throw new JsonException();
 
