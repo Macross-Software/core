@@ -60,12 +60,14 @@ namespace System.Text.Json.Serialization
 
 			for (int i = 0; i < builtInNames.Length; i++)
 			{
-				Enum enumValue = (Enum)builtInValues.GetValue(i);
+				Enum? enumValue = (Enum?)builtInValues.GetValue(i);
+				if (enumValue == null)
+					continue;
 				ulong rawValue = GetEnumValue(enumValue);
 
 				string name = builtInNames[i];
 				FieldInfo field = _EnumType.GetField(name, EnumBindings)!;
-				EnumMemberAttribute enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
+				EnumMemberAttribute? enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
 				string transformedName = enumMemberAttribute?.Value ?? namingPolicy?.ConvertName(name) ?? name;
 
 				_RawToTransformed[rawValue] = new EnumInfo(transformedName, enumValue, rawValue);
@@ -197,7 +199,7 @@ namespace System.Text.Json.Serialization
 
 		// Unfortunately, System.Text.Json.ThrowHelper is internal so we have to use reflection to throw a good exception
 		// that includes the JSONPath, line number and byte position in line of where the conversion error occurred.
-		private static readonly MethodInfo? _ThrowJsonExceptionDeserializeUnableToConvertValue =
+		private static readonly MethodInfo? s_ThrowJsonExceptionDeserializeUnableToConvertValue =
 			typeof(JsonException).Assembly?.GetType("System.Text.Json.ThrowHelper")?.GetMethod("ThrowJsonException_DeserializeUnableToConvertValue", new[] { typeof(Type) });
 
 		/// <summary>
@@ -215,7 +217,7 @@ namespace System.Text.Json.Serialization
 			string fallbackMessage = $"The JSON value \"{enumString}\" could not be converted to {_EnumType}.";
 			try
 			{
-				_ThrowJsonExceptionDeserializeUnableToConvertValue?.Invoke(null, new object[] { _EnumType });
+				s_ThrowJsonExceptionDeserializeUnableToConvertValue?.Invoke(null, new object[] { _EnumType });
 			}
 			catch (TargetInvocationException targetInvocationException) when (targetInvocationException.InnerException is JsonException)
 			{

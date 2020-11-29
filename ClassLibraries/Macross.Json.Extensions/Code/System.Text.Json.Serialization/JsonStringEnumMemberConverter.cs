@@ -55,7 +55,7 @@ namespace System.Text.Json.Serialization
 				BindingFlags.Instance | BindingFlags.Public,
 				binder: null,
 				args: new object?[] { _NamingPolicy, _AllowIntegerValues, IsNullableEnum ? UnderlyingType : null },
-				culture: null);
+				culture: null)!;
 		}
 
 		private static (bool IsNullableEnum, Type? UnderlyingType) TestNullableEnum(Type typeToConvert)
