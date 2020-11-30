@@ -2,9 +2,35 @@
 
 ## 2.0.0
 
-* Added .NET 5.0 target.
+* `JsonContent` has been removed because an [official
+  version](https://docs.microsoft.com/en-us/dotnet/api/system.net.http.json.jsoncontent?view=net-5.0)
+  was released with .NET 5. Add the
+  [System.Net.Http.Json](https://www.nuget.org/packages/System.Net.Http.Json/)
+  NuGet to your project to get started (it has targets for .NET Standard, .NET
+  Core, & .NET Framework).
 
-* `JsonContent` (.NET Standard 2.0 & 2.1 targets) has been updated so that its
-  API & namespace (moved from `System.Net.Http` into `System.Net.Http.Json`)
-  match what is provided in .NET 5.0. This is a breaking change from 1.x but
-  makes it easier to multi-target/migrate code to .NET 5.0.
+    Old API (Macross `JsonContent`):
+    ```csharp
+    public async Task SendRequestToService(HttpClient client, Uri requestUri, RequestObject request)
+    {
+        using JsonContent<RequestObject> jsonContent = new JsonContent<RequestObject>(request);
+
+        using HttpResponseMessage response = await client.PostAsync(requestUri, jsonContent).ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
+    }
+    ```
+
+    New API (.NET 5 `JsonContent`):
+    ```csharp
+    using System.Net.Http.Json;
+
+    public async Task SendRequestToService(HttpClient client, Uri requestUri, RequestObject request)
+    {
+        using JsonContent jsonContent = JsonContent.Create(request);
+
+        using HttpResponseMessage response = await client.PostAsync(requestUri, jsonContent).ConfigureAwait(false);
+
+        response.EnsureSuccessStatusCode();
+    }
+    ```

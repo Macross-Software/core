@@ -207,7 +207,7 @@ Serialization output example:
 }
 ```
 
-## PushStreamContent & JsonContent
+## PushStreamContent
 
 Blog:
 https://blog.macrosssoftware.com/index.php/2020/04/02/efficient-posting-of-json-to-request-streams/
@@ -215,34 +215,6 @@ https://blog.macrosssoftware.com/index.php/2020/04/02/efficient-posting-of-json-
 * A port to .NET Standard 2.0+ of the old
 [PushStreamContent](https://docs.microsoft.com/en-us/previous-versions/aspnet/hh995285(v%3Dvs.118))
 class.
-* A `JsonContent` helper for writing JSON content to `HttpClient`
-requests more efficiently than using the built-in `StringContent` or
-`StreamContent` types. **Note:** .NET 5 has
-[JsonContent](https://docs.microsoft.com/en-us/dotnet/api/system.net.http.json.jsoncontent?view=net-5.0)
-built-in so `JsonContent` is only available when targeting .NET Standard 2.0 & 2.1.
-
-```csharp
-using System.Net.Http.Json;
-
-public async Task SendRequestToService(HttpClient client, Uri requestUri, RequestObject request)
-{
-    using JsonContent jsonContent = JsonContent.Create(request);
-
-    using HttpResponseMessage response = await client.PostAsync(requestUri, jsonContent).ConfigureAwait(false);
-
-    response.EnsureSuccessStatusCode();
-}
-```
-
-Performance benchmark:
-
-|                     Method | NumberOfRequestsPerIteration |     Mean |   Error |  StdDev |     Gen 0 |    Gen 1 | Gen 2 | Allocated |
-|--------------------------- |----------------------------- |---------:|--------:|--------:|----------:|---------:|------:|----------:|
-| PostJsonUsingStringContent |                         1000 | 123.1 ms | 2.70 ms | 7.48 ms | 5625.0000 | 500.0000 |     - |  43.05 MB |
-| PostJsonUsingStreamContent |                         1000 | 124.5 ms | 2.46 ms | 3.82 ms | 4222.2222 | 333.3333 |     - |  32.18 MB |
-|   PostJsonUsingJsonContent |                         1000 | 122.0 ms | 3.02 ms | 8.85 ms | 3500.0000 | 166.6667 |     - |  27.32 MB |
-
-Lower allocations is better.
 
 ## Dynamic Conversion
 

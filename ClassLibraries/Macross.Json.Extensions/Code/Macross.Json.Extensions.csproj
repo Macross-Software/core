@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
     <Description>
@@ -17,7 +17,6 @@
       System.Text.Json.Serialization.JsonIPAddressConverter
       System.Text.Json.Serialization.JsonIPEndPointConverter
       System.Text.Json.Serialization.JsonDelegatedStringConverter
-      System.Net.Http.JsonContent
       System.Net.Http.PushStreamContent
     </Description>
     <Product>Macross.Json.Extensions</Product>

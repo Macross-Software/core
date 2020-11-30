@@ -156,14 +156,18 @@ namespace Macross.Json.Extensions.Tests
 				JsonSerializer.Deserialize<EnumDefinition>(@"""invalid_value""", options);
 				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown.");
 			}
-			catch (JsonException jsonException)
-			{
-				StringAssert.Contains(jsonException.Message, ". Path: $");
-			}
+#pragma warning disable CA1031 // Do not catch general exception types
 			catch (Exception exception)
+#pragma warning restore CA1031 // Do not catch general exception types
 			{
-				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown but a {exception.GetType().FullName} was thrown.");
-				throw;
+				if (exception is JsonException jsonException)
+				{
+					StringAssert.Contains(jsonException.Message, ". Path: $");
+				}
+				else
+				{
+					Assert.Fail($"A {nameof(JsonException)} is expected to be thrown but a {exception.GetType().FullName} was thrown.");
+				}
 			}
 		}
 
@@ -180,14 +184,18 @@ namespace Macross.Json.Extensions.Tests
 				JsonSerializer.Deserialize<FlagDefinitions>(@"""invalid_value""", options);
 				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown.");
 			}
-			catch (JsonException jsonException)
-			{
-				StringAssert.Contains(jsonException.Message, ". Path: $");
-			}
+#pragma warning disable CA1031 // Do not catch general exception types
 			catch (Exception exception)
+#pragma warning restore CA1031 // Do not catch general exception types
 			{
-				Assert.Fail($"A {nameof(JsonException)} is expected to be thrown but a {exception.GetType().FullName} was thrown.");
-				throw;
+				if (exception is JsonException jsonException)
+				{
+					StringAssert.Contains(jsonException.Message, ". Path: $");
+				}
+				else
+				{
+					Assert.Fail($"A {nameof(JsonException)} is expected to be thrown but a {exception.GetType().FullName} was thrown.");
+				}
 			}
 		}
 
