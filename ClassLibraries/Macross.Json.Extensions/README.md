@@ -8,7 +8,7 @@ by the System.Text.Json & System.Net.Http APIs.
 
 Hopefully by .NET 6 this library will no longer be needed.
 
-For a list of changes see: [CHANGELOG](./Code/CHANGELOG.md)
+For a list of changes see: [CHANGELOG](./CHANGELOG.md)
 
 ## Enumerations
 
