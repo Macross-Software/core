@@ -34,3 +34,6 @@
         response.EnsureSuccessStatusCode();
     }
     ```
+
+* Exceptions thrown during deserialization now include JSON path information as
+  part of the exception message.

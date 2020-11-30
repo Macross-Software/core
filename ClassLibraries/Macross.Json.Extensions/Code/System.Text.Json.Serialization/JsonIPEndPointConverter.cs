@@ -2,6 +2,8 @@
 using System.Net;
 using System.Text.RegularExpressions;
 
+using Macross.Json.Extensions;
+
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
@@ -15,19 +17,23 @@ namespace System.Text.Json.Serialization
 		public override IPEndPoint Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			if (reader.TokenType != JsonTokenType.String)
-				throw new JsonException();
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint));
 
-			Match match = s_IPEndPointRegex.Match(reader.GetString()!);
+			string value = reader.GetString()!;
+
+			Match match = s_IPEndPointRegex.Match(value);
 			if (!match.Success)
-				throw new JsonException();
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint), value);
 
 			try
 			{
-				return new IPEndPoint(IPAddress.Parse(match.Groups[1].Value), int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture));
+				return new IPEndPoint(
+					IPAddress.Parse(match.Groups[1].Value),
+					int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture));
 			}
 			catch (Exception ex)
 			{
-				throw new JsonException("Unexpected value format, unable to parse IPEndPoint.", ex);
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint), value, ex);
 			}
 		}
 

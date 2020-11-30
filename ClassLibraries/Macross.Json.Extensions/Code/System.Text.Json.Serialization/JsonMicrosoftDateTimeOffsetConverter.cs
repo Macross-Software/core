@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
+using Macross.Json.Extensions;
+
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
@@ -67,7 +69,7 @@ namespace System.Text.Json.Serialization
 			public static DateTimeOffset ReadDateTimeOffset(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
-					throw new JsonException();
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTimeOffset));
 
 				string formatted = reader.GetString()!;
 				Match match = s_Regex.Match(formatted);
@@ -78,7 +80,7 @@ namespace System.Text.Json.Serialization
 						|| !int.TryParse(match.Groups[3].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int hours)
 						|| !int.TryParse(match.Groups[4].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int minutes))
 				{
-					throw new JsonException("Unexpected value format, unable to parse DateTimeOffset.");
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTimeOffset), formatted);
 				}
 
 				int sign = match.Groups[2].Value[0] == '+' ? 1 : -1;

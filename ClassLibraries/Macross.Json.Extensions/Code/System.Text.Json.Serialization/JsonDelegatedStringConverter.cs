@@ -1,4 +1,6 @@
-﻿namespace System.Text.Json.Serialization
+﻿using Macross.Json.Extensions;
+
+namespace System.Text.Json.Serialization
 {
 	/// <summary>
 	/// A <see cref="JsonConverter{T}"/> that uses conversion functions to transpose types to and from JSON strings.
@@ -24,15 +26,34 @@
 		/// <inheritdoc/>
 		public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
-			return reader.TokenType != JsonTokenType.String
-				? throw new JsonException()
-				: _ConvertValueFromStringFunc(reader.GetString()!);
+			if (reader.TokenType != JsonTokenType.String)
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(T));
+
+			string value = reader.GetString()!;
+
+			try
+			{
+				return _ConvertValueFromStringFunc(value);
+			}
+			catch (Exception ex)
+			{
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(T), value, ex);
+			}
 		}
 
 		/// <inheritdoc/>
 		public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
 #pragma warning disable CA1062 // Don't perform checks for performance. Trust our callers will be nice.
-			=> writer.WriteStringValue(_ConvertValueToStringFunc(value));
+		{
+			try
+			{
+				writer.WriteStringValue(_ConvertValueToStringFunc(value));
+			}
+			catch (Exception ex)
+			{
+				throw new JsonException($"Value '{value}' of {typeof(T)} type could not be converted into a JSON string.", ex);
+			}
+		}
 #pragma warning restore CA1062 // Validate arguments of public methods
 	}
 }

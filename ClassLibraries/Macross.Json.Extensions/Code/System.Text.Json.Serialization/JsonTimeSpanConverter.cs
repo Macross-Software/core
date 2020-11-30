@@ -1,5 +1,7 @@
 ﻿using System.Globalization;
 
+using Macross.Json.Extensions;
+
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
@@ -43,9 +45,18 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				return reader.TokenType != JsonTokenType.String
-					? throw new JsonException()
-					: TimeSpan.ParseExact(reader.GetString()!, "c", CultureInfo.InvariantCulture);
+				if (reader.TokenType != JsonTokenType.String)
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan));
+
+				string value = reader.GetString()!;
+				try
+				{
+					return TimeSpan.ParseExact(value, "c", CultureInfo.InvariantCulture);
+				}
+				catch (Exception parseException)
+				{
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan), value, parseException);
+				}
 			}
 
 			/// <inheritdoc/>
@@ -58,9 +69,18 @@ namespace System.Text.Json.Serialization
 			/// <inheritdoc/>
 			public override TimeSpan? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
-				return reader.TokenType != JsonTokenType.String
-					? throw new JsonException()
-					: TimeSpan.ParseExact(reader.GetString()!, "c", CultureInfo.InvariantCulture);
+				if (reader.TokenType != JsonTokenType.String)
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan?));
+
+				string value = reader.GetString()!;
+				try
+				{
+					return TimeSpan.ParseExact(value, "c", CultureInfo.InvariantCulture);
+				}
+				catch (Exception parseException)
+				{
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan?), value, parseException);
+				}
 			}
 
 			/// <inheritdoc/>

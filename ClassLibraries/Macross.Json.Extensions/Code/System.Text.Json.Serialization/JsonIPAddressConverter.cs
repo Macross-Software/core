@@ -1,5 +1,7 @@
 ﻿using System.Net;
 
+using Macross.Json.Extensions;
+
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
@@ -11,15 +13,17 @@ namespace System.Text.Json.Serialization
 		public override IPAddress Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 		{
 			if (reader.TokenType != JsonTokenType.String)
-				throw new JsonException();
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPAddress));
+
+			string value = reader.GetString()!;
 
 			try
 			{
-				return IPAddress.Parse(reader.GetString()!);
+				return IPAddress.Parse(value);
 			}
 			catch (Exception ex)
 			{
-				throw new JsonException("Unexpected value format, unable to parse IPAddress.", ex);
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint), value, ex);
 			}
 		}
 

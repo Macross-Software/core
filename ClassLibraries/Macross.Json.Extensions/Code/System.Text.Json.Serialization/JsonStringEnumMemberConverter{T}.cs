@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Diagnostics;
+using System.Globalization;
 
 using Macross.Json.Extensions;
 
@@ -120,7 +121,7 @@ namespace System.Text.Json.Serialization
 							}
 
 							if (!matched)
-								ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(_EnumType, flagValue);
+								throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, flagValue);
 						}
 					}
 
@@ -136,19 +137,36 @@ namespace System.Text.Json.Serialization
 					}
 				}
 
-				ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(_EnumType, enumString);
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, enumString);
 			}
 
 			if (token != JsonTokenType.Number || !_AllowIntegerValues)
-				throw new JsonException();
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType);
 
 			switch (_EnumTypeCode)
 			{
-				// Switch cases ordered by expected frequency.
 				case TypeCode.Int32:
 					if (reader.TryGetInt32(out int int32))
 					{
 						return (T)Enum.ToObject(_EnumType, int32);
+					}
+					break;
+				case TypeCode.Int64:
+					if (reader.TryGetInt64(out long int64))
+					{
+						return (T)Enum.ToObject(_EnumType, int64);
+					}
+					break;
+				case TypeCode.Int16:
+					if (reader.TryGetInt16(out short int16))
+					{
+						return (T)Enum.ToObject(_EnumType, int16);
+					}
+					break;
+				case TypeCode.Byte:
+					if (reader.TryGetByte(out byte ubyte8))
+					{
+						return (T)Enum.ToObject(_EnumType, ubyte8);
 					}
 					break;
 				case TypeCode.UInt32:
@@ -163,40 +181,21 @@ namespace System.Text.Json.Serialization
 						return (T)Enum.ToObject(_EnumType, uint64);
 					}
 					break;
-				case TypeCode.Int64:
-					if (reader.TryGetInt64(out long int64))
-					{
-						return (T)Enum.ToObject(_EnumType, int64);
-					}
-					break;
-
-				case TypeCode.SByte:
-					if (reader.TryGetSByte(out sbyte byte8))
-					{
-						return (T)Enum.ToObject(_EnumType, byte8);
-					}
-					break;
-				case TypeCode.Byte:
-					if (reader.TryGetByte(out byte ubyte8))
-					{
-						return (T)Enum.ToObject(_EnumType, ubyte8);
-					}
-					break;
-				case TypeCode.Int16:
-					if (reader.TryGetInt16(out short int16))
-					{
-						return (T)Enum.ToObject(_EnumType, int16);
-					}
-					break;
 				case TypeCode.UInt16:
 					if (reader.TryGetUInt16(out ushort uint16))
 					{
 						return (T)Enum.ToObject(_EnumType, uint16);
 					}
 					break;
+				case TypeCode.SByte:
+					if (reader.TryGetSByte(out sbyte byte8))
+					{
+						return (T)Enum.ToObject(_EnumType, byte8);
+					}
+					break;
 			}
 
-			throw new JsonException();
+			throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType);
 		}
 
 		public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
@@ -239,18 +238,12 @@ namespace System.Text.Json.Serialization
 			}
 
 			if (!_AllowIntegerValues)
-				throw new JsonException();
+				throw new JsonException($"Enum type {_EnumType} does not have a mapping for integer value '{rawValue.ToString(CultureInfo.CurrentCulture)}'.");
 
 			switch (_EnumTypeCode)
 			{
 				case TypeCode.Int32:
 					writer.WriteNumberValue((int)rawValue);
-					break;
-				case TypeCode.UInt32:
-					writer.WriteNumberValue((uint)rawValue);
-					break;
-				case TypeCode.UInt64:
-					writer.WriteNumberValue(rawValue);
 					break;
 				case TypeCode.Int64:
 					writer.WriteNumberValue((long)rawValue);
@@ -258,17 +251,23 @@ namespace System.Text.Json.Serialization
 				case TypeCode.Int16:
 					writer.WriteNumberValue((short)rawValue);
 					break;
-				case TypeCode.UInt16:
-					writer.WriteNumberValue((ushort)rawValue);
-					break;
 				case TypeCode.Byte:
 					writer.WriteNumberValue((byte)rawValue);
+					break;
+				case TypeCode.UInt32:
+					writer.WriteNumberValue((uint)rawValue);
+					break;
+				case TypeCode.UInt64:
+					writer.WriteNumberValue(rawValue);
+					break;
+				case TypeCode.UInt16:
+					writer.WriteNumberValue((ushort)rawValue);
 					break;
 				case TypeCode.SByte:
 					writer.WriteNumberValue((sbyte)rawValue);
 					break;
 				default:
-					throw new JsonException();
+					throw new JsonException(); // GetEnumValue should have already thrown.
 			}
 		}
 
@@ -277,14 +276,14 @@ namespace System.Text.Json.Serialization
 			return _EnumTypeCode switch
 			{
 				TypeCode.Int32 => (ulong)(int)value,
+				TypeCode.Int64 => (ulong)(long)value,
+				TypeCode.Int16 => (ulong)(short)value,
+				TypeCode.Byte => (byte)value,
 				TypeCode.UInt32 => (uint)value,
 				TypeCode.UInt64 => (ulong)value,
-				TypeCode.Int64 => (ulong)(long)value,
-				TypeCode.SByte => (ulong)(sbyte)value,
-				TypeCode.Byte => (byte)value,
-				TypeCode.Int16 => (ulong)(short)value,
 				TypeCode.UInt16 => (ushort)value,
-				_ => throw new JsonException(),
+				TypeCode.SByte => (ulong)(sbyte)value,
+				_ => throw new NotSupportedException($"Enum '{value}' of {_EnumTypeCode} type is not supported."),
 			};
 		}
 	}

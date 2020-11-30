@@ -1,6 +1,8 @@
 ﻿using System.Globalization;
 using System.Text.RegularExpressions;
 
+using Macross.Json.Extensions;
+
 namespace System.Text.Json.Serialization
 {
 	/// <summary>
@@ -25,7 +27,7 @@ namespace System.Text.Json.Serialization
 			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
 #pragma warning disable CA1062 // Validate arguments of public methods
 			return typeToConvert.IsGenericType
-				? (JsonConverter)new JsonNullableDateTimeConverter()
+				? new JsonNullableDateTimeConverter()
 				: new JsonStandardDateTimeConverter();
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
@@ -67,14 +69,14 @@ namespace System.Text.Json.Serialization
 			public static DateTime ReadDateTime(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
-					throw new JsonException();
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTime));
 
 				string formatted = reader.GetString()!;
 				Match match = s_Regex.Match(formatted);
 
 				return !match.Success
 					|| !long.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unixTime)
-					? throw new JsonException("Unexpected value format, unable to parse DateTime.")
+					? throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTime), formatted)
 					: s_Epoch.AddMilliseconds(unixTime);
 			}
 
