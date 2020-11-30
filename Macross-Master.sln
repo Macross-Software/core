@@ -76,6 +76,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.Abstraction
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Json.Extensions", "Macross.Json.Extensions", "{FC997E0B-C1FC-4D96-80E7-AB3F358B5632}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Json.Extensions\CHANGELOG.md = ClassLibraries\Macross.Json.Extensions\CHANGELOG.md
 		ClassLibraries\Macross.Json.Extensions\README.md = ClassLibraries\Macross.Json.Extensions\README.md
 	EndProjectSection
 EndProject
