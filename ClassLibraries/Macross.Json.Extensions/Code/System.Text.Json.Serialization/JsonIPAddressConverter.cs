@@ -23,7 +23,7 @@ namespace System.Text.Json.Serialization
 			}
 			catch (Exception ex)
 			{
-				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint), value, ex);
+				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPAddress), value, ex);
 			}
 		}
 
