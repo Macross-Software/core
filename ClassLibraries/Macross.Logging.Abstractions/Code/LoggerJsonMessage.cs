@@ -1,25 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Text.Json.Serialization;
 using System.Threading;
-using System.ComponentModel;
+using System.Reflection;
 
 using Microsoft.Extensions.Logging;
+
+using Macross.Logging.Abstractions;
 
 namespace Macross.Logging
 {
 	/// <summary>
 	/// A class for flattening Logger data into a Json representation.
 	/// </summary>
-	public class LoggerJsonMessage
+	public sealed class LoggerJsonMessage
 	{
+		private static readonly Action<object, LoggerJsonMessage> s_ParseScopeItem = ParseScopeItem;
+		private static readonly Dictionary<Type, List<PropertyGetter>> s_TypePropertyCache = new Dictionary<Type, List<PropertyGetter>>();
+		private static readonly ConcurrentBag<List<object?>> s_ScopeListPool = new ConcurrentBag<List<object?>>();
+		private static readonly ConcurrentBag<Dictionary<string, object?>> s_DataDictionaryPool = new ConcurrentBag<Dictionary<string, object?>>();
+
 		/// <summary>
 		/// Create a <see cref="LoggerJsonMessage"/> instance from Logger data.
 		/// </summary>
-		/// <param name="groupName">Group name associated with this entry.</param>
 		/// <param name="categoryName">Category name associated with this entry.</param>
-		/// <param name="scope">Scope data associated with this entry.</param>
+		/// <param name="scopeProvider"><see cref="IExternalScopeProvider"/>.</param>
 		/// <param name="logLevel">Entry will be written on this level.</param>
 		/// <param name="eventId">Id of the event.</param>
 		/// <param name="state">The entry to be written. Can be also an object.</param>
@@ -28,57 +35,59 @@ namespace Macross.Logging
 		/// <typeparam name="TState">The type of the object to be written.</typeparam>
 		/// <returns>Created <see cref="LoggerJsonMessage"/> instance.</returns>
 		public static LoggerJsonMessage FromLoggerData<TState>(
-			string? groupName,
 			string categoryName,
-			IEnumerable<object>? scope,
+			IExternalScopeProvider? scopeProvider,
 			LogLevel logLevel,
 			EventId eventId,
 			TState state,
 			Exception? exception,
 			Func<TState, Exception?, string> formatter)
 		{
-			if (formatter == null)
-				throw new ArgumentNullException(nameof(formatter));
+			Debug.Assert(formatter != null);
 
 			LoggerJsonMessage Message = new LoggerJsonMessage()
 			{
 				TimestampUtc = DateTime.UtcNow,
 				ThreadId = Thread.CurrentThread.ManagedThreadId,
-				EventId = eventId.Id != 0 ? (int?)eventId.Id : null,
-				LogLevel = logLevel,
-				GroupName = groupName,
-				CategoryName = categoryName
+				EventId = eventId.Id != 0 ? eventId.Id : null,
+				CategoryName = categoryName,
+				LogLevel = logLevel switch
+				{
+					Microsoft.Extensions.Logging.LogLevel.Information => "Information",
+					Microsoft.Extensions.Logging.LogLevel.Warning => "Warning",
+					Microsoft.Extensions.Logging.LogLevel.Error => "Error",
+					Microsoft.Extensions.Logging.LogLevel.Critical => "Critical",
+					Microsoft.Extensions.Logging.LogLevel.Trace => "Trace",
+					Microsoft.Extensions.Logging.LogLevel.Debug => "Debug",
+					Microsoft.Extensions.Logging.LogLevel.None => "None",
+					_ => throw new NotSupportedException($"LogLevel [{logLevel}] is not supported."),
+				}
 			};
 
-			if (scope != null)
-				(Message.Data, Message.Scope) = ParseScope(scope);
+			scopeProvider?.ForEachScope(s_ParseScopeItem, Message);
 
 			if (exception != null)
 				Message.Exception = LoggerJsonMessageException.FromException(exception);
 
-			if (state is IEnumerable<KeyValuePair<string, object?>> StateValues)
+			if (state is FormattedLogValues formattedLogValues)
 			{
-				foreach (KeyValuePair<string, object?> Item in StateValues)
+				foreach (KeyValuePair<string, object?> Item in formattedLogValues)
 				{
-					if (Item.Key == "{OriginalFormat}")
-					{
-						// state should be a FormattedLogValues instance here, which formats when ToString is called.
-						string FormattedMessage = state.ToString();
-						if (FormattedMessage != "[null]")
-							Message.Content = FormattedMessage;
-						continue;
-					}
-
-					if (Message.Data == null)
-						Message.Data = new Dictionary<string, object?>();
-
-					if (Item.Key == "{Data}")
-					{
-						AddDataToMessage(Message.Data, Item.Value);
-						continue;
-					}
-
-					Message.Data[Item.Key] = Item.Value;
+					AddStateItemToMessage(state, Message, Item);
+				}
+			}
+			else if (state is IReadOnlyList<KeyValuePair<string, object?>> stateList)
+			{
+				for (int i = 0; i < stateList.Count; i++)
+				{
+					AddStateItemToMessage(state, Message, stateList[i]);
+				}
+			}
+			else if (state is IEnumerable<KeyValuePair<string, object?>> stateValues)
+			{
+				foreach (KeyValuePair<string, object?> Item in stateValues)
+				{
+					AddStateItemToMessage(state, Message, Item);
 				}
 			}
 
@@ -92,57 +101,91 @@ namespace Macross.Logging
 			return Message;
 		}
 
-		private static (IDictionary<string, object?>? Data, IList<object?>? Scope) ParseScope(IEnumerable<object> scope)
+		private static void ParseScopeItem(object item, LoggerJsonMessage message)
 		{
-			IDictionary<string, object?>? Data = null;
-			IList<object?>? Scope = null;
-
-			foreach (object Item in scope)
+			if (item is LoggerGroup LoggerGroup)
 			{
-				if (Item is string)
+				if (message._Group == null || LoggerGroup.Priority >= message._Group.Priority)
+					message._Group = LoggerGroup;
+			}
+			else if (item is string)
+			{
+				if (message.Scope == null)
+					message.Scope = RentScopeList();
+				message.Scope.Add(item);
+			}
+			else if (item is IReadOnlyList<KeyValuePair<string, object?>> scopeList)
+			{
+				for (int i = 0; i < scopeList.Count; i++)
 				{
-					if (Scope == null)
-						Scope = new Collection<object?>();
-					Scope.Add(Item);
-				}
-				else if (Item is IEnumerable<KeyValuePair<string, object?>> Dictionary)
-				{
-					if (Data == null)
-						Data = new Dictionary<string, object?>();
-					foreach (KeyValuePair<string, object?> SubItem in Dictionary)
-					{
-						if (SubItem.Key == "{OriginalFormat}")
-						{
-							if (Scope == null)
-								Scope = new Collection<object?>();
-
-							// Item should be a FormattedLogValues instance here, which formats when ToString is called.
-							string FormattedMessage = Item.ToString();
-							if (FormattedMessage == "[null]")
-								Scope.Add(null);
-							else
-								Scope.Add(FormattedMessage);
-							continue;
-						}
-						Data[SubItem.Key] = SubItem.Value;
-					}
-				}
-				else if (Item.GetType().IsValueType)
-				{
-					if (Scope == null)
-						Scope = new Collection<object?>();
-					Scope.Add(Item);
-				}
-				else
-				{
-					if (Data == null)
-						Data = new Dictionary<string, object?>();
-
-					AddObjectPropertiesToMessageData(Data, Item);
+					AddScopeItemToMessage(item, message, scopeList[i]);
 				}
 			}
+			else if (item is IEnumerable<KeyValuePair<string, object?>> scopeValues)
+			{
+				foreach (KeyValuePair<string, object?> SubItem in scopeValues)
+				{
+					AddScopeItemToMessage(item, message, SubItem);
+				}
+			}
+			else if (item.GetType().IsValueType)
+			{
+				if (message.Scope == null)
+					message.Scope = RentScopeList();
+				message.Scope.Add(item);
+			}
+			else
+			{
+				if (message.Data == null)
+					message.Data = RentDataDictionary();
 
-			return (Data, Scope);
+				AddObjectPropertiesToMessageData(message.Data, item);
+			}
+		}
+
+		private static void AddStateItemToMessage<TState>(TState state, LoggerJsonMessage message, KeyValuePair<string, object?> item)
+		{
+			if (item.Key == "{OriginalFormat}")
+			{
+				// state should be a FormattedLogValues instance here, which formats when ToString is called.
+				string FormattedMessage = state!.ToString();
+				if (FormattedMessage != "[null]")
+					message.Content = FormattedMessage;
+				return;
+			}
+
+			if (message.Data == null)
+				message.Data = RentDataDictionary();
+
+			if (item.Key == "{Data}")
+			{
+				AddDataToMessage(message.Data, item.Value);
+				return;
+			}
+
+			message.Data[item.Key] = item.Value;
+		}
+
+		private static void AddScopeItemToMessage(object scopeItem, LoggerJsonMessage message, KeyValuePair<string, object?> scopeSubItem)
+		{
+			if (scopeSubItem.Key == "{OriginalFormat}")
+			{
+				if (message.Scope == null)
+					message.Scope = RentScopeList();
+
+				// Item should be a FormattedLogValues instance here, which formats when ToString is called.
+				string FormattedMessage = scopeItem.ToString();
+				if (FormattedMessage == "[null]")
+					message.Scope.Add(null);
+				else
+					message.Scope.Add(FormattedMessage);
+				return;
+			}
+
+			if (message.Data == null)
+				message.Data = RentDataDictionary();
+
+			message.Data[scopeSubItem.Key] = scopeSubItem.Value;
 		}
 
 		private static void AddDataToMessage(IDictionary<string, object?> messageData, object? data)
@@ -162,15 +205,68 @@ namespace Macross.Logging
 
 		private static void AddObjectPropertiesToMessageData(IDictionary<string, object?> data, object value)
 		{
-			PropertyDescriptorCollection ItemProperties = TypeDescriptor.GetProperties(value);
-
-			foreach (PropertyDescriptor? ItemProperty in ItemProperties)
+			Type type = value.GetType();
+			if (!s_TypePropertyCache.TryGetValue(type, out List<PropertyGetter> propertyGetters))
 			{
-				if (ItemProperty == null)
-					continue;
-				data[ItemProperty.Name] = ItemProperty.GetValue(value);
+				PropertyInfo[] properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+				propertyGetters = new List<PropertyGetter>(properties.Length);
+
+				foreach (PropertyInfo propertyInfo in properties)
+				{
+					if (propertyInfo.CanRead)
+						propertyGetters.Add(new PropertyGetter(type, propertyInfo));
+				}
+
+				s_TypePropertyCache[type] = propertyGetters;
+			}
+
+			foreach (PropertyGetter propertyGetter in propertyGetters)
+			{
+				data[propertyGetter.PropertyName] = propertyGetter.GetPropertyFunc(value);
 			}
 		}
+
+		private static List<object?> RentScopeList()
+		{
+			return !s_ScopeListPool.TryTake(out List<object?> scope)
+				? new List<object?>(16)
+				: scope;
+		}
+
+		private static Dictionary<string, object?> RentDataDictionary()
+		{
+			return !s_DataDictionaryPool.TryTake(out Dictionary<string, object?> data)
+				? new Dictionary<string, object?>(16)
+				: data;
+		}
+
+		/// <summary>
+		/// Returns any rented resources for the <see cref="LoggerJsonMessage"/> back to their parent pools.
+		/// </summary>
+		/// <param name="message"><see cref="LoggerJsonMessage"/>.</param>
+		public static void Return(LoggerJsonMessage message)
+		{
+			Debug.Assert(message != null);
+
+			if (message.Scope != null && s_ScopeListPool.Count < 1024)
+			{
+				message.Scope.Clear();
+				s_ScopeListPool.Add(message.Scope);
+				message.Scope = null;
+			}
+
+			if (message.Data != null && s_DataDictionaryPool.Count < 1024)
+			{
+				message.Data.Clear();
+				s_DataDictionaryPool.Add(message.Data);
+				message.Data = null;
+			}
+
+			if (message.Exception != null)
+				LoggerJsonMessageException.Return(message.Exception);
+		}
+
+		private LoggerGroup? _Group;
 
 		/// <summary>
 		/// Gets or sets the message timestamp in UTC.
@@ -188,10 +284,9 @@ namespace Macross.Logging
 		public int? EventId { get; set; }
 
 		/// <summary>
-		/// Gets or sets the <see cref="LogLevel"/> of the message.
+		/// Gets or sets the <see cref="Microsoft.Extensions.Logging.LogLevel"/> of the message.
 		/// </summary>
-		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
-		public LogLevel? LogLevel { get; set; }
+		public string? LogLevel { get; set; }
 
 		/// <summary>
 		/// Gets or sets the group name of the message.
@@ -217,7 +312,7 @@ namespace Macross.Logging
 		/// Gets or sets the scope data values associated with the message.
 		/// </summary>
 #pragma warning disable CA2227 // Collection properties should be read only
-		public IList<object?>? Scope { get; set; }
+		public List<object?>? Scope { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
 
 		/// <summary>
@@ -225,7 +320,7 @@ namespace Macross.Logging
 		/// </summary>
 		[JsonExtensionData]
 #pragma warning disable CA2227 // Collection properties should be read only
-		public IDictionary<string, object?>? Data { get; set; }
+		public Dictionary<string, object?>? Data { get; set; }
 #pragma warning restore CA2227 // Collection properties should be read only
 	}
 }

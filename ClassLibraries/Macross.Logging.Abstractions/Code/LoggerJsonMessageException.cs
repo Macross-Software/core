@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+using System.Diagnostics;
 
 namespace Macross.Logging
 {
@@ -10,6 +10,8 @@ namespace Macross.Logging
 	/// </summary>
 	public class LoggerJsonMessageException
 	{
+		private static readonly ConcurrentBag<List<LoggerJsonMessageException>> s_ExceptionListPool = new ConcurrentBag<List<LoggerJsonMessageException>>();
+
 		/// <summary>
 		/// Create a <see cref="LoggerJsonMessageException"/> instance from an <see cref="Exception"/> instance.
 		/// </summary>
@@ -27,12 +29,11 @@ namespace Macross.Logging
 				Message = exception.Message
 			};
 
-			if (!string.IsNullOrEmpty(exception.StackTrace))
-				Exception.StackTrace = exception.StackTrace.Split('\r', '\n').Select(s => s.Trim()).Where(s => !string.IsNullOrEmpty(s));
+			Exception.StackTrace = exception.StackTrace;
 
 			if (exception is AggregateException AggregateException)
 			{
-				Collection<LoggerJsonMessageException> Exceptions = new Collection<LoggerJsonMessageException>();
+				List<LoggerJsonMessageException> Exceptions = RentExceptionList();
 
 				foreach (Exception ChildException in AggregateException.InnerExceptions)
 				{
@@ -43,10 +44,35 @@ namespace Macross.Logging
 			}
 			else if (exception.InnerException != null)
 			{
-				Exception.InnerExceptions = new[] { FromException(exception.InnerException) };
+				List<LoggerJsonMessageException> Exceptions = RentExceptionList();
+				Exceptions.Add(FromException(exception.InnerException));
+				Exception.InnerExceptions = Exceptions;
 			}
 
 			return Exception;
+		}
+
+		private static List<LoggerJsonMessageException> RentExceptionList()
+		{
+			return !s_ExceptionListPool.TryTake(out List<LoggerJsonMessageException> exceptions)
+				? new List<LoggerJsonMessageException>(16)
+				: exceptions;
+		}
+
+		/// <summary>
+		/// Returns any rented resources for the <see cref="LoggerJsonMessageException"/> back to their parent pools.
+		/// </summary>
+		/// <param name="exception"><see cref="LoggerJsonMessageException"/>.</param>
+		public static void Return(LoggerJsonMessageException exception)
+		{
+			Debug.Assert(exception != null);
+
+			if (exception.InnerExceptions != null && s_ExceptionListPool.Count < 1024)
+			{
+				exception.InnerExceptions.Clear();
+				s_ExceptionListPool.Add(exception.InnerExceptions);
+				exception.InnerExceptions = null;
+			}
 		}
 
 		/// <summary>
@@ -67,11 +93,13 @@ namespace Macross.Logging
 		/// <summary>
 		/// Gets or sets the stack trace associated with the exception.
 		/// </summary>
-		public IEnumerable<string>? StackTrace { get; set; }
+		public string? StackTrace { get; set; }
 
 		/// <summary>
 		/// Gets or sets the inner exceptions associated with the exception.
 		/// </summary>
-		public IEnumerable<LoggerJsonMessageException>? InnerExceptions { get; set; }
+#pragma warning disable CA2227 // Collection properties should be read only
+		public List<LoggerJsonMessageException>? InnerExceptions { get; set; }
+#pragma warning restore CA2227 // Collection properties should be read only
 	}
 }
