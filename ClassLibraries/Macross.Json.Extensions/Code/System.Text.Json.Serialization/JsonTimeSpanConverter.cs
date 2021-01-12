@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization
 			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
 #pragma warning disable CA1062 // Validate arguments of public methods
 			return typeToConvert.IsGenericType
-				? (JsonConverter)new JsonNullableTimeSpanConverter()
+				? new JsonNullableTimeSpanConverter()
 				: new JsonStandardTimeSpanConverter();
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
@@ -40,7 +40,7 @@ namespace System.Text.Json.Serialization
 			return UnderlyingType != null && UnderlyingType == typeof(TimeSpan);
 		}
 
-		internal class JsonStandardTimeSpanConverter : JsonConverter<TimeSpan>
+		private class JsonStandardTimeSpanConverter : JsonConverter<TimeSpan>
 		{
 			/// <inheritdoc/>
 			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -64,7 +64,7 @@ namespace System.Text.Json.Serialization
 				=> writer.WriteStringValue(value.ToString("c", CultureInfo.InvariantCulture));
 		}
 
-		internal class JsonNullableTimeSpanConverter : JsonConverter<TimeSpan?>
+		private class JsonNullableTimeSpanConverter : JsonConverter<TimeSpan?>
 		{
 			/// <inheritdoc/>
 			public override TimeSpan? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
