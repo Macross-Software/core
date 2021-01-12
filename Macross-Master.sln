@@ -57,6 +57,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.ServiceMana
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Windows.Debugging", "Macross.Windows.Debugging", "{89D0A30E-FF83-4D1E-A8A6-2030969DEC67}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Windows.Debugging\CHANGELOG.md = ClassLibraries\Macross.Windows.Debugging\CHANGELOG.md
 		ClassLibraries\Macross.Windows.Debugging\Example.png = ClassLibraries\Macross.Windows.Debugging\Example.png
 		ClassLibraries\Macross.Windows.Debugging\README.md = ClassLibraries\Macross.Windows.Debugging\README.md
 	EndProjectSection
@@ -67,6 +68,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWebApplication", "Class
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging.Abstractions", "Macross.Logging.Abstractions", "{1398A6A5-549A-4F0E-8D8A-25FCF40A8C22}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Logging.Abstractions\CHANGELOG.md = ClassLibraries\Macross.Logging.Abstractions\CHANGELOG.md
 		ClassLibraries\Macross.Logging.Abstractions\README.md = ClassLibraries\Macross.Logging.Abstractions\README.md
 	EndProjectSection
 EndProject
@@ -90,6 +92,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestWindowsService", "Class
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging.Files", "Macross.Logging.Files", "{8F8C2FCE-48CC-42BA-8572-E6DC015C37D8}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Logging.Files\CHANGELOG.md = ClassLibraries\Macross.Logging.Files\CHANGELOG.md
 		ClassLibraries\Macross.Logging.Files\README.md = ClassLibraries\Macross.Logging.Files\README.md
 	EndProjectSection
 EndProject
@@ -128,6 +131,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Performance.Extensi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.Logging.StandardOutput", "Macross.Logging.StandardOutput", "{BB4BBB29-7C73-43A0-9715-AC47C0C14642}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.Logging.StandardOutput\CHANGELOG.md = ClassLibraries\Macross.Logging.StandardOutput\CHANGELOG.md
 		ClassLibraries\Macross.Logging.StandardOutput\README.md = ClassLibraries\Macross.Logging.StandardOutput\README.md
 	EndProjectSection
 EndProject
