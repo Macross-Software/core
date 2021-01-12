@@ -39,7 +39,7 @@ namespace System.Text.Json.Serialization
 			return UnderlyingType != null && UnderlyingType == typeof(DateTime);
 		}
 
-		internal class JsonStandardDateTimeConverter : JsonDateTimeConverter<DateTime>
+		private class JsonStandardDateTimeConverter : JsonDateTimeConverter<DateTime>
 		{
 			/// <inheritdoc/>
 			public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -50,7 +50,7 @@ namespace System.Text.Json.Serialization
 				=> WriteDateTime(writer, value);
 		}
 
-		internal class JsonNullableDateTimeConverter : JsonDateTimeConverter<DateTime?>
+		private class JsonNullableDateTimeConverter : JsonDateTimeConverter<DateTime?>
 		{
 			/// <inheritdoc/>
 			public override DateTime? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -61,7 +61,7 @@ namespace System.Text.Json.Serialization
 				=> WriteDateTime(writer, value!.Value);
 		}
 
-		internal abstract class JsonDateTimeConverter<T> : JsonConverter<T>
+		private abstract class JsonDateTimeConverter<T> : JsonConverter<T>
 		{
 			private static readonly DateTime s_Epoch = DateTime.SpecifyKind(new DateTime(1970, 1, 1, 0, 0, 0), DateTimeKind.Utc);
 			private static readonly Regex s_Regex = new Regex("^/Date\\(([^+-]+)\\)/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);

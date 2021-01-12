@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Text.Json;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,7 +18,7 @@ namespace Macross.Logging.Abstractions.Tests
 
 			Logger.LogInformation("Hello world.");
 
-			Assert.AreEqual(LogLevel.Information, Logger.Message?.LogLevel);
+			Assert.AreEqual(nameof(LogLevel.Information), Logger.Message?.LogLevel);
 			Assert.AreEqual("Hello world.", Logger.Message?.Content);
 			Assert.IsNull(Logger.Message?.Data);
 			Assert.IsNull(Logger.Message?.Scope);
@@ -32,7 +31,7 @@ namespace Macross.Logging.Abstractions.Tests
 
 			Logger.LogInformation(null);
 
-			Assert.AreEqual(LogLevel.Information, Logger.Message?.LogLevel);
+			Assert.AreEqual(nameof(LogLevel.Information), Logger.Message?.LogLevel);
 			Assert.AreEqual(null, Logger.Message?.Content);
 			Assert.IsNull(Logger.Message?.Data);
 			Assert.IsNull(Logger.Message?.Scope);
@@ -45,7 +44,7 @@ namespace Macross.Logging.Abstractions.Tests
 
 			Logger.Log(LogLevel.Information, 0, 1000, null, (s, e) => $"{s}");
 
-			Assert.AreEqual(LogLevel.Information, Logger.Message?.LogLevel);
+			Assert.AreEqual(nameof(LogLevel.Information), Logger.Message?.LogLevel);
 			Assert.AreEqual("1000", Logger.Message?.Content);
 			Assert.IsNull(Logger.Message?.Data);
 			Assert.IsNull(Logger.Message?.Scope);
@@ -58,7 +57,7 @@ namespace Macross.Logging.Abstractions.Tests
 
 			Logger.LogInformation("OrderId {OrderId} CustomerId {CustomerId} Null {NullValue}", 1, 2, null);
 
-			Assert.AreEqual(LogLevel.Information, Logger.Message?.LogLevel);
+			Assert.AreEqual(nameof(LogLevel.Information), Logger.Message?.LogLevel);
 			Assert.AreEqual("OrderId 1 CustomerId 2 Null (null)", Logger.Message?.Content);
 
 			Assert.AreEqual(3, Logger.Message?.Data?.Count);
@@ -190,20 +189,7 @@ namespace Macross.Logging.Abstractions.Tests
 			public bool IsEnabled(LogLevel logLevel) => true;
 
 			public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
-			{
-				ICollection<object>? Scopes = null;
-
-				_ScopeProvider.ForEachScope(
-					(scope, state) =>
-					{
-						if (Scopes == null)
-							Scopes = new Collection<object>();
-						Scopes.Add(scope);
-					},
-					state);
-
-				Message = LoggerJsonMessage.FromLoggerData(null, "Category", Scopes, logLevel, eventId, state, exception, formatter);
-			}
+				=> Message = LoggerJsonMessage.FromLoggerData("Category", _ScopeProvider, logLevel, eventId, state, exception, formatter);
 		}
 	}
 }

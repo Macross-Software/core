@@ -27,7 +27,7 @@ namespace System.Text.Json.Serialization
 			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
 #pragma warning disable CA1062 // Validate arguments of public methods
 			return typeToConvert.IsGenericType
-				? (JsonConverter)new JsonNullableDateTimeOffsetConverter()
+				? new JsonNullableDateTimeOffsetConverter()
 				: new JsonStandardDateTimeOffsetConverter();
 #pragma warning restore CA1062 // Validate arguments of public methods
 		}
@@ -39,7 +39,7 @@ namespace System.Text.Json.Serialization
 			return UnderlyingType != null && UnderlyingType == typeof(DateTimeOffset);
 		}
 
-		internal class JsonStandardDateTimeOffsetConverter : JsonDateTimeOffsetConverter<DateTimeOffset>
+		private class JsonStandardDateTimeOffsetConverter : JsonDateTimeOffsetConverter<DateTimeOffset>
 		{
 			/// <inheritdoc/>
 			public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -50,7 +50,7 @@ namespace System.Text.Json.Serialization
 				=> WriteDateTimeOffset(writer, value);
 		}
 
-		internal class JsonNullableDateTimeOffsetConverter : JsonDateTimeOffsetConverter<DateTimeOffset?>
+		private class JsonNullableDateTimeOffsetConverter : JsonDateTimeOffsetConverter<DateTimeOffset?>
 		{
 			/// <inheritdoc/>
 			public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -61,7 +61,7 @@ namespace System.Text.Json.Serialization
 				=> WriteDateTimeOffset(writer, value!.Value);
 		}
 
-		internal abstract class JsonDateTimeOffsetConverter<T> : JsonConverter<T>
+		private abstract class JsonDateTimeOffsetConverter<T> : JsonConverter<T>
 		{
 			private static readonly DateTimeOffset s_Epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
 			private static readonly Regex s_Regex = new Regex("^/Date\\(([^+-]+)([+-])(\\d{2})(\\d{2})\\)/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);

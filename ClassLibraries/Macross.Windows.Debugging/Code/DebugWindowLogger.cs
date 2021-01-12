@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 
 using Microsoft.Extensions.Logging;
 
@@ -33,27 +31,8 @@ namespace Macross.Windows.Debugging
 			if (!IsEnabled(logLevel))
 				return;
 
-			ICollection<object>? Scopes = null;
-			LoggerGroup? Group = null;
-
-			ScopeProvider?.ForEachScope(
-				(scope, state) =>
-				{
-					if (scope is LoggerGroup LoggerGroup)
-					{
-						if (Group == null || LoggerGroup.Priority >= Group.Priority)
-							Group = LoggerGroup;
-						return;
-					}
-					if (Scopes == null)
-						Scopes = new Collection<object>();
-					Scopes.Add(scope);
-				},
-				state);
-
-			_MessageManager
-				.AddMessage(
-					LoggerJsonMessage.FromLoggerData(Group?.GroupName, _CategoryName, Scopes, logLevel, eventId, state, exception, formatter));
+			_MessageManager.AddMessage(
+				LoggerJsonMessage.FromLoggerData(_CategoryName, ScopeProvider, logLevel, eventId, state, exception, formatter));
 		}
 	}
 }

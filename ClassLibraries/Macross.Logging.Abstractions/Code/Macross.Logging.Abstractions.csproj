@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
@@ -11,6 +11,7 @@
 
       Commonly Used Types:
       Macross.Logging.LoggerJsonMessage
+      Macross.Logging.LoggerJsonMessageException
 
       Commonly Used Extensions:
       Microsoft.Extensions.Logging.ILogger.Write
@@ -26,10 +27,11 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <VersionPrefix>1.1.1</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
+    <VersionPrefix>2.0.0</VersionPrefix>
+    <VersionSuffix>beta1</VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Logging.Abstractions</PackageProjectUrl>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(VersionSuffix)'==''">
@@ -47,10 +49,9 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.1" />
     <PackageReference Include="System.Text.Json" Version="4.7.0" />
+    <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Macross.Json.Extensions\Code\Macross.Json.Extensions.csproj" />
-  </ItemGroup>
+
 
 </Project>

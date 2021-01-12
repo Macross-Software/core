@@ -70,7 +70,7 @@ namespace System.Collections.Generic
 		/// <param name="instance">The enumerable instance.</param>
 		/// <returns><see cref="AllocationFreeForEach(TEnumerable, ref TState, StructEnumeratorForEachDelegate{TItem, TState})"/>.</returns>
 #pragma warning disable CA1000 // Do not declare static members on generic types
-		public static StructEnumerator<TEnumerable, TItem, TState>.AllocationFreeForEachDelegate FindAllocationFreeForEachDelegate(TEnumerable instance)
+		public static AllocationFreeForEachDelegate FindAllocationFreeForEachDelegate(TEnumerable instance)
 #pragma warning restore CA1000 // Do not declare static members on generic types
 		{
 			Debug.Assert(instance != null);
@@ -82,27 +82,45 @@ namespace System.Collections.Generic
 				s_BuildAllocationFreeForEachDelegateRef);
 		}
 
-		/* We want to do this type of logic...
-			public static void AllocationFreeForEach(List<int> list, ref TState state, ForEachDelegate itemCallback)
-			{
-				using (Enumerator<int>.Enumerator enumerator = list.GetEnumerator())
+		private static AllocationFreeForEachDelegate BuildAllocationFreeForEachDelegate(Type enumerableType)
+			=> BuildAllocationFreeForEachDelegate(enumerableType, false);
+
+		/// <summary>
+		/// Builds a delegate that can be reused to enumerate over an <see cref="IEnumerable{TItem}" /> instance without allocation if a struct GetEnumerator is available.
+		/// </summary>
+		/// <param name="enumerableType">The runtime enumerable type.</param>
+		/// <param name="throwIfStructEnumeratorNotFound">Specify <see langword="true"/> to throw an exception if a struct enumerator cannot be found on <paramref name="enumerableType"/>.</param>
+		/// <returns><see cref="AllocationFreeForEachDelegate"/>.</returns>
+#pragma warning disable CA1000 // Do not declare static members on generic types
+		public static AllocationFreeForEachDelegate BuildAllocationFreeForEachDelegate(Type enumerableType, bool throwIfStructEnumeratorNotFound = true)
+#pragma warning restore CA1000 // Do not declare static members on generic types
+		{
+			/* We want to do this type of logic...
+				public static void AllocationFreeForEach(List<int> list, ref TState state, ForEachDelegate itemCallback)
 				{
-					while (enumerator.MoveNext())
+					using (List<int>.Enumerator enumerator = list.GetEnumerator())
 					{
-						if (!itemCallback(ref state, enumerator.Current))
-							break;
+						while (enumerator.MoveNext())
+						{
+							if (!itemCallback(ref state, enumerator.Current))
+								break;
+						}
 					}
 				}
-			}
-			...because it takes advantage of the struct Enumerator on the built-in types which give an allocation-free way to enumerate.
-		*/
-		private static AllocationFreeForEachDelegate BuildAllocationFreeForEachDelegate(Type enumerableType)
-		{
+				...because it takes advantage of the struct Enumerator on the built-in types which give an allocation-free way to enumerate.
+			*/
+
+			if (enumerableType == null)
+				throw new ArgumentNullException(nameof(enumerableType));
+
 			Type itemCallbackType = typeof(StructEnumeratorForEachDelegate<TItem, TState>);
 
 			MethodInfo? getEnumeratorMethod = ResolveGetEnumeratorMethodForType(enumerableType);
 			if (getEnumeratorMethod == null)
 			{
+				if (throwIfStructEnumeratorNotFound)
+					throw new NotSupportedException($"Type [{enumerableType}] does not implement a GetEnumerator operation returning a struct.");
+
 				// Fallback to allocation mode and use IEnumerable<TItem>.GetEnumerator.
 				// Primarily for Array.Empty and Enumerable.Empty case, but also for user types.
 				getEnumeratorMethod = s_GenericGetEnumeratorMethod;

@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Runtime.CompilerServices;
 
 namespace Macross.Logging.Abstractions
 {
@@ -23,6 +24,20 @@ namespace Macross.Logging.Abstractions
 		private readonly object?[] _Values;
 		private readonly object? _Data;
 		private readonly LogValuesFormatter? _Formatter;
+
+		public int Count => _Formatter == null ? 2 : _Formatter.ValueNames.Count + 2;
+
+		public KeyValuePair<string, object?> this[int index]
+		{
+			get
+			{
+				int count = Count;
+
+				return index < 0 || index >= count
+					? throw new IndexOutOfRangeException(nameof(index))
+					: GetValueAtIndex(index, count);
+			}
+		}
 
 		public FormattedLogValues(string? format, object? data, params object?[]? values)
 		{
@@ -52,33 +67,58 @@ namespace Macross.Logging.Abstractions
 			_Values = values ?? Array.Empty<object>();
 		}
 
-		public KeyValuePair<string, object?> this[int index]
-		{
-			get
-			{
-				if (index < 0 || index >= Count)
-					throw new IndexOutOfRangeException(nameof(index));
-
-				return index == Count - 1
-					? new KeyValuePair<string, object?>("{OriginalFormat}", _OriginalMessage)
-					: index == Count - 2
-						? new KeyValuePair<string, object?>("{Data}", _Data)
-						: _Formatter!.GetValue(_Values, index);
-			}
-		}
-
-		public int Count => _Formatter == null ? 2 : _Formatter.ValueNames.Count + 2;
-
-		public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
-		{
-			for (int i = 0; i < Count; ++i)
-			{
-				yield return this[i];
-			}
-		}
+		public Enumerator GetEnumerator() => new Enumerator(this);
 
 		public override string ToString() => _Formatter == null ? _OriginalMessage : _Formatter.Format(_Values);
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private KeyValuePair<string, object?> GetValueAtIndex(int index, int count)
+		{
+			return index == count - 1
+				? new KeyValuePair<string, object?>("{OriginalFormat}", _OriginalMessage)
+				: index == count - 2
+					? new KeyValuePair<string, object?>("{Data}", _Data)
+					: _Formatter!.GetValue(_Values, index);
+		}
+
+		IEnumerator<KeyValuePair<string, object?>> IEnumerable<KeyValuePair<string, object?>>.GetEnumerator() => GetEnumerator();
+
 		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+		public struct Enumerator : IEnumerator<KeyValuePair<string, object?>>
+		{
+			private readonly FormattedLogValues _FormattedLogValues;
+			private readonly int _Count;
+			private int _Position;
+
+			public Enumerator(FormattedLogValues formattedLogValues)
+			{
+				_FormattedLogValues = formattedLogValues;
+				_Count = formattedLogValues.Count;
+				_Position = 0;
+				Current = default;
+			}
+
+			public KeyValuePair<string, object?> Current { get; private set; }
+
+			object IEnumerator.Current => Current;
+
+			public bool MoveNext()
+			{
+				if (_Position < _Count)
+				{
+					Current = _FormattedLogValues.GetValueAtIndex(_Position++, _Count);
+					return true;
+				}
+
+				return false;
+			}
+
+			public void Dispose()
+			{
+			}
+
+			public void Reset() => throw new NotImplementedException();
+		}
 	}
 }

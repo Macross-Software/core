@@ -155,8 +155,9 @@ thses rules:
         }
        ```
 
-    4. If `state` is an `object`, use `TypeDescriptor.GetProperties` to read the
-       properties and then add them as top-level properties on the JSON.
+    4. If `state` is an `object`, use `Type.GetProperties(BindingFlags.Public |
+       BindingFlags.Instance)` to read the properties and then add them as
+       top-level properties on the JSON.
 
         ```csharp
         using IDisposable Scope = Logger.BeginScope(
@@ -258,7 +259,9 @@ Will omit JSON like this:
 }
 ```
 
-This is supported by [Macross.Logging.Files](../Macross.Logging.Files/README.md)
+This is supported by
+[Macross.Logging.Files](../Macross.Logging.Files/README.md),
+[Macross.Logging.StandardOutput](../Macross.Logging.StandardOutput/README.md),
 and [Macross.Windows.Debugging](../Macross.Windows.Debugging/README.md). Other
 log frameworks will be a mixed bag. Frameworks that just "ToString()" the
 formatter will ignore the extra data. Formatters that loop over all the

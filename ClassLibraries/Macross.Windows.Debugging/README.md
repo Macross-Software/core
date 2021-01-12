@@ -358,7 +358,9 @@ otherwise routing information won't be available.
 
 If you find the flattened message JSON format displayed in the UI conveniant and
 want to write it out into actual log files, see
-[Macross.Logging.Files](../Macross.Logging.Files/README.md).
+[Macross.Logging.Files](../Macross.Logging.Files/README.md). To write it out to
+Console (stdout), see
+[Macross.Logging.StandardOutput](../Macross.Logging.StandardOutput/README.md).
 
 A demo web application using the `DebugWindow` and `Macross.Logging.Files` is
 available [here](./Demo/README.md).

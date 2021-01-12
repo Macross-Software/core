@@ -1,32 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.Serialization;
-using System.Diagnostics;
 using System.Globalization;
 
 using Macross.Json.Extensions;
 
 namespace System.Text.Json.Serialization
 {
-#pragma warning disable CA1812 // Remove class never instantiated
-	internal class JsonStringEnumMemberConverter<T> : JsonConverter<T>
-#pragma warning restore CA1812 // Remove class never instantiated
+	internal class JsonStringEnumMemberConverterHelper<TEnum>
+		where TEnum : struct, Enum
 	{
-		private const BindingFlags EnumBindings = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
-
-#if NETSTANDARD2_0
-		private static readonly string[] s_Split = new string[] { ", " };
-#endif
-
 		private class EnumInfo
 		{
 #pragma warning disable SA1401 // Fields should be private
 			public string Name;
-			public Enum EnumValue;
+			public TEnum EnumValue;
 			public ulong RawValue;
 #pragma warning restore SA1401 // Fields should be private
 
-			public EnumInfo(string name, Enum enumValue, ulong rawValue)
+			public EnumInfo(string name, TEnum enumValue, ulong rawValue)
 			{
 				Name = name;
 				EnumValue = enumValue;
@@ -34,31 +26,30 @@ namespace System.Text.Json.Serialization
 			}
 		}
 
+		private const BindingFlags EnumBindings = BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static;
+
+#if NETSTANDARD2_0
+		private static readonly string[] s_Split = new string[] { ", " };
+#endif
+
 		private readonly bool _AllowIntegerValues;
-		private readonly Type? _UnderlyingType;
 		private readonly Type _EnumType;
 		private readonly TypeCode _EnumTypeCode;
 		private readonly bool _IsFlags;
-		private readonly Dictionary<ulong, EnumInfo> _RawToTransformed;
+		private readonly Dictionary<TEnum, EnumInfo> _RawToTransformed;
 		private readonly Dictionary<string, EnumInfo> _TransformedToRaw;
 
-		public JsonStringEnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, Type? underlyingType)
+		public JsonStringEnumMemberConverterHelper(JsonNamingPolicy? namingPolicy, bool allowIntegerValues)
 		{
-			Debug.Assert(
-				(typeof(T).IsEnum && underlyingType == null)
-				|| (Nullable.GetUnderlyingType(typeof(T)) == underlyingType),
-				"Generic type is invalid.");
-
 			_AllowIntegerValues = allowIntegerValues;
-			_UnderlyingType = underlyingType;
-			_EnumType = _UnderlyingType ?? typeof(T);
+			_EnumType = typeof(TEnum);
 			_EnumTypeCode = Type.GetTypeCode(_EnumType);
 			_IsFlags = _EnumType.IsDefined(typeof(FlagsAttribute), true);
 
 			string[] builtInNames = _EnumType.GetEnumNames();
 			Array builtInValues = _EnumType.GetEnumValues();
 
-			_RawToTransformed = new Dictionary<ulong, EnumInfo>();
+			_RawToTransformed = new Dictionary<TEnum, EnumInfo>();
 			_TransformedToRaw = new Dictionary<string, EnumInfo>();
 
 			for (int i = 0; i < builtInNames.Length; i++)
@@ -73,12 +64,15 @@ namespace System.Text.Json.Serialization
 				EnumMemberAttribute? enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
 				string transformedName = enumMemberAttribute?.Value ?? namingPolicy?.ConvertName(name) ?? name;
 
-				_RawToTransformed[rawValue] = new EnumInfo(transformedName, enumValue, rawValue);
-				_TransformedToRaw[transformedName] = new EnumInfo(name, enumValue, rawValue);
+				if (enumValue is not TEnum typedValue)
+					throw new NotSupportedException();
+
+				_RawToTransformed[typedValue] = new EnumInfo(transformedName, typedValue, rawValue);
+				_TransformedToRaw[transformedName] = new EnumInfo(name, typedValue, rawValue);
 			}
 		}
 
-		public override T Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+		public TEnum Read(ref Utf8JsonReader reader)
 		{
 			JsonTokenType token = reader.TokenType;
 
@@ -88,7 +82,7 @@ namespace System.Text.Json.Serialization
 
 				// Case sensitive search attempted first.
 				if (_TransformedToRaw.TryGetValue(enumString, out EnumInfo? enumInfo))
-					return (T)Enum.ToObject(_EnumType, enumInfo.RawValue);
+					return enumInfo.EnumValue;
 
 				if (_IsFlags)
 				{
@@ -125,7 +119,12 @@ namespace System.Text.Json.Serialization
 						}
 					}
 
-					return (T)Enum.ToObject(_EnumType, calculatedValue);
+					TEnum enumValue = (TEnum)Enum.ToObject(_EnumType, calculatedValue);
+					if (_TransformedToRaw.Count < 64)
+					{
+						_TransformedToRaw[enumString] = new EnumInfo(enumString, enumValue, calculatedValue);
+					}
+					return enumValue;
 				}
 
 				// Case insensitive search attempted second.
@@ -133,7 +132,7 @@ namespace System.Text.Json.Serialization
 				{
 					if (string.Equals(enumItem.Key, enumString, StringComparison.OrdinalIgnoreCase))
 					{
-						return (T)Enum.ToObject(_EnumType, enumItem.Value.RawValue);
+						return enumItem.Value.EnumValue;
 					}
 				}
 
@@ -148,49 +147,49 @@ namespace System.Text.Json.Serialization
 				case TypeCode.Int32:
 					if (reader.TryGetInt32(out int int32))
 					{
-						return (T)Enum.ToObject(_EnumType, int32);
+						return (TEnum)Enum.ToObject(_EnumType, int32);
 					}
 					break;
 				case TypeCode.Int64:
 					if (reader.TryGetInt64(out long int64))
 					{
-						return (T)Enum.ToObject(_EnumType, int64);
+						return (TEnum)Enum.ToObject(_EnumType, int64);
 					}
 					break;
 				case TypeCode.Int16:
 					if (reader.TryGetInt16(out short int16))
 					{
-						return (T)Enum.ToObject(_EnumType, int16);
+						return (TEnum)Enum.ToObject(_EnumType, int16);
 					}
 					break;
 				case TypeCode.Byte:
 					if (reader.TryGetByte(out byte ubyte8))
 					{
-						return (T)Enum.ToObject(_EnumType, ubyte8);
+						return (TEnum)Enum.ToObject(_EnumType, ubyte8);
 					}
 					break;
 				case TypeCode.UInt32:
 					if (reader.TryGetUInt32(out uint uint32))
 					{
-						return (T)Enum.ToObject(_EnumType, uint32);
+						return (TEnum)Enum.ToObject(_EnumType, uint32);
 					}
 					break;
 				case TypeCode.UInt64:
 					if (reader.TryGetUInt64(out ulong uint64))
 					{
-						return (T)Enum.ToObject(_EnumType, uint64);
+						return (TEnum)Enum.ToObject(_EnumType, uint64);
 					}
 					break;
 				case TypeCode.UInt16:
 					if (reader.TryGetUInt16(out ushort uint16))
 					{
-						return (T)Enum.ToObject(_EnumType, uint16);
+						return (TEnum)Enum.ToObject(_EnumType, uint16);
 					}
 					break;
 				case TypeCode.SByte:
 					if (reader.TryGetSByte(out sbyte byte8))
 					{
-						return (T)Enum.ToObject(_EnumType, byte8);
+						return (TEnum)Enum.ToObject(_EnumType, byte8);
 					}
 					break;
 			}
@@ -198,26 +197,25 @@ namespace System.Text.Json.Serialization
 			throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType);
 		}
 
-		public override void Write(Utf8JsonWriter writer, T value, JsonSerializerOptions options)
+		public void Write(Utf8JsonWriter writer, TEnum value)
 		{
-			// Note: There is no check for value == null because Json serializer won't call the converter in that case.
-			ulong rawValue = GetEnumValue(value!);
-
-			if (_RawToTransformed.TryGetValue(rawValue, out EnumInfo? enumInfo))
+			if (_RawToTransformed.TryGetValue(value, out EnumInfo? enumInfo))
 			{
 				writer.WriteStringValue(enumInfo.Name);
 				return;
 			}
+
+			ulong rawValue = GetEnumValue(value);
 
 			if (_IsFlags)
 			{
 				ulong calculatedValue = 0;
 
 				StringBuilder Builder = new StringBuilder();
-				foreach (KeyValuePair<ulong, EnumInfo> enumItem in _RawToTransformed)
+				foreach (KeyValuePair<TEnum, EnumInfo> enumItem in _RawToTransformed)
 				{
 					enumInfo = enumItem.Value;
-					if (!(value as Enum)!.HasFlag(enumInfo.EnumValue)
+					if (!value.HasFlag(enumInfo.EnumValue)
 						|| enumInfo.RawValue == 0) // Definitions with 'None' should hit the cache case.
 					{
 						continue;
@@ -232,7 +230,12 @@ namespace System.Text.Json.Serialization
 				}
 				if (calculatedValue == rawValue)
 				{
-					writer.WriteStringValue(Builder.ToString());
+					string finalName = Builder.ToString();
+					if (_RawToTransformed.Count < 64)
+					{
+						_RawToTransformed[value] = new EnumInfo(finalName, value, rawValue);
+					}
+					writer.WriteStringValue(finalName);
 					return;
 				}
 			}

@@ -18,6 +18,73 @@ namespace Macross.Logging.Files
 	internal class FileLoggerProvider : ILoggerProvider, ISupportExternalScope
 #pragma warning restore CA1812 // Remove class never instantiated
 	{
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
+		private class State
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
+		{
+			private readonly BufferWriter _Buffer;
+			private readonly Utf8JsonWriter _Writer;
+			private readonly JsonSerializerOptions _Options;
+
+			public State(JsonSerializerOptions options)
+			{
+				_Options = options;
+
+				_Buffer = new BufferWriter(16 * 1024);
+
+				_Writer = new Utf8JsonWriter(
+					_Buffer,
+					new JsonWriterOptions
+					{
+						Encoder = options.Encoder,
+						Indented = options.WriteIndented
+					});
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			public void SerializeMessageToJson(LoggerJsonMessage message, Stream stream)
+			{
+				try
+				{
+					_Writer.Reset();
+
+					try
+					{
+						JsonSerializer.Serialize(_Writer, message, _Options);
+					}
+					catch (JsonException JsonException)
+					{
+						JsonSerializer.Serialize(
+							_Writer,
+							new LoggerJsonMessage
+							{
+								LogLevel = message.LogLevel,
+								TimestampUtc = message.TimestampUtc,
+								ThreadId = message.ThreadId,
+								EventId = message.EventId,
+								GroupName = message.GroupName,
+								CategoryName = message.CategoryName,
+								Content = $"Message with Content [{message.Content}] contained data that could not be serialized into Json.",
+								Exception = LoggerJsonMessageException.FromException(JsonException)
+							},
+							_Options);
+					}
+					finally
+					{
+						LoggerJsonMessage.Return(message);
+					}
+
+					_Buffer.WriteToStream(stream);
+					stream.Write(s_NewLine, 0, s_NewLine.Length);
+					stream.Flush();
+				}
+				finally
+				{
+					_Buffer.Clear();
+				}
+			}
+		}
+
 		private static readonly ISystemTime s_DefaultSystemTime = new SystemTime();
 		private static readonly byte[] s_NewLine = Encoding.UTF8.GetBytes(Environment.NewLine);
 
@@ -44,7 +111,6 @@ namespace Macross.Logging.Files
 			}
 		}
 
-		private readonly BufferWriter _Buffer = new BufferWriter(16 * 1024);
 		private readonly LogFileManager _LogFileManager = new LogFileManager(new FileSystem(), s_DefaultSystemTime);
 		private readonly ConcurrentDictionary<string, FileLogger> _Loggers = new ConcurrentDictionary<string, FileLogger>();
 		private readonly ConcurrentQueue<LoggerJsonMessage> _Messages = new ConcurrentQueue<LoggerJsonMessage>();
@@ -61,7 +127,7 @@ namespace Macross.Logging.Files
 		private string? _ApplicationName;
 		private string? _LogFileNamePattern;
 		private int? _LogFileMaxSizeInKilobytes;
-		private JsonSerializerOptions? _JsonOptions;
+		private State? _State;
 		private LoggerGroupCache? _LoggerGroupCache;
 		private LogFileManagementSchedule? _ManagementSchedule;
 		private bool _Disposed;
@@ -181,7 +247,7 @@ namespace Macross.Logging.Files
 				? options.LogFileMaxSizeInKilobytes
 				: (int?)null;
 
-			_JsonOptions = options.JsonOptions ?? FileLoggerOptions.DefaultJsonOptions;
+			_State = new State(options.JsonOptions ?? FileLoggerOptions.DefaultJsonOptions);
 
 			_LoggerGroupCache = new LoggerGroupCache(options.GroupOptions ?? FileLoggerOptions.DefaultGroupOptions);
 
@@ -280,7 +346,7 @@ namespace Macross.Logging.Files
 				{
 					try
 					{
-						SerializeMessageToJson(LogFile.Stream, Message);
+						_State!.SerializeMessageToJson(Message, LogFile.Stream);
 					}
 #pragma warning disable CA1031 // Do not catch general exception types
 					catch
@@ -289,45 +355,6 @@ namespace Macross.Logging.Files
 						LogFile.Toxic = true;
 					}
 				}
-			}
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private void SerializeMessageToJson(Stream stream, LoggerJsonMessage message)
-		{
-			try
-			{
-				using (Utf8JsonWriter Writer = new Utf8JsonWriter(_Buffer))
-				{
-					try
-					{
-						JsonSerializer.Serialize(Writer, message, _JsonOptions);
-					}
-					catch (JsonException JsonException)
-					{
-						JsonSerializer.Serialize(
-							Writer,
-							new LoggerJsonMessage
-							{
-								LogLevel = message.LogLevel,
-								TimestampUtc = message.TimestampUtc,
-								ThreadId = message.ThreadId,
-								EventId = message.EventId,
-								GroupName = message.GroupName,
-								CategoryName = message.CategoryName,
-								Content = $"Message with Content [{message.Content}] contained data that could not be serialized into Json.",
-								Exception = LoggerJsonMessageException.FromException(JsonException)
-							},
-							_JsonOptions);
-					}
-				}
-				_Buffer.WriteToStream(stream);
-				stream.Write(s_NewLine, 0, s_NewLine.Length);
-				stream.Flush();
-			}
-			finally
-			{
-				_Buffer.Clear();
 			}
 		}
 	}
