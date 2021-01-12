@@ -50,12 +50,19 @@ namespace System.Text.Json.Serialization
 		{
 			(bool IsNullableEnum, Type? UnderlyingType) = TestNullableEnum(typeToConvert);
 
-			return (JsonConverter)Activator.CreateInstance(
-				typeof(JsonStringEnumMemberConverter<>).MakeGenericType(typeToConvert),
-				BindingFlags.Instance | BindingFlags.Public,
-				binder: null,
-				args: new object?[] { _NamingPolicy, _AllowIntegerValues, IsNullableEnum ? UnderlyingType : null },
-				culture: null)!;
+			return IsNullableEnum
+				? (JsonConverter)Activator.CreateInstance(
+					typeof(JsonStringEnumMemberNullableConverter<>).MakeGenericType(UnderlyingType),
+					BindingFlags.Instance | BindingFlags.Public,
+					binder: null,
+					args: new object?[] { _NamingPolicy, _AllowIntegerValues },
+					culture: null)
+				: (JsonConverter)Activator.CreateInstance(
+					typeof(JsonStringEnumMemberConverter<>).MakeGenericType(typeToConvert),
+					BindingFlags.Instance | BindingFlags.Public,
+					binder: null,
+					args: new object?[] { _NamingPolicy, _AllowIntegerValues },
+					culture: null);
 		}
 
 		private static (bool IsNullableEnum, Type? UnderlyingType) TestNullableEnum(Type typeToConvert)
