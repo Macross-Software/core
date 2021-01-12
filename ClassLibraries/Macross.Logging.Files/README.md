@@ -39,18 +39,18 @@ logging frameworks:
 
 |                      Method | NumberOfThreads | IncludeFlushTime |        Mean |      Error |     StdDev |      Median | Completed Work Items | Lock Contentions |      Gen 0 |     Gen 1 | Gen 2 | Allocated |
 |---------------------------- |---------------- |----------------- |------------:|-----------:|-----------:|------------:|---------------------:|-----------------:|-----------:|----------:|------:|----------:|
-|               NLogBenchmark |               1 |            False |   315.47 ms |   6.698 ms |  19.000 ms |   312.94 ms |              68.0000 |                - |  1000.0000 |         - |     - |  11.53 MB |
-|            SerilogBenchmark |               1 |            False |   220.92 ms |   4.369 ms |   9.404 ms |   221.75 ms |               2.0000 |                - |  2000.0000 |         - |     - |  18.81 MB |
-| MacrossFileLoggingBenchmark |               1 |            False |    17.55 ms |   0.742 ms |   2.117 ms |    17.50 ms |               1.0000 |                - |          - |         - |     - |   5.48 MB |
-|               NLogBenchmark |               1 |             True |   309.53 ms |   6.568 ms |  13.416 ms |   305.40 ms |              69.0000 |                - |  1000.0000 |         - |     - |  11.67 MB |
-|            SerilogBenchmark |               1 |             True |   223.04 ms |   4.457 ms |  11.263 ms |   222.64 ms |               2.0000 |                - |  2000.0000 |         - |     - |  18.81 MB |
-| MacrossFileLoggingBenchmark |               1 |             True |   167.06 ms |   3.296 ms |   6.658 ms |   167.52 ms |               3.0000 |                - |          - |         - |     - |   6.79 MB |
-|               NLogBenchmark |               4 |            False | 1,699.88 ms |  36.842 ms | 108.630 ms | 1,664.43 ms |             268.0000 |        4110.0000 | 11000.0000 | 2000.0000 |     - |  88.64 MB |
-|            SerilogBenchmark |               4 |            False | 1,166.48 ms | 121.450 ms | 358.098 ms |   949.62 ms |               2.0000 |        8476.0000 | 16000.0000 | 1000.0000 |     - | 128.44 MB |
-| MacrossFileLoggingBenchmark |               4 |            False |    36.35 ms |   1.532 ms |   4.492 ms |    35.52 ms |               1.0000 |           6.0000 |  2000.0000 |         - |     - |  21.73 MB |
-|               NLogBenchmark |               4 |             True | 1,281.70 ms |  58.506 ms | 171.588 ms | 1,187.31 ms |             269.0000 |        8637.0000 | 11000.0000 | 2000.0000 |     - |  89.36 MB |
-|            SerilogBenchmark |               4 |             True | 1,199.68 ms | 106.964 ms | 315.387 ms | 1,043.80 ms |               2.0000 |        8391.0000 | 16000.0000 | 1000.0000 |     - | 128.44 MB |
-| MacrossFileLoggingBenchmark |               4 |             True |   476.07 ms |   9.328 ms |  10.742 ms |   477.93 ms |               3.0000 |           5.0000 |  3000.0000 | 1000.0000 |     - |  27.14 MB |
+|               NLogBenchmark |               1 |            False |   337.40 ms |   6.240 ms |  11.872 ms |   337.37 ms |              68.0000 |                - |  1000.0000 |         - |     - |  11.67 MB |
+|            SerilogBenchmark |               1 |            False |   233.96 ms |   4.677 ms |   8.314 ms |   232.42 ms |               2.0000 |                - |  2000.0000 |         - |     - |  18.81 MB |
+| MacrossFileLoggingBenchmark |               1 |            False |    11.31 ms |   0.527 ms |   1.511 ms |    10.72 ms |               1.0000 |                - |          - |         - |     - |   4.24 MB |
+|               NLogBenchmark |               1 |             True |   345.23 ms |   6.717 ms |   8.967 ms |   345.70 ms |              69.0000 |                - |  1000.0000 |         - |     - |  11.67 MB |
+|            SerilogBenchmark |               1 |             True |   237.32 ms |   4.770 ms |   8.479 ms |   235.63 ms |               2.0000 |                - |  2000.0000 |         - |     - |  18.81 MB |
+| MacrossFileLoggingBenchmark |               1 |             True |   184.53 ms |   3.635 ms |   7.343 ms |   183.42 ms |               2.0000 |                - |          - |         - |     - |   4.88 MB |
+|               NLogBenchmark |               4 |            False | 1,807.63 ms |  35.907 ms |  97.078 ms | 1,768.90 ms |             268.0000 |        4166.0000 | 11000.0000 | 2000.0000 |     - |  88.17 MB |
+|            SerilogBenchmark |               4 |            False | 1,279.95 ms | 104.369 ms | 307.734 ms | 1,188.53 ms |               2.0000 |        6461.0000 | 16000.0000 | 1000.0000 |     - | 128.29 MB |
+| MacrossFileLoggingBenchmark |               4 |            False |    32.23 ms |   1.119 ms |   3.193 ms |    32.10 ms |               1.0000 |          12.0000 |  2000.0000 | 1000.0000 |     - |  18.46 MB |
+|               NLogBenchmark |               4 |             True | 1,171.03 ms |  21.946 ms |  18.326 ms | 1,164.29 ms |             268.0000 |        4450.0000 | 11000.0000 | 1000.0000 |     - |  88.14 MB |
+|            SerilogBenchmark |               4 |             True | 1,125.68 ms | 103.939 ms | 306.468 ms |   945.96 ms |               2.0000 |        6245.0000 | 16000.0000 | 2000.0000 |     - | 128.44 MB |
+| MacrossFileLoggingBenchmark |               4 |             True |   494.28 ms |   9.881 ms |  15.672 ms |   488.55 ms |               3.0000 |           9.0000 |  2000.0000 | 1000.0000 |     - |  21.26 MB |
 
 In the benchmark each thread is writing 5,000 log messages as fast as it can.
 Lower mean is better, lower allocation is better, fewer contentions is better.

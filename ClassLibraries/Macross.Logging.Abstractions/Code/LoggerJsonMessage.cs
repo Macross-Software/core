@@ -18,7 +18,7 @@ namespace Macross.Logging
 	public sealed class LoggerJsonMessage
 	{
 		private static readonly Action<object, LoggerJsonMessage> s_ParseScopeItem = ParseScopeItem;
-		private static readonly Dictionary<Type, List<PropertyGetter>> s_TypePropertyCache = new Dictionary<Type, List<PropertyGetter>>();
+		private static readonly ConcurrentDictionary<Type, List<PropertyGetter>> s_TypePropertyCache = new ConcurrentDictionary<Type, List<PropertyGetter>>();
 		private static readonly ConcurrentBag<List<object?>> s_ScopeListPool = new ConcurrentBag<List<object?>>();
 		private static readonly ConcurrentBag<Dictionary<string, object?>> s_DataDictionaryPool = new ConcurrentBag<Dictionary<string, object?>>();
 
@@ -217,7 +217,7 @@ namespace Macross.Logging
 						propertyGetters.Add(new PropertyGetter(type, propertyInfo));
 				}
 
-				s_TypePropertyCache[type] = propertyGetters;
+				s_TypePropertyCache.TryAdd(type, propertyGetters);
 			}
 
 			foreach (PropertyGetter propertyGetter in propertyGetters)
