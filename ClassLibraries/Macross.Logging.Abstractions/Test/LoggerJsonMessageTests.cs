@@ -98,6 +98,49 @@ namespace Macross.Logging.Abstractions.Tests
 		}
 
 		[TestMethod]
+		public void GroupNameTest()
+		{
+			TestLogger Logger = new TestLogger();
+
+			using IDisposable Group = Logger.BeginGroup("Main");
+
+			Logger.LogInformation("Hello world.");
+
+			Assert.AreEqual("Main", Logger.Message?.GroupName);
+			Assert.AreEqual(0, Logger.Message?.Scope?.Count ?? 0);
+		}
+
+		[TestMethod]
+		public void GroupNameMultipleTest()
+		{
+			TestLogger Logger = new TestLogger();
+
+			using IDisposable Group1 = Logger.BeginGroup("Main");
+			using IDisposable Group2 = Logger.BeginGroup("Sub1");
+			using IDisposable Group3 = Logger.BeginGroup("Sub2");
+
+			Logger.LogInformation("Hello world.");
+
+			Assert.AreEqual("Sub2", Logger.Message?.GroupName);
+			Assert.AreEqual(0, Logger.Message?.Scope?.Count ?? 0);
+		}
+
+		[TestMethod]
+		public void GroupNamePriorityTest()
+		{
+			TestLogger Logger = new TestLogger();
+
+			using IDisposable Group1 = Logger.BeginGroup("Main", 1);
+			using IDisposable Group2 = Logger.BeginGroup("Sub1");
+			using IDisposable Group3 = Logger.BeginGroup("Sub2");
+
+			Logger.LogInformation("Hello world.");
+
+			Assert.AreEqual("Main", Logger.Message?.GroupName);
+			Assert.AreEqual(0, Logger.Message?.Scope?.Count ?? 0);
+		}
+
+		[TestMethod]
 		public void WriteExtensionDataNullTest()
 		{
 			TestLogger Logger = new TestLogger();

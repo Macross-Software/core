@@ -66,6 +66,8 @@ namespace Macross.Logging
 
 			scopeProvider?.ForEachScope(s_ParseScopeItem, Message);
 
+			Message.GroupName = Message._Group?.GroupName;
+
 			if (exception != null)
 				Message.Exception = LoggerJsonMessageException.FromException(exception);
 
