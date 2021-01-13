@@ -1,4 +1,8 @@
-﻿using System.Globalization;
+﻿using System.Buffers;
+using System.Buffers.Text;
+using System.Globalization;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 
 using Macross.Json.Extensions;
@@ -11,6 +15,14 @@ namespace System.Text.Json.Serialization
 	/// <remarks>Adapted from code posted on: <a href="https://github.com/dotnet/runtime/issues/30776">dotnet/runtime #30776</a>.</remarks>
 	public class JsonMicrosoftDateTimeConverter : JsonConverterFactory
 	{
+		// \/Date(
+		internal static byte[] Start { get; } = new byte[] { 0x5C, 0x2F, 0x44, 0x61, 0x74, 0x65, 0x28 };
+
+		// )\/
+		internal static byte[] End { get; } = new byte[] { 0x29, 0x5C, 0x2F };
+
+		internal static Func<byte[], JsonEncodedText> CreateJsonEncodedTextFunc { get; } = BuildCreateJsonEncodedTextFunc();
+
 		/// <inheritdoc/>
 		public override bool CanConvert(Type typeToConvert)
 		{
@@ -61,10 +73,28 @@ namespace System.Text.Json.Serialization
 				=> WriteDateTime(writer, value!.Value);
 		}
 
+		private static Func<byte[], JsonEncodedText> BuildCreateJsonEncodedTextFunc()
+		{
+			DynamicMethod dynamicMethod = new DynamicMethod(
+				nameof(BuildCreateJsonEncodedTextFunc),
+				typeof(JsonEncodedText),
+				new[] { typeof(byte[]) },
+				typeof(JsonMicrosoftDateTimeConverter).Module,
+				skipVisibility: true);
+
+			ILGenerator generator = dynamicMethod.GetILGenerator();
+
+			generator.Emit(OpCodes.Ldarg_0);
+			generator.Emit(OpCodes.Newobj, typeof(JsonEncodedText).GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, new Type[] { typeof(byte[]) }, null));
+			generator.Emit(OpCodes.Ret);
+
+			return (Func<byte[], JsonEncodedText>)dynamicMethod.CreateDelegate(typeof(Func<byte[], JsonEncodedText>));
+		}
+
 		private abstract class JsonDateTimeConverter<T> : JsonConverter<T>
 		{
 			private static readonly DateTime s_Epoch = DateTime.SpecifyKind(new DateTime(1970, 1, 1, 0, 0, 0), DateTimeKind.Utc);
-			private static readonly Regex s_Regex = new Regex("^/Date\\(([^+-]+)\\)/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+			private static readonly Regex s_Regex = new Regex(@"^\\?/Date\((-?\d+)\)\\?/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
 			public static DateTime ReadDateTime(ref Utf8JsonReader reader)
 			{
@@ -84,8 +114,24 @@ namespace System.Text.Json.Serialization
 			{
 				long unixTime = Convert.ToInt64((value.ToUniversalTime() - s_Epoch).TotalMilliseconds);
 
-				string formatted = FormattableString.Invariant($"/Date({unixTime})/");
-				writer.WriteStringValue(formatted);
+				int stackSize = 64;
+				while (true)
+				{
+					Span<byte> span = stackSize <= 1024 ? stackalloc byte[stackSize] : new byte[stackSize];
+
+					if (!Utf8Formatter.TryFormat(unixTime, span.Slice(7), out int bytesWritten, new StandardFormat('D')))
+					{
+						stackSize *= 2;
+						continue;
+					}
+
+					Start.CopyTo(span);
+					End.CopyTo(span.Slice(7 + bytesWritten));
+
+					writer.WriteStringValue(
+						CreateJsonEncodedTextFunc(span.Slice(0, 10 + bytesWritten).ToArray()));
+					break;
+				}
 			}
 		}
 	}

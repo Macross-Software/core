@@ -2,6 +2,10 @@
 
 ## 2.0.0
 
+* `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter` now
+  write in the format `\/Date(...)\/` to match the old Microsoft format more
+  closely.
+
 * Improved the performance of `JsonStringEnumMemberConverter` be removing some
   unnecessary allocations. Added caching of up to 64 value combinations when
   using `[Flags]`.

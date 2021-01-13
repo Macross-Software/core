@@ -144,7 +144,7 @@ Some of the older Microsoft JSON serialization libraries handle `DateTime`s
 differently than System.Text.Json does. If you are talking to an older API and
 it returns JSON like this...
 
-```/Date(1580803200000-0800)/``` or ```/Date(1580803200000)/```
+```\/Date(1580803200000-0800)\/``` or ```\/Date(1580803200000)\/```
 
 ...you will get an exception (see [runtime
 #30776](https://github.com/dotnet/runtime/issues/30776)) trying to deserialize

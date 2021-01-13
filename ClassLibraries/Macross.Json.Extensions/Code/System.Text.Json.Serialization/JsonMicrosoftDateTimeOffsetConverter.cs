@@ -1,4 +1,6 @@
-﻿using System.Globalization;
+﻿using System.Buffers;
+using System.Buffers.Text;
+using System.Globalization;
 using System.Text.RegularExpressions;
 
 using Macross.Json.Extensions;
@@ -64,7 +66,7 @@ namespace System.Text.Json.Serialization
 		private abstract class JsonDateTimeOffsetConverter<T> : JsonConverter<T>
 		{
 			private static readonly DateTimeOffset s_Epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
-			private static readonly Regex s_Regex = new Regex("^/Date\\(([^+-]+)([+-])(\\d{2})(\\d{2})\\)/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
+			private static readonly Regex s_Regex = new Regex(@"^\\?/Date\((-?\d+)([+-])(\d{2})(\d{2})\)\\?/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
 			public static DateTimeOffset ReadDateTimeOffset(ref Utf8JsonReader reader)
 			{
@@ -94,8 +96,50 @@ namespace System.Text.Json.Serialization
 				long unixTime = Convert.ToInt64((value - s_Epoch).TotalMilliseconds);
 				TimeSpan utcOffset = value.Offset;
 
-				string formatted = FormattableString.Invariant($"/Date({unixTime}{(utcOffset >= TimeSpan.Zero ? "+" : "-")}{utcOffset:hhmm})/");
-				writer.WriteStringValue(formatted);
+				//string formatted = FormattableString.Invariant($"/Date({unixTime}{(utcOffset >= TimeSpan.Zero ? "+" : "-")}{utcOffset:hhmm})/");
+				//writer.WriteStringValue(formatted);
+
+				int stackSize = 64;
+				while (true)
+				{
+					Span<byte> span = stackSize <= 1024 ? stackalloc byte[stackSize] : new byte[stackSize];
+
+					if (!Utf8Formatter.TryFormat(unixTime, span.Slice(7), out int bytesWritten, new StandardFormat('D'))
+						|| stackSize < 15 + bytesWritten)
+					{
+						stackSize *= 2;
+						continue;
+					}
+
+					JsonMicrosoftDateTimeConverter.Start.CopyTo(span);
+					span[7 + bytesWritten] = utcOffset >= TimeSpan.Zero ? 0x2B : 0x2D;
+
+					int hours = Math.Abs(utcOffset.Hours);
+					if (hours < 10)
+					{
+						span[7 + bytesWritten + 1] = 0x30;
+						span[7 + bytesWritten + 2] = (byte)(0x30 + hours);
+					}
+					else
+					{
+						Utf8Formatter.TryFormat(hours, span.Slice(7 + bytesWritten + 1), out _, new StandardFormat('D'));
+					}
+					int minutes = Math.Abs(utcOffset.Minutes);
+					if (minutes < 10)
+					{
+						span[7 + bytesWritten + 3] = 0x30;
+						span[7 + bytesWritten + 4] = (byte)(0x30 + minutes);
+					}
+					else
+					{
+						Utf8Formatter.TryFormat(minutes, span.Slice(7 + bytesWritten + 3), out _, new StandardFormat('D'));
+					}
+					JsonMicrosoftDateTimeConverter.End.CopyTo(span.Slice(7 + bytesWritten + 5));
+
+					writer.WriteStringValue(
+						JsonMicrosoftDateTimeConverter.CreateJsonEncodedTextFunc(span.Slice(0, 15 + bytesWritten).ToArray()));
+					break;
+				}
 			}
 		}
 	}

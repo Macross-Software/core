@@ -21,7 +21,7 @@ namespace Macross.Json.Extensions.Tests
 					DateTimeOffset = s_TestLocalDateTimeOffsetNegative
 				});
 
-			Assert.AreEqual(@"{""DateTimeOffset"":""/Date(1580803200000-0800)/""}", Json);
+			Assert.AreEqual(@"{""DateTimeOffset"":""\/Date(1580803200000-0800)\/""}", Json);
 
 			Json = JsonSerializer.Serialize(
 				new TestClass
@@ -29,7 +29,7 @@ namespace Macross.Json.Extensions.Tests
 					DateTimeOffset = s_TestLocalDateTimeOffsetPositive
 				});
 
-			Assert.AreEqual(@"{""DateTimeOffset"":""/Date(1580745600000\u002B0800)/""}", Json);
+			Assert.AreEqual(@"{""DateTimeOffset"":""\/Date(1580745600000+0800)\/""}", Json);
 		}
 
 		[TestMethod]
@@ -41,7 +41,7 @@ namespace Macross.Json.Extensions.Tests
 					DateTimeOffset = s_TestLocalDateTimeOffsetNegative
 				});
 
-			Assert.AreEqual(@"{""DateTimeOffset"":""/Date(1580803200000-0800)/""}", Json);
+			Assert.AreEqual(@"{""DateTimeOffset"":""\/Date(1580803200000-0800)\/""}", Json);
 
 			Json = JsonSerializer.Serialize(new NullableTestClass());
 
@@ -51,7 +51,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void DateTimeOffsetDeserializationTest()
 		{
-			TestClass? Actual = JsonSerializer.Deserialize<TestClass>(@"{""DateTimeOffset"":""/Date(1580803200000-0800)/""}");
+			TestClass? Actual = JsonSerializer.Deserialize<TestClass>(@"{""DateTimeOffset"":""\/Date(1580803200000-0800)\/""}");
 
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(
