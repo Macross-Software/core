@@ -96,9 +96,6 @@ namespace System.Text.Json.Serialization
 				long unixTime = Convert.ToInt64((value - s_Epoch).TotalMilliseconds);
 				TimeSpan utcOffset = value.Offset;
 
-				//string formatted = FormattableString.Invariant($"/Date({unixTime}{(utcOffset >= TimeSpan.Zero ? "+" : "-")}{utcOffset:hhmm})/");
-				//writer.WriteStringValue(formatted);
-
 				int stackSize = 64;
 				while (true)
 				{
