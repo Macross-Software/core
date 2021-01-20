@@ -44,12 +44,36 @@ namespace Microsoft.Extensions.Hosting
 					})
 					.ConfigureServices((context, services) =>
 					{
-						// Register DebugWindowHostedService first so we can configure DebugWindowLoggerProvider ahead of any other IHostedServices.
+						foreach (ServiceDescriptor serviceDescriptor in services)
+						{
+							if (serviceDescriptor.ServiceType == typeof(ILoggerFactory))
+							{
+								// Take over the ILoggerFactory registration so that when it is created we can add in
+								// our DebugWindowLoggerProvider (if the debug window is turned on).
+								services.Remove(serviceDescriptor);
+								services.Add(new ServiceDescriptor(
+									serviceDescriptor.ImplementationType,
+									serviceDescriptor.ImplementationType,
+									serviceDescriptor.Lifetime));
+								services.Add(new ServiceDescriptor(
+									typeof(ILoggerFactory),
+									serviceProvider =>
+									{
+										DebugWindowHost debugWindowHost = serviceProvider.GetRequiredService<DebugWindowHost>();
+										return debugWindowHost.LoggerFactory; // Return the true LoggerFactory.
+									},
+									serviceDescriptor.Lifetime));
+								break;
+							}
+						}
+
+						// Register DebugWindowHostedService first so we can show the debug window ahead of any other IHostedServices.
 						services.Insert(0, new ServiceDescriptor(typeof(IHostedService), typeof(DebugWindowHostedService), ServiceLifetime.Singleton));
 
 						services.AddSingleton<DebugWindowLoggerProvider>();
 						services.AddSingleton<DebugWindowMessageManager>();
 						services.AddSingleton<DebugWindowFactory>();
+						services.AddSingleton<DebugWindowHost>();
 
 						if (configureOptions != null)
 							services.Configure(configureOptions);

@@ -21,6 +21,19 @@ A simple demo application using [Macross.Logging.Files](../../Macross.Logging.Fi
 
 	Logging into files by group is turned on.
 
+* The `WINDOWS` constant is set in `csproj`:
+
+	```xml
+	  <PropertyGroup Condition="'$(OS)' == 'Windows_NT'">
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<DefineConstants>WINDOWS</DefineConstants>
+	  </PropertyGroup>
+
+	  <PropertyGroup Condition="'$(OS)' != 'Windows_NT'">
+		<TargetFramework>net5.0</TargetFramework>
+	  </PropertyGroup>
+	```
+
 * `appsettings.Development.json` has some configuration targeted for development:
 
 	```json

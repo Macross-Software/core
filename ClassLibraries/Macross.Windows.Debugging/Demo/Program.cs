@@ -23,6 +23,8 @@ namespace DemoWebApplication
 
 			using IDisposable group = log.BeginGroup("Main");
 
+			log.WriteInfo("Starting...");
+
 			try
 			{
 				await host.StartAsync().ConfigureAwait(false);
@@ -36,6 +38,8 @@ namespace DemoWebApplication
 			}
 			finally
 			{
+				log.WriteInfo("Stopping...");
+
 				if (host is IAsyncDisposable asyncDisposable)
 				{
 					await asyncDisposable.DisposeAsync().ConfigureAwait(false);
