@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 
 using Microsoft.Extensions.Logging;
 
-namespace Macross.OpenTelemetry.Extensions
+namespace System.Diagnostics.Tracing
 {
 	/// <summary>
 	/// Stores options for controlling OpenTelemetry event logging.
@@ -25,7 +24,7 @@ namespace Macross.OpenTelemetry.Extensions
 		/// Gets or sets the <see cref="OpenTelemetryEventLoggingSourceOptions"/> options used to select the event sources for the listener.
 		/// </summary>
 		/// <remarks>
-		/// By default the <c>^OpenTelemetry.*$</c> regular expression is used at the <see cref="EventLevel.Warning"/> level or greater.
+		/// By default the <c>^OpenTelemetry.*$</c> regular expression is used at the <see cref="EventLevel.Warning"/> level or lower (more severe).
 		/// </remarks>
 		public IReadOnlyCollection<OpenTelemetryEventLoggingSourceOptions>? EventSources { get; set; }
 

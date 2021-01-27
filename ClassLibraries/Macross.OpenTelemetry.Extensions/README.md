@@ -58,7 +58,7 @@ configuration has `LogOpenTelemetryEvents` set to `true`.
 
 By default the extension will listen to all OpenTelemetry sources
 (`^OpenTelemetry.*$`) and will log any events at the `EventLevel.Warning` level
-or greater, but this can be configured.
+or lower (more severe), but this can be configured.
 
 At runtime:
 

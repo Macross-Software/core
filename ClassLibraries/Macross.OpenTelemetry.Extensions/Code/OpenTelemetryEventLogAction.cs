@@ -1,8 +1,6 @@
-﻿using System.Diagnostics.Tracing;
+﻿using Microsoft.Extensions.Logging;
 
-using Microsoft.Extensions.Logging;
-
-namespace Macross.OpenTelemetry.Extensions
+namespace System.Diagnostics.Tracing
 {
 	/// <summary>
 	/// Callback action for writing OpenTelemetry events to an <see cref="ILogger"/> instance.

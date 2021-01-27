@@ -1,6 +1,7 @@
 ﻿using System;
+using System.Diagnostics.Tracing;
 
-using Macross.OpenTelemetry.Extensions;
+using Macross.OpenTelemetry;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

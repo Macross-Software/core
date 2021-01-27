@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Macross.OpenTelemetry.Extensions
+namespace Macross.OpenTelemetry
 {
 	internal class OpenTelemetryEventListener : EventListener
 	{
@@ -86,6 +86,7 @@ namespace Macross.OpenTelemetry.Extensions
 			_Options!.LogAction(_Log, logLevel, e);
 		}
 
+		// note: Live reloading is not currently supported, but it could be.
 		private void ApplyOptions(OpenTelemetryEventLoggingOptions options)
 			=> _Options = options;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics.Tracing;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -6,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Macross.OpenTelemetry.Extensions
+namespace Macross.OpenTelemetry
 {
 #pragma warning disable CA1812 // Remove class never instantiated
 	internal class OpenTelemetryEventLoggingHostedService : IHostedService, IDisposable

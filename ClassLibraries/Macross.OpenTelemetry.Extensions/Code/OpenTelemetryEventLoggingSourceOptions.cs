@@ -1,6 +1,4 @@
-﻿using System.Diagnostics.Tracing;
-
-namespace Macross.OpenTelemetry.Extensions
+﻿namespace System.Diagnostics.Tracing
 {
 	/// <summary>
 	/// Stores options for controlling OpenTelemetry event logging for an individual event source.
@@ -13,7 +11,7 @@ namespace Macross.OpenTelemetry.Extensions
 		public string? EventSourceRegExExpression { get; set; }
 
 		/// <summary>
-		/// Gets or sets the minimum event level to capture.
+		/// Gets or sets the maximum event level to capture. All events lower (more severe) will also be captured.
 		/// </summary>
 		public EventLevel EventLevel { get; set; } = EventLevel.Warning;
 	}
