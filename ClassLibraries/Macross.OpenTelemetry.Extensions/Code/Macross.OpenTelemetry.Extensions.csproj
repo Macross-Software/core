@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
+    <Description>
+      Macross OpenTelemetry .NET extensions library.
+
+      Provides extensions and utilities for OpenTelemetry .NET.
+
+      Commonly Used Extensions:
+      IServiceCollection.AddOpenTelemetryEventLogging
+    </Description>
+    <Product>Macross.OpenTelemetry.Extensions</Product>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionSuffix>beta1</VersionSuffix>
+    <FileVersion>$(VersionPrefix)</FileVersion>
+    <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.OpenTelemetry.Extensions</PackageProjectUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(VersionSuffix)'==''">
+    <AssemblyInformationalVersion>$(VersionPrefix)</AssemblyInformationalVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(VersionSuffix)'!=''">
+    <AssemblyInformationalVersion>$(VersionPrefix)-$(VersionSuffix)</AssemblyInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>..\..\..\_build\DLLs\$(Configuration)\</OutputPath>
+    <DocumentationFile>..\..\..\_build\DLLs\$(Configuration)\Macross.OpenTelemetry.Extensions.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.0" />
+  </ItemGroup>
+
+</Project>
