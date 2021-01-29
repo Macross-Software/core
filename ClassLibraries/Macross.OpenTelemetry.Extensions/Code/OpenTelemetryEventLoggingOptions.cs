@@ -39,5 +39,10 @@ namespace System.Diagnostics.Tracing
 				openTelemetryEvent.EventName,
 				openTelemetryEvent.Message,
 				openTelemetryEvent.Payload);
+
+		/// <summary>
+		/// Gets or sets the callback action invoked when options are configured.
+		/// </summary>
+		public Action? ConfiguredAction { get; set; }
 	}
 }

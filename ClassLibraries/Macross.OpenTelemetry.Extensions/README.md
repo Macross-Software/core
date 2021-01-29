@@ -139,3 +139,96 @@ private void OnLogMessageWritten(ILogger logger, LogLevel logLevel, EventWritten
         openTelemetryEvent.Message);
 }
 ```
+
+## Capturing Activity objects created for a specific trace
+
+The
+[ActivityListener](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activitylistener)
+class is provided by the runtime for listening to all `Activity` objects created
+in the process (optionally filtered by
+[ActivitySource](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activitysource)
+name).
+
+There is no built-in mechanism for listening for only the `Activity` objects
+created under a specific
+[TraceId](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activity.traceid).
+
+To add this functionality
+[System.Diagnostics.ActivityTraceListenerManager](.\Code\ActivityTraceListenerManager.cs)
+is provided.
+
+### Usage
+
+1) Call the `AddActivityTraceListener` extension in your `ConfigureServices`
+   method:
+
+    ```csharp
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddActivityTraceListener();
+        }
+    }
+
+    ```
+
+    This will register the `ActivityTraceListenerManager` with the
+    `IServiceProvider`.
+
+2) Use the `ActivityTraceListenerManager` to register a listener:
+
+    ```csharp
+    using System.Diagnostics;
+
+    public class TraceCaptureMiddleware
+    {
+        private readonly RequestDelegate _Next;
+        private readonly ActivityTraceListenerManager _ActivityTraceListenerManager;
+
+        public TraceCaptureMiddleware(RequestDelegate next, ActivityTraceListenerManager activityTraceListenerManager)
+        {
+            _Next = next ?? throw new ArgumentNullException(nameof(next));
+            _ActivityTraceListenerManager = activityTraceListenerManager ?? throw new ArgumentNullException(nameof(activityTraceListenerManager));
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            using IActivityTraceListener activityTraceListener = _ActivityTraceListenerManager.RegisterTraceListener(Activity.Current);
+
+            try
+            {
+                await _Next(context).ConfigureAwait(false);
+            }
+            finally
+            {
+                if (activityTraceListener.CompletedActivities.Count > 0)
+                {
+                    // TODO: Do something interesting with the captured data.
+                }
+            }
+        }
+    }
+    ```
+
+### Options
+
+There are a few callback actions which are provided primarily for logging events
+that occur inside the `ActivityTraceListenerManager` but the important setting
+is:
+
+[ActivityTraceListenerManagerOptions.CleanupIntervalInMilliseconds](.\Code\ActivityTraceListenerManagerOptions.cs)
+
+`ActivityTraceListenerManager` is expensive. It will cause all `Activity`
+objects to be created and populated with data for the observed trace. It is best
+used in a debugging or troubleshooting capacity. To that end, the
+`ActivityTraceListenerManager` will clean itself up and stop listening once it
+has been inactive for at least `CleanupIntervalInMilliseconds`. The default
+value is 20 minutes.
+
+To configure options a `configure` callback parameter is provided on the
+`AddActivityTraceListener` method or you can bind the options to configuration:
+
+```csharp
+services.Configure<ActivityTraceListenerManagerOptions>(_Configuration.GetSection("ActivityTracing"));
+```

@@ -88,7 +88,10 @@ namespace Macross.OpenTelemetry
 
 		// note: Live reloading is not currently supported, but it could be.
 		private void ApplyOptions(OpenTelemetryEventLoggingOptions options)
-			=> _Options = options;
+		{
+			_Options = options;
+			_Options.ConfiguredAction?.Invoke();
+		}
 
 		private void EnableSource(EventSource eventSource)
 		{
