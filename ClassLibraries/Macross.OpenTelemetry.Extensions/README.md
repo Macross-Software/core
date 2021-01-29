@@ -9,6 +9,9 @@ library.
 
 ## OpenTelemetry Event Logging
 
+Blog:
+https://blog.macrosssoftware.com/index.php/2021/01/27/troubleshooting-opentelemetry-net/
+
 The individual OpenTelemetry components each write to their own
 [EventSource](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource)
 instances for internal error logging and debugging. For example the SDK project
