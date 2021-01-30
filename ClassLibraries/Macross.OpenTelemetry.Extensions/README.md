@@ -142,6 +142,9 @@ private void OnLogMessageWritten(ILogger logger, LogLevel logLevel, EventWritten
 
 ## Capturing Activity objects created for a specific trace
 
+Blog:
+https://blog.macrosssoftware.com/index.php/2021/01/30/using-opentelemetry-while-debugging/
+
 The
 [ActivityListener](https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.activitylistener)
 class is provided by the runtime for listening to all `Activity` objects created
