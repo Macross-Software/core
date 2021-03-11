@@ -62,7 +62,12 @@ namespace System.Text.Json.Serialization
 				string name = builtInNames[i];
 				FieldInfo field = _EnumType.GetField(name, EnumBindings)!;
 				EnumMemberAttribute? enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
-				string transformedName = enumMemberAttribute?.Value ?? namingPolicy?.ConvertName(name) ?? name;
+				JsonPropertyNameAttribute? jsonPropertyNameAttribute = field.GetCustomAttribute<JsonPropertyNameAttribute>(true);
+
+				string transformedName = enumMemberAttribute?.Value ??
+										 jsonPropertyNameAttribute?.Name ??
+										 namingPolicy?.ConvertName(name) ??
+										 name;
 
 				if (enumValue is not TEnum typedValue)
 					throw new NotSupportedException();

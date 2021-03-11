@@ -47,6 +47,33 @@ but it adds two features and fixes one bug.
     }
     ```
 
+* [JsonPropertyName](https://docs.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonpropertynameattribute)
+  Support
+
+    When serializing and deserializing an Enum as a string the value specified
+    by `EnumMember` will be used.
+
+    ```csharp
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
+    public enum DefinitionType
+    {
+        [JsonPropertyName("UNKNOWN_DEFINITION_000")]
+        DefinitionUnknown
+    }
+
+    [TestMethod]
+    public void ExampleTest()
+    {
+        string Json = JsonSerializer.Serialize(DefinitionType.DefinitionUnknown);
+
+        Assert.AreEqual("\"UNKNOWN_DEFINITION_000\"", Json);
+
+        DefinitionType ParsedDefinitionType = JsonSerializer.Deserialize<DefinitionType>(Json);
+
+        Assert.AreEqual(DefinitionType.DefinitionUnknown, ParsedDefinitionType);
+    }
+    ```
+
 * Nullable&lt;Enum&gt; Support
 
     If you try to use the built-in `JsonStringEnumConverter` with a nullable
