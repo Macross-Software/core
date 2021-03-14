@@ -1,5 +1,12 @@
 ﻿# Changelog
 
+## 2.1.0
+
+* If you are using the 5.0.0+ version of System.Text.Json you can now decorate
+  enum values with `JsonPropertyName` instead of `EnumMember` for
+  `JsonStringEnumMemberConverter`.
+  ([#17](https://github.com/Macross-Software/core/pull/17)) 
+
 ## 2.0.0
 
 * `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter` now

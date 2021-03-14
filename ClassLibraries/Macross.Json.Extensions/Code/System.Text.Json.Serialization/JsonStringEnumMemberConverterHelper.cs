@@ -61,11 +61,9 @@ namespace System.Text.Json.Serialization
 
 				string name = builtInNames[i];
 				FieldInfo field = _EnumType.GetField(name, EnumBindings)!;
-				EnumMemberAttribute? enumMemberAttribute = field.GetCustomAttribute<EnumMemberAttribute>(true);
-				JsonPropertyNameAttribute? jsonPropertyNameAttribute = field.GetCustomAttribute<JsonPropertyNameAttribute>(true);
 
-				string transformedName = enumMemberAttribute?.Value ??
-										 jsonPropertyNameAttribute?.Name ??
+				string transformedName = field.GetCustomAttribute<EnumMemberAttribute>(true)?.Value ??
+										 field.GetCustomAttribute<JsonPropertyNameAttribute>(true)?.Name ??
 										 namingPolicy?.ConvertName(name) ??
 										 name;
 

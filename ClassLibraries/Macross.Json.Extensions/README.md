@@ -15,7 +15,7 @@ For a list of changes see: [CHANGELOG](./CHANGELOG.md)
 [JsonStringEnumMemberConverter](./Code/System.Text.Json.Serialization/JsonStringEnumMemberConverter.cs)
 is similar to the official
 [JsonStringEnumConverter](https://docs.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonstringenumconverter)
-but it adds two features and fixes one bug.
+but it adds three features and fixes one bug.
 
 * [EnumMemberAttribute](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.enummemberattribute)
   Support
@@ -48,10 +48,11 @@ but it adds two features and fixes one bug.
     ```
 
 * [JsonPropertyName](https://docs.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonpropertynameattribute)
-  Support
+  Support (available for System.Text.Json 5.0.0+, needs field support added with
+  [dotnet/runtime#36986](https://github.com/dotnet/runtime/pull/36986))
 
     When serializing and deserializing an Enum as a string the value specified
-    by `EnumMember` will be used.
+    by `JsonPropertyName` will be used.
 
     ```csharp
     [JsonConverter(typeof(JsonStringEnumMemberConverter))]

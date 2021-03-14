@@ -199,6 +199,34 @@ namespace Macross.Json.Extensions.Tests
 			}
 		}
 
+#if NET5_0_OR_GREATER
+		[TestMethod]
+		public void JsonPropertyNameSerializationTest()
+		{
+			string Json = JsonSerializer.Serialize(MixedEnumDefintion.First);
+			Assert.AreEqual(@"""_first""", Json);
+
+			Json = JsonSerializer.Serialize(MixedEnumDefintion.Second);
+			Assert.AreEqual(@"""_second""", Json);
+
+			Json = JsonSerializer.Serialize(MixedEnumDefintion.Third);
+			Assert.AreEqual(@"""_third_enumMember""", Json);
+		}
+
+		[TestMethod]
+		public void JsonPropertyNameDeserializationTest()
+		{
+			MixedEnumDefintion Value = JsonSerializer.Deserialize<MixedEnumDefintion>(@"""_first""");
+			Assert.AreEqual(MixedEnumDefintion.First, Value);
+
+			Value = JsonSerializer.Deserialize<MixedEnumDefintion>(@"""_second""");
+			Assert.AreEqual(MixedEnumDefintion.Second, Value);
+
+			Value = JsonSerializer.Deserialize<MixedEnumDefintion>(@"""_third_enumMember""");
+			Assert.AreEqual(MixedEnumDefintion.Third, Value);
+		}
+#endif
+
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
 		[Flags]
 		public enum FlagDefinitions
@@ -212,9 +240,18 @@ namespace Macross.Json.Extensions.Tests
 			One = 0x01,
 			[EnumMember(Value = "two value")]
 			Two = 0x02,
+#if NET5_0_OR_GREATER
 			[EnumMember(Value = "three value")]
+			[JsonPropertyName("jsonPropertyName.is.ignored")]
+#else
+			[EnumMember(Value = "three value")]
+#endif
 			Three = 0x04,
+#if NET5_0_OR_GREATER
+			[JsonPropertyName("four value")]
+#else
 			[EnumMember(Value = "four value")]
+#endif
 			Four = 0x08,
 		}
 
@@ -225,5 +262,22 @@ namespace Macross.Json.Extensions.Tests
 			[EnumMember(Value = "_second")]
 			Second,
 		}
+
+#if NET5_0_OR_GREATER
+		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
+		public enum MixedEnumDefintion
+		{
+			[EnumMember(Value = "_first")]
+			First,
+
+			[JsonPropertyName("_second")]
+			Second,
+
+			// Note: We use EnumMember over JsonPropertyName if both are specified.
+			[JsonPropertyName("_third_jsonPropertyName")]
+			[EnumMember(Value = "_third_enumMember")]
+			Third
+		}
+#endif
 	}
 }
