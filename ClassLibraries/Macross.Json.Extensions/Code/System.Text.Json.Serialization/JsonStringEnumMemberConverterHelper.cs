@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Globalization;
 
@@ -33,13 +34,14 @@ namespace System.Text.Json.Serialization
 #endif
 
 		private readonly bool _AllowIntegerValues;
+		private readonly TEnum? _DeserializationFailureFallbackValue;
 		private readonly Type _EnumType;
 		private readonly TypeCode _EnumTypeCode;
 		private readonly bool _IsFlags;
 		private readonly Dictionary<TEnum, EnumInfo> _RawToTransformed;
 		private readonly Dictionary<string, EnumInfo> _TransformedToRaw;
 
-		public JsonStringEnumMemberConverterHelper(JsonNamingPolicy? namingPolicy, bool allowIntegerValues)
+		public JsonStringEnumMemberConverterHelper(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, ulong? deserializationFailureFallbackValue)
 		{
 			_AllowIntegerValues = allowIntegerValues;
 			_EnumType = typeof(TEnum);
@@ -69,6 +71,9 @@ namespace System.Text.Json.Serialization
 
 				if (enumValue is not TEnum typedValue)
 					throw new NotSupportedException();
+
+				if (deserializationFailureFallbackValue.HasValue && rawValue == deserializationFailureFallbackValue)
+					_DeserializationFailureFallbackValue = typedValue;
 
 				_RawToTransformed[typedValue] = new EnumInfo(transformedName, typedValue, rawValue);
 				_TransformedToRaw[transformedName] = new EnumInfo(name, typedValue, rawValue);
@@ -118,7 +123,7 @@ namespace System.Text.Json.Serialization
 							}
 
 							if (!matched)
-								throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, flagValue);
+								return ReturnDefaultValueOrThrowJsonException(flagValue);
 						}
 					}
 
@@ -139,11 +144,18 @@ namespace System.Text.Json.Serialization
 					}
 				}
 
-				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, enumString);
+				return ReturnDefaultValueOrThrowJsonException(enumString);
 			}
 
 			if (token != JsonTokenType.Number || !_AllowIntegerValues)
+			{
+				if (_DeserializationFailureFallbackValue.HasValue)
+				{
+					reader.Skip();
+					return _DeserializationFailureFallbackValue.Value;
+				}
 				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType);
+			}
 
 			switch (_EnumTypeCode)
 			{
@@ -292,5 +304,9 @@ namespace System.Text.Json.Serialization
 				_ => throw new NotSupportedException($"Enum '{value}' of {_EnumTypeCode} type is not supported."),
 			};
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private TEnum ReturnDefaultValueOrThrowJsonException(string propertyValue)
+			=> _DeserializationFailureFallbackValue ?? throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, propertyValue);
 	}
 }

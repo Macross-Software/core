@@ -7,6 +7,10 @@
   `JsonStringEnumMemberConverter`.
   ([#17](https://github.com/Macross-Software/core/pull/17)) 
 
+* Added the `deserializationFailureFallbackValue` option on
+  `JsonStringEnumMemberConverter`. See the project [README](./README.md) for
+  details on its usage.
+
 ## 2.0.0
 
 * `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter` now

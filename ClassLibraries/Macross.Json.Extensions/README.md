@@ -15,7 +15,7 @@ For a list of changes see: [CHANGELOG](./CHANGELOG.md)
 [JsonStringEnumMemberConverter](./Code/System.Text.Json.Serialization/JsonStringEnumMemberConverter.cs)
 is similar to the official
 [JsonStringEnumConverter](https://docs.microsoft.com/en-us/dotnet/api/system.text.json.serialization.jsonstringenumconverter)
-but it adds three features and fixes one bug.
+but it adds a few features and bug fixes.
 
 * [EnumMemberAttribute](https://docs.microsoft.com/en-us/dotnet/api/system.runtime.serialization.enummemberattribute)
   Support
@@ -132,6 +132,33 @@ but it adds three features and fixes one bug.
 
         Assert.AreEqual(DayOfWeek.Friday, ParsedDayOfWeek);
     }
+    ```
+
+* Deserialization Failure Fallback Value
+
+    If a json value is received that cannot be converted into something defined
+    on the target enum the default behavior is to throw a `JsonException`. If
+    you would prefer to have a default definition returned instead, the
+    `deserializationFailureFallbackValue` option is provided.
+
+    ```csharp
+        public enum MyEnum
+        {
+            Unknown = 0,
+
+            [EnumMember(Value = "value1")]
+            ValidValue = 1
+        }
+
+        [TestMethod]
+        public void DeserializationWithFallbackTest()
+        {
+            JsonSerializerOptions Options = new JsonSerializerOptions();
+            Options.Converters.Add(new JsonStringEnumMemberConverter(deserializationFailureFallbackValue: 0));
+
+            MyEnum parsedValue = JsonSerializer.Deserialize<MyEnum>(@"""value99""", Options);
+            Assert.AreEqual(MyEnum.Unknown, parsedValue);
+        }
     ```
 
 ## TimeSpans

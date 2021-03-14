@@ -10,6 +10,7 @@ namespace System.Text.Json.Serialization
 	{
 		private readonly JsonNamingPolicy? _NamingPolicy;
 		private readonly bool _AllowIntegerValues;
+		private readonly ulong? _DeserializationFailureFallbackValue;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="JsonStringEnumMemberConverter"/> class.
@@ -29,10 +30,16 @@ namespace System.Text.Json.Serialization
 		/// True to allow undefined enum values. When true, if an enum value isn't
 		/// defined it will output as a number rather than a string.
 		/// </param>
-		public JsonStringEnumMemberConverter(JsonNamingPolicy? namingPolicy = null, bool allowIntegerValues = true)
+		/// <param name="deserializationFailureFallbackValue">
+		/// Optional default value to use when a json string does not match
+		/// anything defined on the target enum. If not specified a <see
+		/// cref="JsonException"/> is thrown for all failures.
+		/// </param>
+		public JsonStringEnumMemberConverter(JsonNamingPolicy? namingPolicy = null, bool allowIntegerValues = true, ulong? deserializationFailureFallbackValue = null)
 		{
 			_NamingPolicy = namingPolicy;
 			_AllowIntegerValues = allowIntegerValues;
+			_DeserializationFailureFallbackValue = deserializationFailureFallbackValue;
 		}
 
 		/// <inheritdoc/>
@@ -55,13 +62,13 @@ namespace System.Text.Json.Serialization
 					typeof(NullableEnumMemberConverter<>).MakeGenericType(UnderlyingType),
 					BindingFlags.Instance | BindingFlags.Public,
 					binder: null,
-					args: new object?[] { _NamingPolicy, _AllowIntegerValues },
+					args: new object?[] { _NamingPolicy, _AllowIntegerValues, _DeserializationFailureFallbackValue },
 					culture: null)
 				: (JsonConverter)Activator.CreateInstance(
 					typeof(EnumMemberConverter<>).MakeGenericType(typeToConvert),
 					BindingFlags.Instance | BindingFlags.Public,
 					binder: null,
-					args: new object?[] { _NamingPolicy, _AllowIntegerValues },
+					args: new object?[] { _NamingPolicy, _AllowIntegerValues, _DeserializationFailureFallbackValue },
 					culture: null);
 		}
 
@@ -79,9 +86,9 @@ namespace System.Text.Json.Serialization
 		{
 			private readonly JsonStringEnumMemberConverterHelper<TEnum> _JsonStringEnumMemberConverterHelper;
 
-			public EnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues)
+			public EnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, ulong? deserializationFailureFallbackValue)
 			{
-				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(namingPolicy, allowIntegerValues);
+				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(namingPolicy, allowIntegerValues, deserializationFailureFallbackValue);
 			}
 
 			public override TEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -98,9 +105,9 @@ namespace System.Text.Json.Serialization
 		{
 			private readonly JsonStringEnumMemberConverterHelper<TEnum> _JsonStringEnumMemberConverterHelper;
 
-			public NullableEnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues)
+			public NullableEnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, ulong? deserializationFailureFallbackValue)
 			{
-				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(namingPolicy, allowIntegerValues);
+				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(namingPolicy, allowIntegerValues, deserializationFailureFallbackValue);
 			}
 
 			public override TEnum? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

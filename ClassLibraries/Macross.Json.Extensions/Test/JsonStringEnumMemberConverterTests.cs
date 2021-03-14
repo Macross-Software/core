@@ -38,11 +38,28 @@ namespace Macross.Json.Extensions.Tests
 
 		[ExpectedException(typeof(JsonException))]
 		[TestMethod]
-		public void EnumMemberInvalidTypeDeserializationTest() => JsonSerializer.Deserialize<FlagDefinitions>(@"null");
+		[DataRow("null")]
+		[DataRow(@"""invalid_value""")]
+		public void EnumMemberInvalidDeserializationTest(string json) => JsonSerializer.Deserialize<FlagDefinitions>(json);
 
-		[ExpectedException(typeof(JsonException))]
 		[TestMethod]
-		public void EnumMemberInvalidValueDeserializationTest() => JsonSerializer.Deserialize<FlagDefinitions>(@"""invalid_value""");
+		public void EnumMemberInvalidDeserializationWithFallbackTest()
+		{
+			JsonSerializerOptions Options = new JsonSerializerOptions();
+			Options.Converters.Add(new JsonStringEnumMemberConverter(deserializationFailureFallbackValue: (ulong)DayOfWeek.Friday));
+
+			DayOfWeek dayOfWeek = JsonSerializer.Deserialize<DayOfWeek>(@"""invalid_value""", Options);
+			Assert.AreEqual(DayOfWeek.Friday, dayOfWeek);
+
+			DayOfWeek[]? days = JsonSerializer.Deserialize<DayOfWeek[]>(@"[{}, ""Saturday""]", Options);
+			CollectionAssert.AreEqual(new DayOfWeek[] { DayOfWeek.Friday, DayOfWeek.Saturday }, days);
+
+			Options = new JsonSerializerOptions();
+			Options.Converters.Add(new JsonStringEnumMemberConverter(deserializationFailureFallbackValue: (ulong)FlagDefinitions.None));
+
+			FlagDefinitions Value = JsonSerializer.Deserialize<FlagDefinitions>(@"""invalid_value""", Options);
+			Assert.AreEqual(FlagDefinitions.None, Value);
+		}
 
 		[ExpectedException(typeof(JsonException))]
 		[TestMethod]
