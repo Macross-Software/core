@@ -24,7 +24,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <VersionPrefix>2.0.0</VersionPrefix>
-    <VersionSuffix>beta2</VersionSuffix>
+    <VersionSuffix></VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>
   </PropertyGroup>

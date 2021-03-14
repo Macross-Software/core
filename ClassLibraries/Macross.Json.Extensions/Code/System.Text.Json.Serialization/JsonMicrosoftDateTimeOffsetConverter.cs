@@ -109,7 +109,7 @@ namespace System.Text.Json.Serialization
 					}
 
 					JsonMicrosoftDateTimeConverter.Start.CopyTo(span);
-					span[7 + bytesWritten] = utcOffset >= TimeSpan.Zero ? 0x2B : 0x2D;
+					span[7 + bytesWritten] = utcOffset >= TimeSpan.Zero ? (byte)0x2B : (byte)0x2D;
 
 					int hours = Math.Abs(utcOffset.Hours);
 					if (hours < 10)
