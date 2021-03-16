@@ -299,7 +299,7 @@ namespace Macross.Json.Extensions.Tests
 				Converters = { new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 1)) }
 			};
 
-			JsonSerializer.Deserialize<EnumWithAttributeOptions>(@"""invalid_json""", options);
+			JsonSerializer.Deserialize<EnumWithOptionsAttribute>(@"""invalid_json""", options);
 		}
 
 		[TestMethod]
@@ -404,12 +404,13 @@ namespace Macross.Json.Extensions.Tests
 			Second,
 		}
 
-		private class ValidJsonNamingPolicy : JsonNamingPolicy
+#pragma warning disable CA1034 // Nested types should not be visible
+		public class ValidJsonNamingPolicy : JsonNamingPolicy
 		{
 			public override string ConvertName(string name) => throw new NotImplementedException();
 		}
 
-		private class InvalidJsonNamingPolicy : JsonNamingPolicy
+		public class InvalidJsonNamingPolicy : JsonNamingPolicy
 		{
 			private InvalidJsonNamingPolicy()
 			{
@@ -417,10 +418,11 @@ namespace Macross.Json.Extensions.Tests
 
 			public override string ConvertName(string name) => throw new NotImplementedException();
 		}
+#pragma warning restore CA1034 // Nested types should not be visible
 
 		[JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 99)]
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
-		private enum EnumWithAttributeOptions
+		public enum EnumWithOptionsAttribute
 		{
 			One = 1,
 			Two = 2
