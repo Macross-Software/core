@@ -41,12 +41,19 @@ namespace System.Text.Json.Serialization
 		private readonly Dictionary<TEnum, EnumInfo> _RawToTransformed;
 		private readonly Dictionary<string, EnumInfo> _TransformedToRaw;
 
-		public JsonStringEnumMemberConverterHelper(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, ulong? deserializationFailureFallbackValue)
+		public JsonStringEnumMemberConverterHelper(JsonStringEnumMemberConverterOptions? options)
 		{
-			_AllowIntegerValues = allowIntegerValues;
 			_EnumType = typeof(TEnum);
+
+			JsonStringEnumMemberConverterOptions? computedOptions
+				= _EnumType.GetCustomAttribute<JsonStringEnumMemberConverterOptionsAttribute>(false)?.Options
+				?? options;
+
+			_AllowIntegerValues = computedOptions?.AllowIntegerValues ?? true;
 			_EnumTypeCode = Type.GetTypeCode(_EnumType);
 			_IsFlags = _EnumType.IsDefined(typeof(FlagsAttribute), true);
+
+			ulong? deserializationFailureFallbackValue = computedOptions?.ConvertedDeserializationFailureFallbackValue;
 
 			string[] builtInNames = _EnumType.GetEnumNames();
 			Array builtInValues = _EnumType.GetEnumValues();
@@ -59,14 +66,14 @@ namespace System.Text.Json.Serialization
 				Enum? enumValue = (Enum?)builtInValues.GetValue(i);
 				if (enumValue == null)
 					continue;
-				ulong rawValue = GetEnumValue(enumValue);
+				ulong rawValue = JsonStringEnumMemberConverter.GetEnumValue(_EnumTypeCode, enumValue);
 
 				string name = builtInNames[i];
 				FieldInfo field = _EnumType.GetField(name, EnumBindings)!;
 
 				string transformedName = field.GetCustomAttribute<EnumMemberAttribute>(true)?.Value ??
 										 field.GetCustomAttribute<JsonPropertyNameAttribute>(true)?.Name ??
-										 namingPolicy?.ConvertName(name) ??
+										 computedOptions?.NamingPolicy?.ConvertName(name) ??
 										 name;
 
 				if (enumValue is not TEnum typedValue)
@@ -78,6 +85,9 @@ namespace System.Text.Json.Serialization
 				_RawToTransformed[typedValue] = new EnumInfo(transformedName, typedValue, rawValue);
 				_TransformedToRaw[transformedName] = new EnumInfo(name, typedValue, rawValue);
 			}
+
+			if (deserializationFailureFallbackValue.HasValue && !_DeserializationFailureFallbackValue.HasValue)
+				throw new JsonException($"JsonStringEnumMemberConverter could not find a definition on Enum type {_EnumType} matching deserializationFailureFallbackValue '{deserializationFailureFallbackValue}'.");
 		}
 
 		public TEnum Read(ref Utf8JsonReader reader)
@@ -220,7 +230,7 @@ namespace System.Text.Json.Serialization
 				return;
 			}
 
-			ulong rawValue = GetEnumValue(value);
+			ulong rawValue = JsonStringEnumMemberConverter.GetEnumValue(_EnumTypeCode, value);
 
 			if (_IsFlags)
 			{
@@ -287,22 +297,6 @@ namespace System.Text.Json.Serialization
 				default:
 					throw new JsonException(); // GetEnumValue should have already thrown.
 			}
-		}
-
-		private ulong GetEnumValue(object value)
-		{
-			return _EnumTypeCode switch
-			{
-				TypeCode.Int32 => (ulong)(int)value,
-				TypeCode.Int64 => (ulong)(long)value,
-				TypeCode.Int16 => (ulong)(short)value,
-				TypeCode.Byte => (byte)value,
-				TypeCode.UInt32 => (uint)value,
-				TypeCode.UInt64 => (ulong)value,
-				TypeCode.UInt16 => (ushort)value,
-				TypeCode.SByte => (ulong)(sbyte)value,
-				_ => throw new NotSupportedException($"Enum '{value}' of {_EnumTypeCode} type is not supported."),
-			};
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

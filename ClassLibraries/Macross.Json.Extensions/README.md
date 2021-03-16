@@ -142,23 +142,70 @@ but it adds a few features and bug fixes.
     `deserializationFailureFallbackValue` option is provided.
 
     ```csharp
-        public enum MyEnum
+    public enum MyEnum
+    {
+        Unknown = 0,
+
+        [EnumMember(Value = "value1")]
+        ValidValue = 1
+    }
+
+    [TestMethod]
+    public void DeserializationWithFallbackTest()
+    {
+        JsonSerializerOptions Options = new JsonSerializerOptions
         {
-            Unknown = 0,
+            Converters =
+            {
+                new JsonStringEnumMemberConverter(
+                    new JsonStringEnumMemberConverterOptions(
+                        deserializationFailureFallbackValue: MyEnum.Unknown))
+            }
+        };
 
-            [EnumMember(Value = "value1")]
-            ValidValue = 1
-        }
+        MyEnum parsedValue = JsonSerializer.Deserialize<MyEnum>(@"""value99""", Options);
+        Assert.AreEqual(MyEnum.Unknown, parsedValue);
+    }
+    ```
 
-        [TestMethod]
-        public void DeserializationWithFallbackTest()
+* Specifying options declaratively
+
+    `JsonStringEnumMemberConverterOptionsAttribute` is provided to specify
+    `JsonStringEnumMemberConverterOptions` directly on the enum type being
+    serialized/deserialized by `JsonStringEnumMemberConverter`.
+
+    ```csharp
+    [JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: MyEnum.Unknown)]
+    [JsonConverter(typeof(JsonStringEnumMemberConverter))]
+    public enum MyEnum
+    {
+        Unknown = 0,
+
+        [EnumMember(Value = "value1")]
+        ValidValue = 1
+    }
+    ```
+
+* Specifying options at run-time
+
+    Multiple `JsonStringEnumMemberConverter`s can be registered on an
+    `JsonSerializerOptions` instance by using the `targetEnumTypes` parameter.
+
+    ```csharp
+    JsonSerializerOptions options = new JsonSerializerOptions
+    {
+        Converters =
         {
-            JsonSerializerOptions Options = new JsonSerializerOptions();
-            Options.Converters.Add(new JsonStringEnumMemberConverter(deserializationFailureFallbackValue: 0));
-
-            MyEnum parsedValue = JsonSerializer.Deserialize<MyEnum>(@"""value99""", Options);
-            Assert.AreEqual(MyEnum.Unknown, parsedValue);
+            new JsonStringEnumMemberConverter(
+                new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: DayOfWeek.Friday),
+                typeof(DayOfWeek)),
+            new JsonStringEnumMemberConverter(
+                new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 0),
+                typeof(FlagDefinitions),
+                typeof(EnumDefinition?)),
+            new JsonStringEnumMemberConverter(allowIntegerValues: false)
         }
+    };
     ```
 
 ## TimeSpans
@@ -268,8 +315,8 @@ Blog:
 https://blog.macrosssoftware.com/index.php/2020/04/02/efficient-posting-of-json-to-request-streams/
 
 * A port to .NET Standard 2.0+ of the old
-[PushStreamContent](https://docs.microsoft.com/en-us/previous-versions/aspnet/hh995285(v%3Dvs.118))
-class.
+  [PushStreamContent](https://docs.microsoft.com/en-us/previous-versions/aspnet/hh995285(v%3Dvs.118))
+  class.
 
 ## Dynamic Conversion
 
