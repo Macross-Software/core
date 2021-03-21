@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.Serialization;
 
 namespace System.Text.Json.Serialization
@@ -8,15 +9,13 @@ namespace System.Text.Json.Serialization
 	/// </summary>
 	public class JsonStringEnumMemberConverter : JsonConverterFactory
 	{
-		private readonly JsonNamingPolicy? _NamingPolicy;
-		private readonly bool _AllowIntegerValues;
-		private readonly ulong? _DeserializationFailureFallbackValue;
+		private readonly HashSet<Type>? _EnumTypes;
+		private readonly JsonStringEnumMemberConverterOptions? _Options;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="JsonStringEnumMemberConverter"/> class.
 		/// </summary>
 		public JsonStringEnumMemberConverter()
-			: this(namingPolicy: null, allowIntegerValues: true)
 		{
 		}
 
@@ -30,46 +29,91 @@ namespace System.Text.Json.Serialization
 		/// True to allow undefined enum values. When true, if an enum value isn't
 		/// defined it will output as a number rather than a string.
 		/// </param>
-		/// <param name="deserializationFailureFallbackValue">
-		/// Optional default value to use when a json string does not match
-		/// anything defined on the target enum. If not specified a <see
-		/// cref="JsonException"/> is thrown for all failures.
-		/// </param>
-		public JsonStringEnumMemberConverter(JsonNamingPolicy? namingPolicy = null, bool allowIntegerValues = true, ulong? deserializationFailureFallbackValue = null)
+		public JsonStringEnumMemberConverter(JsonNamingPolicy? namingPolicy = null, bool allowIntegerValues = true)
+			: this(new JsonStringEnumMemberConverterOptions { NamingPolicy = namingPolicy, AllowIntegerValues = allowIntegerValues })
 		{
-			_NamingPolicy = namingPolicy;
-			_AllowIntegerValues = allowIntegerValues;
-			_DeserializationFailureFallbackValue = deserializationFailureFallbackValue;
 		}
 
+		/// <summary>
+		/// Initializes a new instance of the <see cref="JsonStringEnumMemberConverter"/> class.
+		/// </summary>
+		/// <param name="options"><see cref="JsonStringEnumMemberConverterOptions"/>.</param>
+		/// <param name="targetEnumTypes">Optional list of supported enum types to be converted. Specify <see langword="null"/> or empty to convert all enums.</param>
+		public JsonStringEnumMemberConverter(JsonStringEnumMemberConverterOptions options, params Type[] targetEnumTypes)
+		{
+			_Options = options ?? throw new ArgumentNullException(nameof(options));
+
+			if (targetEnumTypes != null && targetEnumTypes.Length > 0)
+			{
+#if NETSTANDARD2_0
+				_EnumTypes = new HashSet<Type>();
+#else
+				_EnumTypes = new HashSet<Type>(targetEnumTypes.Length);
+#endif
+				foreach (Type enumType in targetEnumTypes)
+				{
+					if (enumType.IsEnum)
+					{
+						_EnumTypes.Add(enumType);
+						_EnumTypes.Add(typeof(Nullable<>).MakeGenericType(enumType));
+						continue;
+					}
+
+					if (enumType.IsGenericType)
+					{
+						(bool IsNullableEnum, Type? UnderlyingType) = TestNullableEnum(enumType);
+						if (IsNullableEnum)
+						{
+							_EnumTypes.Add(UnderlyingType!);
+							_EnumTypes.Add(enumType);
+							continue;
+						}
+					}
+
+					throw new NotSupportedException($"Type {enumType} is not supported by JsonStringEnumMemberConverter. Only enum types can be converted.");
+				}
+			}
+		}
+
+#pragma warning disable CA1062 // Validate arguments of public methods
 		/// <inheritdoc/>
 		public override bool CanConvert(Type typeToConvert)
 		{
 			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
-#pragma warning disable CA1062 // Validate arguments of public methods
-			return typeToConvert.IsEnum
+			return _EnumTypes != null
+				? _EnumTypes.Contains(typeToConvert)
+				: typeToConvert.IsEnum
 				|| (typeToConvert.IsGenericType && TestNullableEnum(typeToConvert).IsNullableEnum);
-#pragma warning restore CA1062 // Validate arguments of public methods
 		}
+#pragma warning restore CA1062 // Validate arguments of public methods
 
 		/// <inheritdoc/>
 		public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
 		{
 			(bool IsNullableEnum, Type? UnderlyingType) = TestNullableEnum(typeToConvert);
 
-			return IsNullableEnum
-				? (JsonConverter)Activator.CreateInstance(
-					typeof(NullableEnumMemberConverter<>).MakeGenericType(UnderlyingType),
-					BindingFlags.Instance | BindingFlags.Public,
-					binder: null,
-					args: new object?[] { _NamingPolicy, _AllowIntegerValues, _DeserializationFailureFallbackValue },
-					culture: null)
-				: (JsonConverter)Activator.CreateInstance(
-					typeof(EnumMemberConverter<>).MakeGenericType(typeToConvert),
-					BindingFlags.Instance | BindingFlags.Public,
-					binder: null,
-					args: new object?[] { _NamingPolicy, _AllowIntegerValues, _DeserializationFailureFallbackValue },
-					culture: null);
+			try
+			{
+				return IsNullableEnum
+					? (JsonConverter)Activator.CreateInstance(
+						typeof(NullableEnumMemberConverter<>).MakeGenericType(UnderlyingType),
+						BindingFlags.Instance | BindingFlags.Public,
+						binder: null,
+						args: new object?[] { _Options },
+						culture: null)
+					: (JsonConverter)Activator.CreateInstance(
+						typeof(EnumMemberConverter<>).MakeGenericType(typeToConvert),
+						BindingFlags.Instance | BindingFlags.Public,
+						binder: null,
+						args: new object?[] { _Options },
+						culture: null);
+			}
+			catch (TargetInvocationException targetInvocationEx)
+			{
+				if (targetInvocationEx.InnerException != null)
+					throw targetInvocationEx.InnerException;
+				throw;
+			}
 		}
 
 		private static (bool IsNullableEnum, Type? UnderlyingType) TestNullableEnum(Type typeToConvert)
@@ -79,6 +123,22 @@ namespace System.Text.Json.Serialization
 			return (UnderlyingType?.IsEnum ?? false, UnderlyingType);
 		}
 
+		internal static ulong GetEnumValue(TypeCode enumTypeCode, object value)
+		{
+			return enumTypeCode switch
+			{
+				TypeCode.Int32 => (ulong)(int)value,
+				TypeCode.Int64 => (ulong)(long)value,
+				TypeCode.Int16 => (ulong)(short)value,
+				TypeCode.Byte => (byte)value,
+				TypeCode.UInt32 => (uint)value,
+				TypeCode.UInt64 => (ulong)value,
+				TypeCode.UInt16 => (ushort)value,
+				TypeCode.SByte => (ulong)(sbyte)value,
+				_ => throw new NotSupportedException($"Enum '{value}' of {enumTypeCode} type is not supported."),
+			};
+		}
+
 #pragma warning disable CA1812 // Remove class never instantiated
 		private class EnumMemberConverter<TEnum> : JsonConverter<TEnum>
 			where TEnum : struct, Enum
@@ -86,9 +146,9 @@ namespace System.Text.Json.Serialization
 		{
 			private readonly JsonStringEnumMemberConverterHelper<TEnum> _JsonStringEnumMemberConverterHelper;
 
-			public EnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, ulong? deserializationFailureFallbackValue)
+			public EnumMemberConverter(JsonStringEnumMemberConverterOptions? options)
 			{
-				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(namingPolicy, allowIntegerValues, deserializationFailureFallbackValue);
+				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(options);
 			}
 
 			public override TEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -105,9 +165,9 @@ namespace System.Text.Json.Serialization
 		{
 			private readonly JsonStringEnumMemberConverterHelper<TEnum> _JsonStringEnumMemberConverterHelper;
 
-			public NullableEnumMemberConverter(JsonNamingPolicy? namingPolicy, bool allowIntegerValues, ulong? deserializationFailureFallbackValue)
+			public NullableEnumMemberConverter(JsonStringEnumMemberConverterOptions? options)
 			{
-				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(namingPolicy, allowIntegerValues, deserializationFailureFallbackValue);
+				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(options);
 			}
 
 			public override TEnum? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

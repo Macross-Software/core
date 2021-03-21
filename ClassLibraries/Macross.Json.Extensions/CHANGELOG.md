@@ -11,6 +11,15 @@
   `JsonStringEnumMemberConverter`. See the project [README](./README.md) for
   details on its usage.
 
+* Added a constructor on `JsonStringEnumMemberConverter` which accepts
+  `JsonStringEnumMemberConverterOptions options` & `params Type[]
+  targetEnumTypes` parameters for specifying the options to be used to
+  serialize/deserialize the specific target enum types.
+
+* Added `JsonStringEnumMemberConverterOptionsAttribute` which can be used to
+  decorate an enum type with the options to use when serializing/deserializing
+  its values.
+
 ## 2.0.0
 
 * `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter` now

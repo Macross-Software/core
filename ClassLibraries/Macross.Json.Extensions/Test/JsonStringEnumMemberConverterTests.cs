@@ -46,7 +46,7 @@ namespace Macross.Json.Extensions.Tests
 		public void EnumMemberInvalidDeserializationWithFallbackTest()
 		{
 			JsonSerializerOptions Options = new JsonSerializerOptions();
-			Options.Converters.Add(new JsonStringEnumMemberConverter(deserializationFailureFallbackValue: (ulong)DayOfWeek.Friday));
+			Options.Converters.Add(new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: (ulong)DayOfWeek.Friday)));
 
 			DayOfWeek dayOfWeek = JsonSerializer.Deserialize<DayOfWeek>(@"""invalid_value""", Options);
 			Assert.AreEqual(DayOfWeek.Friday, dayOfWeek);
@@ -55,7 +55,7 @@ namespace Macross.Json.Extensions.Tests
 			CollectionAssert.AreEqual(new DayOfWeek[] { DayOfWeek.Friday, DayOfWeek.Saturday }, days);
 
 			Options = new JsonSerializerOptions();
-			Options.Converters.Add(new JsonStringEnumMemberConverter(deserializationFailureFallbackValue: (ulong)FlagDefinitions.None));
+			Options.Converters.Add(new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions { DeserializationFailureFallbackValue = FlagDefinitions.None }));
 
 			FlagDefinitions Value = JsonSerializer.Deserialize<FlagDefinitions>(@"""invalid_value""", Options);
 			Assert.AreEqual(FlagDefinitions.None, Value);
@@ -216,6 +216,130 @@ namespace Macross.Json.Extensions.Tests
 			}
 		}
 
+		[TestMethod]
+		public void JsonSerializerOptionsTargetTypesTest()
+		{
+			JsonSerializerOptions options = new JsonSerializerOptions
+			{
+				Converters =
+				{
+					new JsonStringEnumMemberConverter(
+						new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: DayOfWeek.Friday),
+						typeof(DayOfWeek)),
+					new JsonStringEnumMemberConverter(
+						new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 0),
+						typeof(FlagDefinitions),
+						typeof(EnumDefinition?)),
+					new JsonStringEnumMemberConverter(allowIntegerValues: false)
+				}
+			};
+
+			DayOfWeek dayOfWeek = JsonSerializer.Deserialize<DayOfWeek>(@"""invalid_value""", options);
+			Assert.AreEqual(DayOfWeek.Friday, dayOfWeek);
+
+			EnumDefinition enumDefinition = JsonSerializer.Deserialize<EnumDefinition>(@"""invalid_value""", options);
+			Assert.AreEqual((EnumDefinition)0, enumDefinition);
+
+			try
+			{
+				JsonSerializer.Deserialize<DateTimeKind>("0", options);
+				Assert.Fail();
+			}
+			catch (JsonException)
+			{
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(NotSupportedException))]
+		public void JsonSerializerOptionsInvalidTargetTypeTest()
+		{
+			new JsonStringEnumMemberConverter(
+				new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: DayOfWeek.Friday),
+				typeof(DateTime));
+		}
+
+		[TestMethod]
+		[DataRow(typeof(ValidJsonNamingPolicy))]
+		[DataRow(typeof(InvalidJsonNamingPolicy), true)]
+		[DataRow(typeof(DateTime), true)]
+		public void JsonStringEnumMemberConverterOptionsAttributeJsonNamingPolicyTest(Type namingPolicyType, bool shouldThrow = false)
+		{
+			JsonStringEnumMemberConverterOptionsAttribute? options;
+			Exception? thrownException = null;
+			try
+			{
+				options = new JsonStringEnumMemberConverterOptionsAttribute(namingPolicyType: namingPolicyType);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types
+			catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+			{
+				thrownException = ex;
+				options = null;
+			}
+
+			if (shouldThrow)
+			{
+				Assert.IsNotNull(thrownException);
+			}
+			else
+			{
+				Assert.IsNotNull(options?.Options?.NamingPolicy);
+				Assert.IsNull(thrownException);
+			}
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(JsonException))]
+		public void JsonStringEnumMemberConverterOptionsAttributeOverrideTest()
+		{
+			JsonSerializerOptions options = new JsonSerializerOptions
+			{
+				Converters = { new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 1)) }
+			};
+
+			JsonSerializer.Deserialize<EnumWithOptionsAttribute>(@"""invalid_json""", options);
+		}
+
+		[TestMethod]
+		[DataRow(0)]
+		[DataRow(0U)]
+		[DataRow(0L)]
+		[DataRow(0UL)]
+		[DataRow((byte)0)]
+		[DataRow((sbyte)0)]
+		[DataRow((short)0)]
+		[DataRow((ushort)0)]
+		[DataRow(EnumDefinition.First)]
+		[DataRow("invalid_value", true)]
+		public void JsonStringEnumMemberConverterOptionsEnumParsing(object value, bool shouldThrow = false)
+		{
+			JsonStringEnumMemberConverterOptions? options;
+			Exception? thrownException = null;
+			try
+			{
+				options = new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: value);
+			}
+#pragma warning disable CA1031 // Do not catch general exception types
+			catch (Exception ex)
+#pragma warning restore CA1031 // Do not catch general exception types
+			{
+				thrownException = ex;
+				options = null;
+			}
+
+			if (shouldThrow)
+			{
+				Assert.IsNotNull(thrownException);
+			}
+			else
+			{
+				Assert.AreEqual(0UL, options?.ConvertedDeserializationFailureFallbackValue);
+				Assert.IsNull(thrownException);
+			}
+		}
+
 #if NET5_0_OR_GREATER
 		[TestMethod]
 		public void JsonPropertyNameSerializationTest()
@@ -278,6 +402,30 @@ namespace Macross.Json.Extensions.Tests
 
 			[EnumMember(Value = "_second")]
 			Second,
+		}
+
+#pragma warning disable CA1034 // Nested types should not be visible
+		public class ValidJsonNamingPolicy : JsonNamingPolicy
+		{
+			public override string ConvertName(string name) => throw new NotImplementedException();
+		}
+
+		public class InvalidJsonNamingPolicy : JsonNamingPolicy
+		{
+			private InvalidJsonNamingPolicy()
+			{
+			}
+
+			public override string ConvertName(string name) => throw new NotImplementedException();
+		}
+#pragma warning restore CA1034 // Nested types should not be visible
+
+		[JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 99)]
+		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
+		public enum EnumWithOptionsAttribute
+		{
+			One = 1,
+			Two = 2
 		}
 
 #if NET5_0_OR_GREATER
