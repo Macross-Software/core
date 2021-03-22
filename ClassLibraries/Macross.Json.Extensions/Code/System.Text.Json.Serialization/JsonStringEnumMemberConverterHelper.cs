@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Globalization;
 
@@ -34,6 +33,7 @@ namespace System.Text.Json.Serialization
 #endif
 
 		private readonly bool _AllowIntegerValues;
+		private readonly ulong? _DeserializationFailureFallbackValueRaw;
 		private readonly TEnum? _DeserializationFailureFallbackValue;
 		private readonly Type _EnumType;
 		private readonly TypeCode _EnumTypeCode;
@@ -80,7 +80,10 @@ namespace System.Text.Json.Serialization
 					throw new NotSupportedException();
 
 				if (deserializationFailureFallbackValue.HasValue && rawValue == deserializationFailureFallbackValue)
+				{
+					_DeserializationFailureFallbackValueRaw = deserializationFailureFallbackValue;
 					_DeserializationFailureFallbackValue = typedValue;
+				}
 
 				_RawToTransformed[typedValue] = new EnumInfo(transformedName, typedValue, rawValue);
 				_TransformedToRaw[transformedName] = new EnumInfo(name, typedValue, rawValue);
@@ -133,7 +136,12 @@ namespace System.Text.Json.Serialization
 							}
 
 							if (!matched)
-								return ReturnDefaultValueOrThrowJsonException(flagValue);
+							{
+								if (_DeserializationFailureFallbackValueRaw.HasValue)
+									calculatedValue |= _DeserializationFailureFallbackValueRaw.Value;
+								else
+									throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, flagValue);
+							}
 						}
 					}
 
@@ -154,7 +162,7 @@ namespace System.Text.Json.Serialization
 					}
 				}
 
-				return ReturnDefaultValueOrThrowJsonException(enumString);
+				return _DeserializationFailureFallbackValue ?? throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, enumString);
 			}
 
 			if (token != JsonTokenType.Number || !_AllowIntegerValues)
@@ -298,9 +306,5 @@ namespace System.Text.Json.Serialization
 					throw new JsonException(); // GetEnumValue should have already thrown.
 			}
 		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		private TEnum ReturnDefaultValueOrThrowJsonException(string propertyValue)
-			=> _DeserializationFailureFallbackValue ?? throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(_EnumType, propertyValue);
 	}
 }

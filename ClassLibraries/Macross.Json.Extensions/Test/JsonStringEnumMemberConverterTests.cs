@@ -55,10 +55,13 @@ namespace Macross.Json.Extensions.Tests
 			CollectionAssert.AreEqual(new DayOfWeek[] { DayOfWeek.Friday, DayOfWeek.Saturday }, days);
 
 			Options = new JsonSerializerOptions();
-			Options.Converters.Add(new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions { DeserializationFailureFallbackValue = FlagDefinitions.None }));
+			Options.Converters.Add(new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions { DeserializationFailureFallbackValue = FlagDefinitions.Four }));
 
 			FlagDefinitions Value = JsonSerializer.Deserialize<FlagDefinitions>(@"""invalid_value""", Options);
-			Assert.AreEqual(FlagDefinitions.None, Value);
+			Assert.AreEqual(FlagDefinitions.Four, Value);
+
+			Value = JsonSerializer.Deserialize<FlagDefinitions>(@"""one value, invalid_value, two value""", Options);
+			Assert.AreEqual(FlagDefinitions.One | FlagDefinitions.Four | FlagDefinitions.Two, Value);
 		}
 
 		[ExpectedException(typeof(JsonException))]
