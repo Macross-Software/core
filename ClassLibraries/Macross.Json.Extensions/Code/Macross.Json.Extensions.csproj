@@ -17,7 +17,7 @@
       System.Text.Json.Serialization.JsonIPAddressConverter
       System.Text.Json.Serialization.JsonIPEndPointConverter
       System.Text.Json.Serialization.JsonDelegatedStringConverter
-      System.Text.Json.Serialization.JsonTypeConverterAdapterFactory
+      System.Text.Json.Serialization.JsonTypeConverterAdapter
       System.Net.Http.PushStreamContent
     </Description>
     <Product>Macross.Json.Extensions</Product>

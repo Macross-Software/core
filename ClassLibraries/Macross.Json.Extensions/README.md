@@ -379,13 +379,13 @@ decoration](https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.ty
 pattern, much like `JsonConverter`, but it is not supported by the
 System.Text.Json engine (as of .NET 5).
 
-The `JsonTypeConverterAdapterFactory` is provided to add support for using a
+The `JsonTypeConverterAdapter` is provided to add support for using a
 `TypeConverter` to [de]serialize a given type through System.Text.Json. Note:
-The `TypeConverter` being used must support `string` as a to destination & from
-source.
+The `TypeConverter` being used must support `string` as a "to" destination &
+"from" source.
 
 ```csharp
-[JsonConverter(typeof(JsonTypeConverterAdapterFactory))]
+[JsonConverter(typeof(JsonTypeConverterAdapter))]
 [TypeConverter(typeof(MyCustomTypeConverter))]
 public class MyClass
 {

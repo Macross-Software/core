@@ -11,13 +11,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Macross.Json.Extensions.Tests
 {
 	[TestClass]
-	public class JsonTypeConverterAdapterFactoryTests
+	public class JsonTypeConverterAdapterTests
 	{
 		[TestMethod]
-		public void TypeConverterTest()
+		public void SerializeAndDeserializeTest()
 		{
 			JsonSerializerOptions options = new JsonSerializerOptions();
-			options.Converters.Add(new JsonTypeConverterAdapterFactory());
+			options.Converters.Add(new JsonTypeConverterAdapter());
 
 			TestClass testObj = new TestClass()
 			{
@@ -72,7 +72,7 @@ namespace Macross.Json.Extensions.Tests
 		public void InvalidReferenceValueTest(Type typeToConvert)
 		{
 			JsonSerializerOptions options = new JsonSerializerOptions();
-			options.Converters.Add(new JsonTypeConverterAdapterFactory());
+			options.Converters.Add(new JsonTypeConverterAdapter());
 
 			JsonSerializer.Deserialize("1234", typeToConvert, options);
 		}
@@ -89,7 +89,7 @@ namespace Macross.Json.Extensions.Tests
 		}
 
 		[TypeConverter(typeof(ReferenceTypeConverter))]
-		[JsonConverter(typeof(JsonTypeConverterAdapterFactory))]
+		[JsonConverter(typeof(JsonTypeConverterAdapter))]
 		private record ReferenceTest
 		{
 			public int X { get; set; }

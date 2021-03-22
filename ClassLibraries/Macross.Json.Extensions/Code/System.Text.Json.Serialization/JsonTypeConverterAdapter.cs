@@ -9,7 +9,7 @@ namespace System.Text.Json.Serialization
 	/// <summary>
 	/// <see cref="JsonConverterFactory"/> to convert types to and from strings using <see cref="TypeConverter"/>s. Supports nullable value types.
 	/// </summary>
-	public class JsonTypeConverterAdapterFactory : JsonConverterFactory
+	public class JsonTypeConverterAdapter : JsonConverterFactory
 	{
 #pragma warning disable CA1062 // Validate arguments of public methods
 		/// <inheritdoc />
