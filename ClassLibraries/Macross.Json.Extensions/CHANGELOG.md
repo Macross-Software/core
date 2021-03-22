@@ -20,6 +20,9 @@
   decorate an enum type with the options to use when serializing/deserializing
   its values.
 
+* Add `JsonTypeConverterAdapterFactory` for using `TypeConverter`s with
+  System.Text.Json. ([#19](https://github.com/Macross-Software/core/pull/19)) 
+
 ## 2.0.0
 
 * `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter` now

@@ -367,3 +367,66 @@ public class TestClass
 BUT watch out for `Nullable<T>` value types when you do that, they won't work
 correctly until .NET 5. [There is a bug in
 System.Text.Json](https://github.com/dotnet/runtime/pull/32006).
+
+## TypeConverters
+
+The .NET runtime provides the
+[TypeConverter](https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.typeconverter?view=net-5.0)
+class in the System.ComponentModel namespace as a generic mechanism for
+converting between different types at runtime. `TypeConverter` is applied to a
+target type using an [attribute
+decoration](https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.typeconverterattribute?view=net-5.0)
+pattern, much like `JsonConverter`, but it is not supported by the
+System.Text.Json engine (as of .NET 5).
+
+The `JsonTypeConverterAdapterFactory` is provided to add support for using a
+`TypeConverter` to [de]serialize a given type through System.Text.Json. Note:
+The `TypeConverter` being used must support `string` as a to destination & from
+source.
+
+```csharp
+[JsonConverter(typeof(JsonTypeConverterAdapterFactory))]
+[TypeConverter(typeof(MyCustomTypeConverter))]
+public class MyClass
+{
+    public string PropertyA { get; }
+
+    public string PropertyB { get; }
+
+    internal MyClass(string propertyA, string propertyB)
+    {
+        PropertyA = propertyA;
+        PropertyB = propertyB;
+    }
+}
+
+public class MyCustomTypeConverter : TypeConverter
+{
+    public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+        sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
+
+    public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+    {
+        if (value is string str)
+        {
+            string[] data = str.Split('|');
+            return new MyClass(data[0], data[1]);
+        }
+
+        return base.ConvertFrom(context, culture, value);
+    }
+
+    public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+        => destinationType == typeof(string) || base.CanConvertTo(context, destinationType);
+
+    public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+    {
+        if (value is MyClass myClass && destinationType == typeof(string))
+        {
+            return $"{myClass.PropertyA}|{myClass.PropertyB}";
+        }
+
+        return base.ConvertTo(context, culture, value, destinationType);
+    }
+}
+```
