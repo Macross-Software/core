@@ -96,9 +96,9 @@ public class Startup
 In the example above the logging is only turned on when the application
 configuration has `LogOpenTelemetryEvents` set to `true`.
 
-## Options
+### Options
 
-### EventSource selection & EventLevel configuration
+#### EventSource selection & EventLevel configuration
 
 By default the extension will listen to all OpenTelemetry sources
 (`^OpenTelemetry.*$`) and will log any events at the `EventLevel.Warning` level
@@ -156,7 +156,7 @@ if (_Configuration.GetValue<bool>("LogOpenTelemetryEvents"))
 }
 ```
 
-### Log message format
+#### Log message format
 
 To change the format of the `ILogger` message that is written for triggered
 events override the `LogAction` property:
