@@ -7,6 +7,47 @@ is a .NET Standard 2.0+ library for extending what is provided by the official
 [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet)
 library.
 
+## OpenTelemetry Activity Enrichment Scope
+
+Blog: _Coming soon._
+
+Most OpenTelemetry .NET instrumentation libraries provide an options object with
+an `Enrich` callback for the purpose of adding additional data to the spans
+(`Activity`) created by the instrumentation. The challenge with these callbacks
+is they are global. Sometimes you want to add contextual information that isn't
+available globally.
+
+`ActivityEnrichmentScope` works a lot like `ILogger` scopes in that it wraps an
+operation with information that can be accessed later (until the scope is
+disposed). A span processor is provided which automatically calls the enrichment
+callback when any span is ended under the scope.
+
+Example:
+
+```csharp
+public void PerformAction()
+{
+    using (IDisposable scope = ActivityEnrichmentScope.Begin(EnrichActivity, myUser))
+    {
+        return CallService(myUser.Id);
+    }
+
+    static void EnrichActivity(Activity activity, MyUser user)
+    {
+        activity.SetTag("service.username", user.Username);
+    }
+}
+```
+
+To enable `ActivityEnrichmentScope` use the
+`AddActivityEnrichmentScopeProcessor` extension in your startup code:
+
+```csharp
+using IDisposable sdk = Sdk.CreateTracerProviderBuilder()
+    .AddActivityEnrichmentScopeProcessor()
+    .Build();
+```
+
 ## OpenTelemetry Event Logging
 
 Blog:

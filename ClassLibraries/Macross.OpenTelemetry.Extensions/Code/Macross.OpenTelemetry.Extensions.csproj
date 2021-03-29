@@ -15,13 +15,14 @@
       Commonly Used Extensions:
       IServiceCollection.AddOpenTelemetryEventLogging
       IServiceCollection.AddActivityTraceListener
+      TracerProviderBuilder.AddActivityEnrichmentScopeProcessor
     </Description>
     <Product>Macross.OpenTelemetry.Extensions</Product>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <VersionSuffix>beta2</VersionSuffix>
+    <VersionSuffix>beta3</VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.OpenTelemetry.Extensions</PackageProjectUrl>
   </PropertyGroup>
@@ -40,9 +41,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.0.1" />
   </ItemGroup>
 
 </Project>

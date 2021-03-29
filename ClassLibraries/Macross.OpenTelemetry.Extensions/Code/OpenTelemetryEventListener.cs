@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Macross.OpenTelemetry
+namespace Macross.OpenTelemetry.Extensions
 {
 	internal class OpenTelemetryEventListener : EventListener
 	{

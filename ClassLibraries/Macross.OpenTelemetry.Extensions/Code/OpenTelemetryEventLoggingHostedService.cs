@@ -7,7 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Macross.OpenTelemetry
+namespace Macross.OpenTelemetry.Extensions
 {
 #pragma warning disable CA1812 // Remove class never instantiated
 	internal class OpenTelemetryEventLoggingHostedService : IHostedService, IDisposable

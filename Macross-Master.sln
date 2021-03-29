@@ -146,6 +146,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.OpenTelemetry.Exten
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.OpenTelemetry.Extensions", "ClassLibraries\Macross.OpenTelemetry.Extensions\Code\Macross.OpenTelemetry.Extensions.csproj", "{8E763F6E-30F7-4D58-B2EF-C88697E68A5C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.OpenTelemetry.Extensions.Tests", "ClassLibraries\Macross.OpenTelemetry.Extensions\Test\Macross.OpenTelemetry.Extensions.Tests.csproj", "{0AA47B42-FFB2-49F7-BA03-9D9097D6EE6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -260,6 +262,10 @@ Global
 		{8E763F6E-30F7-4D58-B2EF-C88697E68A5C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E763F6E-30F7-4D58-B2EF-C88697E68A5C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E763F6E-30F7-4D58-B2EF-C88697E68A5C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AA47B42-FFB2-49F7-BA03-9D9097D6EE6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AA47B42-FFB2-49F7-BA03-9D9097D6EE6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AA47B42-FFB2-49F7-BA03-9D9097D6EE6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AA47B42-FFB2-49F7-BA03-9D9097D6EE6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -293,6 +299,7 @@ Global
 		{B8B9C3D4-C72A-4DB5-A10E-F1FA4D43CB25} = {BB4BBB29-7C73-43A0-9715-AC47C0C14642}
 		{576563CB-FE9A-4482-97B3-571F6C479F9E} = {BB4BBB29-7C73-43A0-9715-AC47C0C14642}
 		{8E763F6E-30F7-4D58-B2EF-C88697E68A5C} = {C91BFF20-3419-4C6B-B729-476496C632DD}
+		{0AA47B42-FFB2-49F7-BA03-9D9097D6EE6E} = {C91BFF20-3419-4C6B-B729-476496C632DD}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8D27B7B0-BD74-4094-96C3-490528274426}
