@@ -11,11 +11,13 @@
 
       Commonly Used Types:
       System.Diagnostics.ActivityTraceListenerManager
+      System.Diagnostics.ActivityEnrichmentScope
 
       Commonly Used Extensions:
       IServiceCollection.AddOpenTelemetryEventLogging
       IServiceCollection.AddActivityTraceListener
       TracerProviderBuilder.AddActivityEnrichmentScopeProcessor
+      TracerProviderBuilder.SetActivityTraceListenerSampler
     </Description>
     <Product>Macross.OpenTelemetry.Extensions</Product>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
