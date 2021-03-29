@@ -9,7 +9,7 @@ namespace Macross.OpenTelemetry.Extensions
 	/// EventSource implementation for OpenTelemetry extensions.
 	/// </summary>
 	[EventSource(Name = "OpenTelemetry-Extensions")]
-	internal class OpenTelemetryExtensionsEventSource : EventSource
+	internal sealed class OpenTelemetryExtensionsEventSource : EventSource
 	{
 		public static OpenTelemetryExtensionsEventSource Log { get; } = new OpenTelemetryExtensionsEventSource();
 

@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Macross.OpenTelemetry.Extensions
 {
-	internal class OpenTelemetryEventListener : EventListener
+	internal sealed class OpenTelemetryEventListener : EventListener
 	{
 		private readonly List<EventSource> _UnitializedEventSources = new List<EventSource>();
 		private readonly List<EventSource> _EventSources = new List<EventSource>();

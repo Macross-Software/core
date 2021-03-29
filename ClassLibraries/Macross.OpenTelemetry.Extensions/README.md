@@ -214,13 +214,26 @@ is provided.
             services.AddActivityTraceListener();
         }
     }
-
     ```
 
     This will register the `ActivityTraceListenerManager` with the
     `IServiceProvider`.
 
-2) Use the `ActivityTraceListenerManager` to register a listener:
+2) Call the `SetActivityTraceListenerSampler` extension where you configure
+   OpenTelemetry:
+
+    ```csharp
+    services.AddOpenTelemetryTracing((serviceProvider, builder) =>
+    {
+        builder.SetActivityTraceListenerSampler(new ParentBasedSampler(new AlwaysOnSampler()));
+    };
+    ```
+
+   The `innerSampler` parameter is the sampler which will be used when a trace
+   listener is NOT registered. The default behavior is shown
+   (`ParentBasedSampler` w/ `AlwaysOnSampler`).
+
+3) Use the `ActivityTraceListenerManager` to register a listener:
 
     ```csharp
     using System.Diagnostics;

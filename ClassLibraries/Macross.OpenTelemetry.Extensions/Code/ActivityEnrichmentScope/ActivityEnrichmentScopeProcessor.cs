@@ -5,7 +5,7 @@ using OpenTelemetry;
 
 namespace Macross.OpenTelemetry.Extensions
 {
-	internal class ActivityEnrichmentScopeProcessor : BaseProcessor<Activity>
+	internal sealed class ActivityEnrichmentScopeProcessor : BaseProcessor<Activity>
 	{
 		/// <inheritdoc/>
 		public override void OnEnd(Activity activity)

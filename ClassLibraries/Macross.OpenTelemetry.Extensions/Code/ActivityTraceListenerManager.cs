@@ -1,9 +1,14 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 using Microsoft.Extensions.Options;
+
+using OpenTelemetry.Trace;
+
+using Macross.OpenTelemetry.Extensions;
 
 namespace System.Diagnostics
 {
@@ -16,22 +21,34 @@ namespace System.Diagnostics
 
 		private readonly ConcurrentDictionary<ActivityTraceId, TraceListener> _TraceListeners = new ConcurrentDictionary<ActivityTraceId, TraceListener>();
 		private readonly EventWaitHandle _StopHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
+		private readonly ActivityTraceListenerSampler _ActivityTraceListenerSampler;
 		private readonly IDisposable _OptionsChangeToken;
 		private ActivityTraceListenerManagerOptions? _Options;
 		private Thread? _CleanupThread;
-		private ActivityListener? _ActivityListener;
 		private bool _HasInitialized;
 		private long _LastRequestedListenerDateTimeBinary;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="ActivityTraceListenerManager"/> class.
 		/// </summary>
+		/// <param name="tracerProvider"><see cref="TracerProvider"/>.</param>
 		/// <param name="options"><see cref="ActivityTraceListenerManagerOptions"/>.</param>
 		public ActivityTraceListenerManager(
+			TracerProvider tracerProvider,
 			IOptionsMonitor<ActivityTraceListenerManagerOptions> options)
 		{
+			if (tracerProvider == null)
+				throw new ArgumentNullException(nameof(tracerProvider));
 			if (options == null)
 				throw new ArgumentNullException(nameof(options));
+
+			FieldInfo? samplerFieldInfo = tracerProvider.GetType().GetField("sampler", BindingFlags.Instance | BindingFlags.NonPublic);
+			if (samplerFieldInfo == null)
+				throw new NotSupportedException($"sampler field could not be read reflectively on tracerProvider of type {tracerProvider.GetType()}.");
+
+			_ActivityTraceListenerSampler = (samplerFieldInfo.GetValue(tracerProvider) as ActivityTraceListenerSampler)!;
+			if (_ActivityTraceListenerSampler == null)
+				throw new NotSupportedException("ActivityTraceListenerManager cannot be used without the ActivityTraceListenerSampler. Call SetActivityTraceListenerSampler on TracerProviderBuilder during startup.");
 
 			ApplyOptions(options.CurrentValue);
 			_OptionsChangeToken = options.OnChange(ApplyOptions);
@@ -82,6 +99,10 @@ namespace System.Diagnostics
 				: listener;
 		}
 
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal bool IsTraceIdRegistered(ActivityTraceId activityTraceId)
+			=> _TraceListeners.ContainsKey(activityTraceId);
+
 		/// <summary>
 		/// Releases the unmanaged resources used by this class and optionally releases the managed resources.
 		/// </summary>
@@ -99,14 +120,8 @@ namespace System.Diagnostics
 			{
 				_OptionsChangeToken.Dispose();
 				_StopHandle.Dispose();
-				_ActivityListener?.Dispose();
+				_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
 			}
-		}
-
-		private void OnActivityStopped(Activity activity)
-		{
-			if (_TraceListeners.TryGetValue(activity.TraceId, out TraceListener? listener))
-				listener.Add(activity);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -126,14 +141,7 @@ namespace System.Diagnostics
 				};
 				_CleanupThread.Start();
 
-				// Watch out doing this in prod, it's expensive.
-				_ActivityListener = new ActivityListener
-				{
-					ShouldListenTo = source => true, // Listens to all sources.
-					Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.AllData, // Causes all Activity objects to be created and populated.
-					ActivityStopped = OnActivityStopped
-				};
-				ActivitySource.AddActivityListener(_ActivityListener);
+				_ActivityTraceListenerSampler.ActivityTraceListenerManager = this;
 
 				_HasInitialized = true;
 			}
@@ -155,8 +163,7 @@ namespace System.Diagnostics
 					lock (_TraceListeners)
 					{
 						_HasInitialized = false;
-						_ActivityListener?.Dispose();
-						_ActivityListener = null;
+						_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
 					}
 
 					_Options.ClosedAction?.Invoke();
