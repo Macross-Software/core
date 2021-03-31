@@ -7,10 +7,9 @@ namespace Macross.OpenTelemetry.Extensions
 	{
 		private readonly TState _State;
 
-		public ActivityEnricher<TState> ActivityEnricher { get; private set; }
+		public ActivityEnricher<TState>? ActivityEnricher { get; private set; }
 
-		public GenericActivityEnrichmentScope(ActivityEnricher<TState> activityEnricher, TState state, EnrichmentScopeTarget target)
-			: base(target)
+		public GenericActivityEnrichmentScope(ActivityEnricher<TState> activityEnricher, TState state)
 		{
 			ActivityEnricher = activityEnricher ?? throw new ArgumentNullException(nameof(activityEnricher));
 			_State = state;
@@ -21,7 +20,7 @@ namespace Macross.OpenTelemetry.Extensions
 
 		protected override void Dispose(bool isDisposing)
 		{
-			ActivityEnricher = null!;
+			ActivityEnricher = null;
 
 			base.Dispose(isDisposing);
 		}

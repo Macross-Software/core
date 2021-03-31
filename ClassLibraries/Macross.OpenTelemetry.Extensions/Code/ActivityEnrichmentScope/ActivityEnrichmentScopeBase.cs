@@ -17,12 +17,8 @@ namespace Macross.OpenTelemetry.Extensions
 
 		public ActivityEnrichmentScopeBase? Child { get; private set; }
 
-		public EnrichmentScopeTarget EnrichmentTarget { get; private set; }
-
-		protected ActivityEnrichmentScopeBase(EnrichmentScopeTarget target)
+		protected ActivityEnrichmentScopeBase()
 		{
-			EnrichmentTarget = target;
-
 			Parent = Current;
 			if (Parent != null)
 			{
