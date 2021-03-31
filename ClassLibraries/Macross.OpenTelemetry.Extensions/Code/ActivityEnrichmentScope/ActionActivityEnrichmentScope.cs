@@ -5,10 +5,9 @@ namespace Macross.OpenTelemetry.Extensions
 {
 	internal sealed class ActionActivityEnrichmentScope : ActivityEnrichmentScopeBase
 	{
-		public Action<Activity> EnrichmentAction { get; private set; }
+		public Action<Activity>? EnrichmentAction { get; private set; }
 
-		public ActionActivityEnrichmentScope(Action<Activity> enrichmentAction, EnrichmentScopeTarget target)
-			: base(target)
+		public ActionActivityEnrichmentScope(Action<Activity> enrichmentAction)
 		{
 			EnrichmentAction = enrichmentAction ?? throw new ArgumentNullException(nameof(enrichmentAction));
 		}
@@ -18,7 +17,7 @@ namespace Macross.OpenTelemetry.Extensions
 
 		protected override void Dispose(bool isDisposing)
 		{
-			EnrichmentAction = null!;
+			EnrichmentAction = null;
 
 			base.Dispose(isDisposing);
 		}

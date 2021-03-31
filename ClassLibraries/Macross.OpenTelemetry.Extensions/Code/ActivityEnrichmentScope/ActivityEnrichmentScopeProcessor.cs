@@ -24,14 +24,7 @@ namespace Macross.OpenTelemetry.Extensions
 					OpenTelemetryExtensionsEventSource.Log.SpanProcessorException(nameof(ActivityEnrichmentScopeProcessor), ex);
 				}
 
-				ActivityEnrichmentScopeBase? nextParent = scope.Parent;
-
-				if (scope.EnrichmentTarget == EnrichmentScopeTarget.FirstChild)
-				{
-					scope.Dispose();
-				}
-
-				scope = nextParent;
+				scope = scope.Parent;
 			}
 		}
 	}

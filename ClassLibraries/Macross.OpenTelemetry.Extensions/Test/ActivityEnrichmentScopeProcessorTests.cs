@@ -50,65 +50,13 @@ namespace Macross.OpenTelemetry.Extensions.Tests
 		}
 
 		[TestMethod]
-		public void NextSpanEnrichedActionMethodTest()
+		public void SpansEnrichedActionMethodTest()
 		{
 			using IDisposable reset = _TestActivityProcessor.ResetWhenDone();
 
 			Activity activity;
 
-			using (ActivityEnrichmentScope.Begin(s_EnrichmentAction, EnrichmentScopeTarget.FirstChild))
-			{
-				activity = _ActivitySource.StartActivity("Test1", ActivityKind.Internal)!;
-				activity.Stop();
-
-				activity = _ActivitySource.StartActivity("Test2", ActivityKind.Internal)!;
-				activity.Stop();
-			}
-
-			activity = _ActivitySource.StartActivity("Test3", ActivityKind.Internal)!;
-			activity.Stop();
-
-			Assert.IsNull(ActivityEnrichmentScopeBase.Current);
-			Assert.AreEqual(3, _TestActivityProcessor.EndedActivityObjects.Count);
-			Assert.IsTrue(_TestActivityProcessor.EndedActivityObjects[0].TagObjects.Any(i => i.Key == "enriched" && (i.Value as bool?) == true));
-			Assert.IsFalse(_TestActivityProcessor.EndedActivityObjects[1].TagObjects.Any());
-			Assert.IsFalse(_TestActivityProcessor.EndedActivityObjects[2].TagObjects.Any());
-		}
-
-		[TestMethod]
-		public void NextSpanEnrichedGenricMethodTest()
-		{
-			using IDisposable reset = _TestActivityProcessor.ResetWhenDone();
-
-			Activity activity;
-
-			using (ActivityEnrichmentScope.Begin(s_Enricher, "enrichment_state", EnrichmentScopeTarget.FirstChild))
-			{
-				activity = _ActivitySource.StartActivity("Test1", ActivityKind.Internal)!;
-				activity.Stop();
-
-				activity = _ActivitySource.StartActivity("Test2", ActivityKind.Internal)!;
-				activity.Stop();
-			}
-
-			activity = _ActivitySource.StartActivity("Test3", ActivityKind.Internal)!;
-			activity.Stop();
-
-			Assert.IsNull(ActivityEnrichmentScopeBase.Current);
-			Assert.AreEqual(3, _TestActivityProcessor.EndedActivityObjects.Count);
-			Assert.IsTrue(_TestActivityProcessor.EndedActivityObjects[0].TagObjects.Any(i => i.Key == "enrichment_state" && (i.Value as bool?) == true));
-			Assert.IsFalse(_TestActivityProcessor.EndedActivityObjects[1].TagObjects.Any());
-			Assert.IsFalse(_TestActivityProcessor.EndedActivityObjects[2].TagObjects.Any());
-		}
-
-		[TestMethod]
-		public void ChildSpansEnrichedActionMethodTest()
-		{
-			using IDisposable reset = _TestActivityProcessor.ResetWhenDone();
-
-			Activity activity;
-
-			using (ActivityEnrichmentScope.Begin(s_EnrichmentAction, EnrichmentScopeTarget.AllChildren))
+			using (ActivityEnrichmentScope.Begin(s_EnrichmentAction))
 			{
 				activity = _ActivitySource.StartActivity("Test1", ActivityKind.Internal)!;
 				activity.Stop();
@@ -128,13 +76,13 @@ namespace Macross.OpenTelemetry.Extensions.Tests
 		}
 
 		[TestMethod]
-		public void ChildSpansEnrichedGenericMethodTest()
+		public void SpansEnrichedGenericMethodTest()
 		{
 			using IDisposable reset = _TestActivityProcessor.ResetWhenDone();
 
 			Activity activity;
 
-			using (ActivityEnrichmentScope.Begin(s_Enricher, "enrichment_state", EnrichmentScopeTarget.AllChildren))
+			using (ActivityEnrichmentScope.Begin(s_Enricher, "enrichment_state"))
 			{
 				activity = _ActivitySource.StartActivity("Test1", ActivityKind.Internal)!;
 				activity.Stop();
@@ -151,57 +99,6 @@ namespace Macross.OpenTelemetry.Extensions.Tests
 			Assert.IsTrue(_TestActivityProcessor.EndedActivityObjects[0].TagObjects.Any(i => i.Key == "enrichment_state" && (i.Value as bool?) == true));
 			Assert.IsTrue(_TestActivityProcessor.EndedActivityObjects[1].TagObjects.Any(i => i.Key == "enrichment_state" && (i.Value as bool?) == true));
 			Assert.IsFalse(_TestActivityProcessor.EndedActivityObjects[2].TagObjects.Any());
-		}
-
-		[TestMethod]
-		public void MixedTargetEnrichedTest()
-		{
-			using IDisposable reset = _TestActivityProcessor.ResetWhenDone();
-
-			Activity activity;
-
-			using (ActivityEnrichmentScope.Begin((a) => a.AddTag("enrichment.top", true), EnrichmentScopeTarget.AllChildren))
-			{
-				activity = _ActivitySource.StartActivity("Test1", ActivityKind.Internal)!; // Test1 <- enrichment.top
-				activity.Stop();
-
-				using (ActivityEnrichmentScope.Begin((a) => a.AddTag("enrichment.next", 1), EnrichmentScopeTarget.FirstChild))
-				{
-					activity = _ActivitySource.StartActivity("Test2", ActivityKind.Internal)!; // Test2 <- enrichment.top, enrichment.next=1
-					activity.Stop();
-				}
-
-				using (ActivityEnrichmentScope.Begin((a) => a.AddTag("enrichment.next", 2), EnrichmentScopeTarget.FirstChild))
-				{
-					using (ActivityEnrichmentScope.Begin((a) => a.AddTag("enrichment.inner", true), EnrichmentScopeTarget.AllChildren))
-					{
-						activity = _ActivitySource.StartActivity("Test3", ActivityKind.Internal)!; // Test3 <- enrichment.top, enrichment.next=2, enrichment.inner
-						activity.Stop();
-
-						activity = _ActivitySource.StartActivity("Test4", ActivityKind.Internal)!; // Test4 <- enrichment.top, enrichment.inner
-						activity.Stop();
-					}
-				}
-
-				activity = _ActivitySource.StartActivity("Test5", ActivityKind.Internal)!; // Test5 <- enrichment.top
-				activity.Stop();
-			}
-
-			activity = _ActivitySource.StartActivity("Test6", ActivityKind.Internal)!;
-			activity.Stop();
-
-			Assert.IsNull(ActivityEnrichmentScopeBase.Current);
-
-			Assert.AreEqual(6, _TestActivityProcessor.EndedActivityObjects.Count);
-
-			List<Activity> activities = _TestActivityProcessor.EndedActivityObjects;
-
-			EnsureActivityMatchesTags(activities[0], new KeyValuePair<string, object>("enrichment.top", true));
-			EnsureActivityMatchesTags(activities[1], new KeyValuePair<string, object>("enrichment.top", true), new KeyValuePair<string, object>("enrichment.next", 1));
-			EnsureActivityMatchesTags(activities[2], new KeyValuePair<string, object>("enrichment.top", true), new KeyValuePair<string, object>("enrichment.next", 2), new KeyValuePair<string, object>("enrichment.inner", true));
-			EnsureActivityMatchesTags(activities[3], new KeyValuePair<string, object>("enrichment.top", true), new KeyValuePair<string, object>("enrichment.inner", true));
-			EnsureActivityMatchesTags(activities[4], new KeyValuePair<string, object>("enrichment.top", true));
-			Assert.IsFalse(activities[5].TagObjects.Any());
 		}
 
 		[TestMethod]

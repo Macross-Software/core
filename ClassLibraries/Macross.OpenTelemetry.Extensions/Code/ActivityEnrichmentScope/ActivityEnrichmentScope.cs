@@ -11,10 +11,9 @@ namespace System.Diagnostics
 		/// Registers an action that will be called to enrich the next <see cref="Activity"/> processed under the current scope if it has been sampled.
 		/// </summary>
 		/// <param name="enrichmentAction">Action to be called.</param>
-		/// <param name="target">The target for the enrichment scope.</param>
 		/// <returns><see cref="IDisposable"/> to cancel the enrichment scope.</returns>
-		public static IDisposable Begin(Action<Activity> enrichmentAction, EnrichmentScopeTarget target = EnrichmentScopeTarget.AllChildren)
-			=> new ActionActivityEnrichmentScope(enrichmentAction, target);
+		public static IDisposable Begin(Action<Activity> enrichmentAction)
+			=> new ActionActivityEnrichmentScope(enrichmentAction);
 
 		/// <summary>
 		/// Registers an <see cref="ActivityEnricher{TState}"/> that will be called to enrich the next <see cref="Activity"/> processed under the current scope if it has been sampled.
@@ -22,9 +21,8 @@ namespace System.Diagnostics
 		/// <typeparam name="TState">State type.</typeparam>
 		/// <param name="activityEnricher"><see cref="ActivityEnricher{TState}"/> to be called.</param>
 		/// <param name="state">The state to pass to the <see cref="ActivityEnricher{TState}"/>.</param>
-		/// <param name="target">The target for the enrichment scope.</param>
 		/// <returns><see cref="IDisposable"/> to cancel the enrichment scope.</returns>
-		public static IDisposable Begin<TState>(ActivityEnricher<TState> activityEnricher, TState state, EnrichmentScopeTarget target = EnrichmentScopeTarget.AllChildren)
-			=> new GenericActivityEnrichmentScope<TState>(activityEnricher, state, target);
+		public static IDisposable Begin<TState>(ActivityEnricher<TState> activityEnricher, TState state)
+			=> new GenericActivityEnrichmentScope<TState>(activityEnricher, state);
 	}
 }
