@@ -2,6 +2,10 @@
 
 ## 2.1.0
 
+* Added `PushStreamContent<T>` to allow passing of state to the callback invoked
+  to write data to the request stream which can be used to avoid allocation of a
+  delegate.
+
 * If you are using the 5.0.0+ version of System.Text.Json you can now decorate
   enum values with `JsonPropertyName` instead of `EnumMember` for
   `JsonStringEnumMemberConverter`.
