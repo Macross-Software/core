@@ -9,7 +9,8 @@ library.
 
 ## OpenTelemetry Activity Enrichment Scope
 
-Blog: _Coming soon._
+Blog:
+https://blog.macrosssoftware.com/index.php/2021/03/31/enrich-opentelemetry-spans-with-contextual-information/
 
 Most OpenTelemetry .NET instrumentation libraries provide an options object with
 an `Enrich` callback for the purpose of adding additional data to the spans

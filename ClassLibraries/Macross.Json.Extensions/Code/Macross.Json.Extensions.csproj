@@ -19,13 +19,14 @@
       System.Text.Json.Serialization.JsonDelegatedStringConverter
       System.Text.Json.Serialization.JsonTypeConverterAdapter
       System.Net.Http.PushStreamContent
+      System.Net.Http.PushStreamContent&lt;T&gt;
     </Description>
     <Product>Macross.Json.Extensions</Product>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <VersionPrefix>2.1.0</VersionPrefix>
-    <VersionSuffix>beta2</VersionSuffix>
+    <VersionSuffix>beta3</VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>
   </PropertyGroup>
