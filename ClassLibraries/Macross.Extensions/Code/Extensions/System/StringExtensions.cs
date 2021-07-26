@@ -32,9 +32,10 @@ namespace System
 		/// <returns>String built by repeating the specified string.</returns>
 		public static string Repeat(this string value, int repetitions)
 		{
+#if NETSTANDARD2_0
 			if (value == null)
 				throw new ArgumentNullException(nameof(value));
-			if (repetitions < 0)
+			if (repetitions < 0 || repetitions >= int.MaxValue)
 				throw new ArgumentOutOfRangeException(nameof(repetitions));
 
 			int Length = value.Length;
@@ -45,6 +46,23 @@ namespace System
 				value.CopyTo(0, Characters, p, Length);
 
 			return new string(Characters);
+#else
+			return value == null
+				? throw new ArgumentNullException(nameof(value))
+				: repetitions < 0 || repetitions >= int.MaxValue
+					? throw new ArgumentOutOfRangeException(nameof(repetitions))
+					: string.Create(value.Length * (repetitions + 1), (value, repetitions), BuildString);
+
+			static void BuildString(Span<char> destination, (string Value, int Repetitions) state)
+			{
+				int repetitions = state.Repetitions;
+				ReadOnlySpan<char> value = state.Value.AsSpan();
+				int length = value.Length;
+
+				for (int i = 0, p = 0; i <= repetitions; i++, p += length)
+					value.CopyTo(destination[p..]);
+			}
+#endif
 		}
 
 		/// <summary>
