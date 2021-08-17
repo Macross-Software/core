@@ -74,6 +74,16 @@ namespace Macross.OpenTelemetry.Extensions.Tests
 
 				activity.Stop();
 
+				Activity? activity2 = _ActivitySource.StartActivity("Test", ActivityKind.Server);
+				/* Note: This could be a bug in OpenTelemetry. If root sampler
+				is AlwaysOffSampler then StartActivity returns null. But if
+				AlwaysOffSampler is used as an inner sampler, it creates
+				propagation-only spans. */
+				Assert.IsNotNull(activity2);
+				Assert.IsFalse(activity2.IsAllDataRequested);
+				Assert.IsFalse(activity2.Recorded);
+
+				Assert.AreEqual(1, registration.CompletedActivities.Count);
 				Assert.IsTrue(registration.CompletedActivities.Contains(activity));
 			}
 
