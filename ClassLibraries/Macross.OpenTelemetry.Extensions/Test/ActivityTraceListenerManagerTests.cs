@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -63,13 +64,27 @@ namespace Macross.OpenTelemetry.Extensions.Tests
 		[TestMethod]
 		public void ActivitySampledWithRegistration()
 		{
-			using (IDisposable registration = _ActivityTraceListenerManager.RegisterTraceListener(_ActivityContext.TraceId))
+			using (IActivityTraceListener registration = _ActivityTraceListenerManager.RegisterTraceListener(_ActivityContext.TraceId))
 			{
 				Activity? activity = _ActivitySource.StartActivity("Test", ActivityKind.Server, _ActivityContext);
 
 				Assert.IsNotNull(activity);
 				Assert.IsTrue(activity.IsAllDataRequested);
 				Assert.IsTrue(activity.Recorded);
+
+				activity.Stop();
+
+				Activity? activity2 = _ActivitySource.StartActivity("Test", ActivityKind.Server);
+				/* Note: This could be a bug in OpenTelemetry. If root sampler
+				is AlwaysOffSampler then StartActivity returns null. But if
+				AlwaysOffSampler is used as an inner sampler, it creates
+				propagation-only spans. */
+				Assert.IsNotNull(activity2);
+				Assert.IsFalse(activity2.IsAllDataRequested);
+				Assert.IsFalse(activity2.Recorded);
+
+				Assert.AreEqual(1, registration.CompletedActivities.Count);
+				Assert.IsTrue(registration.CompletedActivities.Contains(activity));
 			}
 
 			ActivityNotSampledWithoutRegistration();

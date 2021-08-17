@@ -25,6 +25,7 @@ namespace System.Diagnostics
 		private readonly IDisposable _OptionsChangeToken;
 		private ActivityTraceListenerManagerOptions? _Options;
 		private Thread? _CleanupThread;
+		private ActivityListener? _ActivityListener;
 		private bool _HasInitialized;
 		private long _LastRequestedListenerDateTimeBinary;
 
@@ -120,8 +121,15 @@ namespace System.Diagnostics
 			{
 				_OptionsChangeToken.Dispose();
 				_StopHandle.Dispose();
+				_ActivityListener?.Dispose();
 				_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
 			}
+		}
+
+		private void OnActivityStopped(Activity activity)
+		{
+			if (_TraceListeners.TryGetValue(activity.TraceId, out TraceListener? listener))
+				listener.Add(activity);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,6 +148,15 @@ namespace System.Diagnostics
 					Name = $"{nameof(ActivityTraceListenerManager)}.Cleanup"
 				};
 				_CleanupThread.Start();
+
+				// Watch out doing this in prod, it's expensive.
+				_ActivityListener = new ActivityListener
+				{
+					ShouldListenTo = source => true, // Listens to all sources.
+					Sample = (ref ActivityCreationOptions<ActivityContext> options) => ActivitySamplingResult.None, // Let OpenTelemetry handle the sampling.
+					ActivityStopped = OnActivityStopped
+				};
+				ActivitySource.AddActivityListener(_ActivityListener);
 
 				_ActivityTraceListenerSampler.ActivityTraceListenerManager = this;
 
@@ -164,6 +181,8 @@ namespace System.Diagnostics
 					{
 						_HasInitialized = false;
 						_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
+						_ActivityListener?.Dispose();
+						_ActivityListener = null;
 					}
 
 					_Options.ClosedAction?.Invoke();
