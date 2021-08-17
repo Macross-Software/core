@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -63,13 +64,17 @@ namespace Macross.OpenTelemetry.Extensions.Tests
 		[TestMethod]
 		public void ActivitySampledWithRegistration()
 		{
-			using (IDisposable registration = _ActivityTraceListenerManager.RegisterTraceListener(_ActivityContext.TraceId))
+			using (IActivityTraceListener registration = _ActivityTraceListenerManager.RegisterTraceListener(_ActivityContext.TraceId))
 			{
 				Activity? activity = _ActivitySource.StartActivity("Test", ActivityKind.Server, _ActivityContext);
 
 				Assert.IsNotNull(activity);
 				Assert.IsTrue(activity.IsAllDataRequested);
 				Assert.IsTrue(activity.Recorded);
+
+				activity.Stop();
+
+				Assert.IsTrue(registration.CompletedActivities.Contains(activity));
 			}
 
 			ActivityNotSampledWithoutRegistration();
