@@ -1,4 +1,7 @@
-﻿using System.Globalization;
+﻿#if NETSTANDARD2_1_OR_GREATER
+using System.Buffers;
+#endif
+using System.Globalization;
 
 using Macross.Json.Extensions;
 
@@ -44,10 +47,26 @@ namespace System.Text.Json.Serialization
 		{
 			/// <inheritdoc/>
 			public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+				=> ReadInternal(ref reader);
+
+			/// <inheritdoc/>
+			public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
+				=> WriteInternal(writer, value);
+
+			internal static TimeSpan ReadInternal(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
 					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan));
 
+#if NETSTANDARD2_1_OR_GREATER
+				Span<char> charData = stackalloc char[26];
+				int count = Encoding.UTF8.GetChars(
+					reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan,
+					charData);
+				return !TimeSpan.TryParseExact(charData.Slice(0, count), "c".AsSpan(), CultureInfo.InvariantCulture, out TimeSpan result)
+					? throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan))
+					: result;
+#else
 				string value = reader.GetString()!;
 				try
 				{
@@ -57,35 +76,31 @@ namespace System.Text.Json.Serialization
 				{
 					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan), value, parseException);
 				}
+#endif
 			}
 
-			/// <inheritdoc/>
-			public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)
-				=> writer.WriteStringValue(value.ToString("c", CultureInfo.InvariantCulture));
+			internal static void WriteInternal(Utf8JsonWriter writer, TimeSpan value)
+			{
+#if NETSTANDARD2_1_OR_GREATER
+				Span<char> data = stackalloc char[26];
+				if (!value.TryFormat(data, out int charsWritten, "c".AsSpan(), CultureInfo.InvariantCulture))
+					throw new JsonException($"TimeSpan [{value}] could not be written to JSON.");
+				writer.WriteStringValue(data.Slice(0, charsWritten));
+#else
+				writer.WriteStringValue(value.ToString("c", CultureInfo.InvariantCulture));
+#endif
+			}
 		}
 
 		private class JsonNullableTimeSpanConverter : JsonConverter<TimeSpan?>
 		{
 			/// <inheritdoc/>
 			public override TimeSpan? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-			{
-				if (reader.TokenType != JsonTokenType.String)
-					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan?));
-
-				string value = reader.GetString()!;
-				try
-				{
-					return TimeSpan.ParseExact(value, "c", CultureInfo.InvariantCulture);
-				}
-				catch (Exception parseException)
-				{
-					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(TimeSpan?), value, parseException);
-				}
-			}
+				=> JsonStandardTimeSpanConverter.ReadInternal(ref reader);
 
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, TimeSpan? value, JsonSerializerOptions options)
-				=> writer.WriteStringValue(value!.Value.ToString("c", CultureInfo.InvariantCulture));
+				=> JsonStandardTimeSpanConverter.WriteInternal(writer, value!.Value);
 		}
 	}
 }

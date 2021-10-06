@@ -7,9 +7,11 @@
     <Description>
       Macross Software Json extensions library.
 
-      Provides converters for the System.Text.Json API &amp; push stream types for the System.Net.Http API.
+      Provides helpers &amp; converters for the System.Text.Json API and push
+      stream types for the System.Net.Http API.
 
       Commonly Used Types:
+      System.Text.Json.Utf8JsonStreamReader
       System.Text.Json.Serialization.JsonStringEnumMemberConverter
       System.Text.Json.Serialization.JsonTimeSpanConverter
       System.Text.Json.Serialization.JsonMicrosoftDateTimeConverter
@@ -18,6 +20,7 @@
       System.Text.Json.Serialization.JsonIPEndPointConverter
       System.Text.Json.Serialization.JsonDelegatedStringConverter
       System.Text.Json.Serialization.JsonTypeConverterAdapter
+      System.Text.Json.Serialization.JsonVersionConverter
       System.Net.Http.PushStreamContent
       System.Net.Http.PushStreamContent&lt;T&gt;
     </Description>
@@ -26,7 +29,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <VersionPrefix>2.1.0</VersionPrefix>
-    <VersionSuffix>beta4</VersionSuffix>
+    <VersionSuffix>beta5</VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>
   </PropertyGroup>
