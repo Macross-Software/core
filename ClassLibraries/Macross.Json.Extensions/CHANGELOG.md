@@ -27,6 +27,10 @@
 * Added `JsonTypeConverterAdapter` for using `TypeConverter`s with
   System.Text.Json. ([#19](https://github.com/Macross-Software/core/pull/19)) 
 
+* Added `Utf8JsonStreamReader` and improved performance of
+  `JsonIPAddressConverter`, `JsonIPEndPointConverter`, &
+  `JsonTimeSpanConverter` on .NET Standard 2.1+.
+
 ## 2.0.0
 
 * `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter` now
