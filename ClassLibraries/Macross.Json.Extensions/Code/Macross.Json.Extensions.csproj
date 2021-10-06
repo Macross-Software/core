@@ -20,6 +20,7 @@
       System.Text.Json.Serialization.JsonIPEndPointConverter
       System.Text.Json.Serialization.JsonDelegatedStringConverter
       System.Text.Json.Serialization.JsonTypeConverterAdapter
+      System.Text.Json.Serialization.JsonVersionConverter
       System.Net.Http.PushStreamContent
       System.Net.Http.PushStreamContent&lt;T&gt;
     </Description>
