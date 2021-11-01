@@ -10,6 +10,12 @@ namespace System.Text.Json
 	/// </summary>
 	public static class Utf8JsonStreamReader
 	{
+		internal static Func<int, byte[]> RentBufferFunc { get; set; } = (int bufferSize)
+			=> ArrayPool<byte>.Shared.Rent(bufferSize);
+
+		internal static Action<byte[]> ReturnBufferAction { get; set; } = (byte[] buffer)
+			=> ArrayPool<byte>.Shared.Return(buffer);
+
 		/// <summary>
 		/// Utf8JsonStreamReader deserialization state maching callback.
 		/// </summary>
@@ -56,48 +62,113 @@ namespace System.Text.Json
 			if (stateMachine == null)
 				throw new ArgumentNullException(nameof(stateMachine));
 
-			byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
-
-			int state = 0;
-			JsonReaderState? readerState = null;
-			int offset = 0;
-
-			while (true)
+			byte[] buffer = RentBufferFunc(bufferSize);
+			try
 			{
-				Memory<byte> data = new(buffer);
+				int state = 0;
+				JsonReaderState? readerState = null;
+			ContinueSingleBuffer:
+				int offset = 0;
+				int bytesRead;
+
+				while (true)
+				{
+					Memory<byte> data = new(buffer);
 
 #if NETSTANDARD2_0
-				int bytesRead = await stream.ReadAsync(buffer, offset, buffer.Length - offset, cancellationToken).ConfigureAwait(false);
+					bytesRead = await stream.ReadAsync(buffer, offset, buffer.Length - offset, cancellationToken).ConfigureAwait(false);
 #else
-				int bytesRead = await stream.ReadAsync(offset > 0 ? data[offset..] : data, cancellationToken).ConfigureAwait(false);
+					bytesRead = await stream.ReadAsync(offset > 0 ? data[offset..] : data, cancellationToken).ConfigureAwait(false);
 #endif
-				if (bytesRead <= 0)
-					throw new JsonException("Unexpected end of json data reached.");
+					if (bytesRead <= 0)
+						throw new JsonException("Unexpected end of json data reached.");
 
-				DeserializeInternal(instance, stateMachine, ref readerState, ref data, ref state);
-				if (readerState == null)
-					break;
+					data = data.Slice(0, bytesRead + offset);
 
-				offset = data.Length;
-				if (offset == buffer.Length)
-				{
-					// If no bytes were consumed expand the buffer to store more of the json off the stream.
-					byte[] newBuffer = ArrayPool<byte>.Shared.Rent(buffer.Length * 2);
-					data.CopyTo(newBuffer);
-					ArrayPool<byte>.Shared.Return(buffer);
-					buffer = newBuffer;
+					DeserializeInternalFromMemory(instance, stateMachine, ref readerState, ref data, ref state);
+					if (readerState == null)
+						return;
+
+					// Note: data post-call here has the remaining bytes in the buffer.
+					offset = data.Length;
+					if (offset == buffer.Length)
+					{
+						// If no bytes were consumed and there is no room left
+						// in the buffer go into sequencing mode.
+						break;
+					}
+					if (offset > 0)
+					{
+						// If there were bytes left over move them to the front of the buffer.
+						data.CopyTo(buffer);
+					}
 				}
-				else if (offset > 0)
+
+#pragma warning disable CA2000 // Dispose objects before losing scope
+				Sequence startSequence = new(true, buffer, buffer.Length);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+				try
 				{
-					// If there was data left over move it to the front of the buffer.
-					data.CopyTo(buffer);
+					Sequence lastSequence = startSequence;
+					while (true)
+					{
+						byte[] nextBuffer = RentBufferFunc(bufferSize);
+#if NETSTANDARD2_0
+						bytesRead = await stream.ReadAsync(nextBuffer, 0, nextBuffer.Length, cancellationToken).ConfigureAwait(false);
+#else
+						bytesRead = await stream.ReadAsync(nextBuffer, cancellationToken).ConfigureAwait(false);
+#endif
+						if (bytesRead <= 0)
+							throw new JsonException("Unexpected end of json data reached.");
+
+						Sequence nextSequence = new(false, nextBuffer, bytesRead);
+						lastSequence.SetNext(nextSequence);
+						lastSequence = nextSequence;
+
+						while (true)
+						{
+							DeserializeInternalFromSequence(instance, stateMachine, ref readerState, ref startSequence, lastSequence, ref state);
+							if (readerState == null)
+								return;
+
+							if (startSequence == null)
+								goto ContinueSingleBuffer;
+
+							int bytesRemaining = nextBuffer.Length - lastSequence.Offset - lastSequence.Count;
+							if (bytesRemaining <= 0)
+								break;
+
+							await ReadFromStreamIntoLastSequence(stream, lastSequence, nextBuffer, bytesRemaining, cancellationToken).ConfigureAwait(false);
+						}
+					}
+				}
+				catch
+				{
+					startSequence.Dispose();
+					throw;
 				}
 			}
-
-			ArrayPool<byte>.Shared.Return(buffer);
+			finally
+			{
+				ReturnBufferAction(buffer);
+			}
 		}
 
-		private static void DeserializeInternal<T>(T instance, DeserializeStateMachine<T> stateMachine, ref JsonReaderState? readerState, ref Memory<byte> data, ref int state)
+		private static async Task ReadFromStreamIntoLastSequence(Stream stream, Sequence lastSequence, byte[] buffer, int bytesRemainingInBuffer, CancellationToken cancellationToken)
+		{
+#if NETSTANDARD2_0
+			int bytesRead = await stream.ReadAsync(buffer, lastSequence.Offset + lastSequence.Count, bytesRemainingInBuffer, cancellationToken).ConfigureAwait(false);
+#else
+			Memory<byte> data = new(buffer, lastSequence.Offset + lastSequence.Count, bytesRemainingInBuffer);
+			int bytesRead = await stream.ReadAsync(data, cancellationToken).ConfigureAwait(false);
+#endif
+			if (bytesRead <= 0)
+				throw new JsonException("Unexpected end of json data reached.");
+
+			lastSequence.Expand(bytesRead);
+		}
+
+		private static void DeserializeInternalFromMemory<T>(T instance, DeserializeStateMachine<T> stateMachine, ref JsonReaderState? readerState, ref Memory<byte> data, ref int state)
 		{
 			Utf8JsonReader reader = new(data.Span, false, readerState ?? default);
 
@@ -114,6 +185,92 @@ namespace System.Text.Json
 #endif
 
 			readerState = reader.CurrentState;
+		}
+
+		private static void DeserializeInternalFromSequence<T>(T instance, DeserializeStateMachine<T> stateMachine, ref JsonReaderState? readerState, ref Sequence startSequence, Sequence lastSequence, ref int state)
+		{
+			Utf8JsonReader reader = new(new ReadOnlySequence<byte>(startSequence, 0, lastSequence, lastSequence.Count), false, readerState ?? default);
+
+			if (stateMachine(instance, ref reader, ref state))
+			{
+				startSequence.Dispose();
+				readerState = null;
+				return;
+			}
+
+			readerState = reader.CurrentState;
+
+			int bytesConsumed = (int)reader.BytesConsumed;
+			if (bytesConsumed > 0)
+			{
+				while (bytesConsumed >= startSequence.Count)
+				{
+					Sequence completeSequence = startSequence;
+					startSequence = (Sequence)startSequence.Next;
+
+					completeSequence.SetNext(null);
+					completeSequence.Dispose();
+
+					if (startSequence == null)
+						return;
+					bytesConsumed -= completeSequence.Count;
+				}
+
+				if (bytesConsumed > 0)
+				{
+					startSequence.Consume(bytesConsumed);
+				}
+			}
+		}
+
+		private sealed class Sequence : ReadOnlySequenceSegment<byte>, IDisposable
+		{
+			public bool IsFirst { get; }
+
+			public byte[] Buffer { get; }
+
+			public int Offset { get; private set; }
+
+			public int Count { get; private set; }
+
+			public Sequence(bool isFirst, byte[] buffer, int count)
+			{
+				IsFirst = isFirst;
+				Buffer = buffer;
+				Count = count;
+				Memory = new ReadOnlyMemory<byte>(buffer, 0, count);
+			}
+
+			public void SetNext(Sequence? next)
+			{
+				if (next != null)
+					next.RunningIndex = RunningIndex + Count;
+
+				Next = next;
+			}
+
+			public void Expand(int bytesAdded)
+			{
+				Count += bytesAdded;
+				Memory = new ReadOnlyMemory<byte>(Buffer, Offset, Count);
+			}
+
+			public void Consume(int bytesConsumed)
+			{
+				Count -= bytesConsumed;
+				Offset += bytesConsumed;
+				RunningIndex += bytesConsumed;
+				Memory = new ReadOnlyMemory<byte>(Buffer, Offset, Count);
+			}
+
+			public void Dispose()
+			{
+				if (Next is IDisposable disposable)
+					disposable.Dispose();
+
+				if (!IsFirst)
+					ReturnBufferAction(Buffer);
+			}
 		}
 	}
 }
