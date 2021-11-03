@@ -32,5 +32,12 @@
 		/// Gets or sets the callback action invoked when options are configured.
 		/// </summary>
 		public Action? ConfiguredAction { get; set; }
+
+		/// <summary>
+		/// Gets or sets a value indicating whether or not child <see
+		/// cref="Activity"/> objects created under a trace with a registered
+		/// listener should automatically be sampled. Default value: True.
+		/// </summary>
+		public bool AutomaticallySampleChildren { get; set; } = true;
 	}
 }

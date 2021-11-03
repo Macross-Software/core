@@ -17,11 +17,11 @@ namespace System.Diagnostics
 	/// </summary>
 	public class ActivityTraceListenerManager : IDisposable
 	{
-		private static readonly NoopTraceListener s_DefaultNoopTraceListener = new NoopTraceListener();
+		private static readonly NoopTraceListener s_DefaultNoopTraceListener = new();
 
-		private readonly ConcurrentDictionary<ActivityTraceId, TraceListener> _TraceListeners = new ConcurrentDictionary<ActivityTraceId, TraceListener>();
-		private readonly EventWaitHandle _StopHandle = new EventWaitHandle(false, EventResetMode.ManualReset);
-		private readonly ActivityTraceListenerSampler _ActivityTraceListenerSampler;
+		private readonly ConcurrentDictionary<ActivityTraceId, TraceListener> _TraceListeners = new();
+		private readonly EventWaitHandle _StopHandle = new(false, EventResetMode.ManualReset);
+		private readonly ActivityTraceListenerSampler? _ActivityTraceListenerSampler;
 		private readonly IDisposable _OptionsChangeToken;
 		private ActivityTraceListenerManagerOptions? _Options;
 		private Thread? _CleanupThread;
@@ -43,15 +43,19 @@ namespace System.Diagnostics
 			if (options == null)
 				throw new ArgumentNullException(nameof(options));
 
-			FieldInfo? samplerFieldInfo = tracerProvider.GetType().GetField("sampler", BindingFlags.Instance | BindingFlags.NonPublic);
-			if (samplerFieldInfo == null)
-				throw new NotSupportedException($"sampler field could not be read reflectively on tracerProvider of type {tracerProvider.GetType()}.");
+			ActivityTraceListenerManagerOptions managerOptions = options.CurrentValue;
+			if (managerOptions.AutomaticallySampleChildren)
+			{
+				FieldInfo? samplerFieldInfo = tracerProvider.GetType().GetField("sampler", BindingFlags.Instance | BindingFlags.NonPublic);
+				if (samplerFieldInfo == null)
+					throw new NotSupportedException($"sampler field could not be read reflectively on tracerProvider of type {tracerProvider.GetType()}.");
 
-			_ActivityTraceListenerSampler = (samplerFieldInfo.GetValue(tracerProvider) as ActivityTraceListenerSampler)!;
-			if (_ActivityTraceListenerSampler == null)
-				throw new NotSupportedException("ActivityTraceListenerManager cannot be used without the ActivityTraceListenerSampler. Call SetActivityTraceListenerSampler on TracerProviderBuilder during startup.");
+				_ActivityTraceListenerSampler = (samplerFieldInfo.GetValue(tracerProvider) as ActivityTraceListenerSampler)!;
+				if (_ActivityTraceListenerSampler == null)
+					throw new NotSupportedException("ActivityTraceListenerManager cannot be used without the ActivityTraceListenerSampler. Call SetActivityTraceListenerSampler on TracerProviderBuilder during startup.");
+			}
 
-			ApplyOptions(options.CurrentValue);
+			ApplyOptions(managerOptions);
 			_OptionsChangeToken = options.OnChange(ApplyOptions);
 		}
 
@@ -93,7 +97,7 @@ namespace System.Diagnostics
 
 			EnsureInitialized();
 
-			TraceListener listener = new TraceListener(this, traceId);
+			TraceListener listener = new(this, traceId);
 
 			return !_TraceListeners.TryAdd(traceId, listener)
 				? throw new InvalidOperationException($"A trace listener for TraceId {traceId} is already registered.")
@@ -122,7 +126,8 @@ namespace System.Diagnostics
 				_OptionsChangeToken.Dispose();
 				_StopHandle.Dispose();
 				_ActivityListener?.Dispose();
-				_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
+				if (_ActivityTraceListenerSampler != null)
+					_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
 			}
 		}
 
@@ -158,7 +163,8 @@ namespace System.Diagnostics
 				};
 				ActivitySource.AddActivityListener(_ActivityListener);
 
-				_ActivityTraceListenerSampler.ActivityTraceListenerManager = this;
+				if (_ActivityTraceListenerSampler != null)
+					_ActivityTraceListenerSampler.ActivityTraceListenerManager = this;
 
 				_HasInitialized = true;
 			}
@@ -180,7 +186,8 @@ namespace System.Diagnostics
 					lock (_TraceListeners)
 					{
 						_HasInitialized = false;
-						_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
+						if (_ActivityTraceListenerSampler != null)
+							_ActivityTraceListenerSampler.ActivityTraceListenerManager = null;
 						_ActivityListener?.Dispose();
 						_ActivityListener = null;
 					}

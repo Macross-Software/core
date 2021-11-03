@@ -1,5 +1,10 @@
 ﻿# Changelog
 
+# 2.2.0
+
+* `Utf8JsonStreamReader` now supports sequencing when the JSON being read
+  doesn't fit into the default buffer.
+
 ## 2.1.0
 
 * Added `PushStreamContent<T>` to allow passing of state to the callback invoked
