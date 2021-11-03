@@ -4,4 +4,4 @@
 
 * `AutomaticallySampleChildren` flag has been added on
   `ActivityTraceListenerManagerOptions` to disable automatic sampling in cases
-  where custom sampling logic is already being used
+  where custom sampling logic is already being used.

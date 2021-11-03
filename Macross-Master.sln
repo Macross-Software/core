@@ -141,6 +141,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Macross.Logging.StandardOut
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Macross.OpenTelemetry.Extensions", "Macross.OpenTelemetry.Extensions", "{C91BFF20-3419-4C6B-B729-476496C632DD}"
 	ProjectSection(SolutionItems) = preProject
+		ClassLibraries\Macross.OpenTelemetry.Extensions\CHANGELOG.md = ClassLibraries\Macross.OpenTelemetry.Extensions\CHANGELOG.md
 		ClassLibraries\Macross.OpenTelemetry.Extensions\README.md = ClassLibraries\Macross.OpenTelemetry.Extensions\README.md
 	EndProjectSection
 EndProject
