@@ -24,7 +24,7 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <VersionSuffix>beta5</VersionSuffix>
+    <VersionSuffix>beta6</VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.OpenTelemetry.Extensions</PackageProjectUrl>
   </PropertyGroup>
