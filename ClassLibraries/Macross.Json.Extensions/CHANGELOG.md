@@ -5,6 +5,9 @@
 * `Utf8JsonStreamReader` now supports sequencing when the JSON being read
   doesn't fit into the default buffer.
 
+* Bumped the `System.Text.Json` reference to 4.7.2 to resolve a security issue.
+  ([#24](https://github.com/Macross-Software/core/pull/24))
+
 ## 2.1.0
 
 * Added `PushStreamContent<T>` to allow passing of state to the callback invoked
