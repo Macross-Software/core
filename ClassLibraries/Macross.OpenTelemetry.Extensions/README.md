@@ -220,19 +220,38 @@ is provided.
     This will register the `ActivityTraceListenerManager` with the
     `IServiceProvider`.
 
-2) Call the `SetActivityTraceListenerSampler` extension where you configure
-   OpenTelemetry:
+2) Configure sampling:
 
-    ```csharp
-    services.AddOpenTelemetryTracing((serviceProvider, builder) =>
-    {
-        builder.SetActivityTraceListenerSampler(new ParentBasedSampler(new AlwaysOnSampler()));
-    };
-    ```
+   * If you want to have children created under a trace automatically sampled when
+     a listener is registered, call the `SetActivityTraceListenerSampler`
+     extension where you configure OpenTelemetry:
+     
+        ```csharp
+        services.AddOpenTelemetryTracing((serviceProvider, builder) =>
+        {
+            builder.SetActivityTraceListenerSampler(new ParentBasedSampler(new AlwaysOnSampler()));
+        };
+        ```
+     
+     The `innerSampler` parameter is the sampler which will be used when a trace
+     listener is NOT registered. The default behavior is shown
+     (`ParentBasedSampler` w/ `AlwaysOnSampler`).
 
-   The `innerSampler` parameter is the sampler which will be used when a trace
-   listener is NOT registered. The default behavior is shown
-   (`ParentBasedSampler` w/ `AlwaysOnSampler`).
+   * If you don't want to turn on automatic sampling, use the
+     `AutomaticallySampleChildren` option when you call
+     `AddActivityTraceListener` (see step 1):
+
+        ```csharp
+        public class Startup
+        {
+            public void ConfigureServices(IServiceCollection services)
+            {
+                services.AddActivityTraceListener(o => o.AutomaticallySampleChildren = false);
+            }
+        }
+        ```
+
+     You do NOT need to call `SetActivityTraceListenerSampler` in this case.
 
 3) Use the `ActivityTraceListenerManager` to register a listener:
 
@@ -252,7 +271,9 @@ is provided.
 
         public async Task InvokeAsync(HttpContext context)
         {
-            using IActivityTraceListener activityTraceListener = _ActivityTraceListenerManager.RegisterTraceListener(Activity.Current);
+            using IActivityTraceListener? activityTraceListener =  ShouldCaptureTrace(context)
+                ? _ActivityTraceListenerManager.RegisterTraceListener(Activity.Current))
+                : null;
 
             try
             {
@@ -260,11 +281,16 @@ is provided.
             }
             finally
             {
-                if (activityTraceListener.CompletedActivities.Count > 0)
+                if (activityTraceListener?.CompletedActivities.Count > 0)
                 {
                     // TODO: Do something interesting with the captured data.
                 }
             }
+        }
+
+        private static bool ShouldCaptureTrace(HttpContext context)
+        {
+            // TODO: Trigger trace capture using some mechanism.
         }
     }
     ```
