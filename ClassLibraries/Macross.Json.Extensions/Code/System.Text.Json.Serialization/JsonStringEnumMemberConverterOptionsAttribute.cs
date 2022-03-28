@@ -48,7 +48,7 @@
 				if (namingPolicyType.GetConstructor(Type.EmptyTypes) == null)
 					throw new InvalidOperationException($"Supplied namingPolicyType {namingPolicyType} does not expose a public parameterless constructor.");
 
-				Options.NamingPolicy = (JsonNamingPolicy)Activator.CreateInstance(namingPolicyType);
+				Options.NamingPolicy = (JsonNamingPolicy)Activator.CreateInstance(namingPolicyType)!;
 			}
 		}
 	}

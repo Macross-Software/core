@@ -203,7 +203,11 @@ namespace Macross.Json.Extensions.Tests
 			public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 				=> ReadAsync(new Memory<byte>(buffer, offset, count), cancellationToken).AsTask();
 
+#if NETFRAMEWORK
+			public virtual ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+#else
 			public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+#endif
 			{
 				if (_Index > _Buffers.Count)
 					return new ValueTask<int>(0);

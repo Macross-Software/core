@@ -1,4 +1,4 @@
-﻿#if NETSTANDARD2_1_OR_GREATER
+﻿#if NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
 using System.Buffers;
 using System.Globalization;
 using System.Net;
@@ -19,7 +19,7 @@ namespace System.Text.Json.Serialization
 	public class JsonIPEndPointConverter : JsonConverter<IPEndPoint>
 	{
 #if NETSTANDARD2_0
-		private static readonly Regex s_IPEndPointRegex = new Regex("^[[]?(.*?)[]]?:(\\d+)$", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex s_IPEndPointRegex = new("^[[]?(.*?)[]]?:(\\d+)$", RegexOptions.Compiled | RegexOptions.Singleline);
 #endif
 
 		/// <inheritdoc/>
@@ -28,7 +28,7 @@ namespace System.Text.Json.Serialization
 			if (reader.TokenType != JsonTokenType.String)
 				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint));
 
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
 			Span<char> charData = stackalloc char[53];
 			int count = Encoding.UTF8.GetChars(
 				reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan,
@@ -43,14 +43,14 @@ namespace System.Text.Json.Serialization
 				{
 					addressLength = lastColonPos;
 				}
-				else if (charData.Slice(0, lastColonPos).LastIndexOf(':') == -1)
+				else if (charData[..lastColonPos].LastIndexOf(':') == -1)
 				{
 					// Look to see if this is IPv4 with a port (IPv6 will have another colon)
 					addressLength = lastColonPos;
 				}
 			}
 
-			if (!IPAddress.TryParse(charData.Slice(0, addressLength), out IPAddress? address))
+			if (!IPAddress.TryParse(charData[..addressLength], out IPAddress? address))
 				throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(IPEndPoint));
 
 			uint port = 0;
@@ -80,9 +80,9 @@ namespace System.Text.Json.Serialization
 
 		/// <inheritdoc/>
 		public override void Write(Utf8JsonWriter writer, IPEndPoint value, JsonSerializerOptions options)
-		{
 #pragma warning disable CA1062 // Don't perform checks for performance. Trust our callers will be nice.
-#if NETSTANDARD2_1_OR_GREATER
+#if NETSTANDARD2_1_OR_GREATER || NET6_0_OR_GREATER
+		{
 			bool isIpv6 = value.AddressFamily == AddressFamily.InterNetworkV6;
 			Span<char> data = isIpv6
 				? stackalloc char[21]
@@ -103,11 +103,11 @@ namespace System.Text.Json.Serialization
 			data[offset++] = ':';
 			if (!value.Port.TryFormat(data[offset..], out int portCharsWritten))
 				throw new JsonException($"IPEndPoint [{value}] could not be written to JSON.");
-			writer.WriteStringValue(data.Slice(0, offset + portCharsWritten));
+			writer.WriteStringValue(data[..(offset + portCharsWritten)]);
+		}
 #else
-			writer.WriteStringValue(value.ToString());
+			=> writer.WriteStringValue(value.ToString());
 #endif
 #pragma warning restore CA1062 // Validate arguments of public methods
-		}
 	}
 }

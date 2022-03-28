@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;netstandard2.1;netstandard2.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
     <Description>
@@ -13,14 +13,12 @@
       Commonly Used Types:
       System.Text.Json.Utf8JsonStreamReader
       System.Text.Json.Serialization.JsonStringEnumMemberConverter
-      System.Text.Json.Serialization.JsonTimeSpanConverter
       System.Text.Json.Serialization.JsonMicrosoftDateTimeConverter
       System.Text.Json.Serialization.JsonMicrosoftDateTimeOffsetConverter
       System.Text.Json.Serialization.JsonIPAddressConverter
       System.Text.Json.Serialization.JsonIPEndPointConverter
       System.Text.Json.Serialization.JsonDelegatedStringConverter
       System.Text.Json.Serialization.JsonTypeConverterAdapter
-      System.Text.Json.Serialization.JsonVersionConverter
       System.Net.Http.PushStreamContent
       System.Net.Http.PushStreamContent&lt;T&gt;
     </Description>
@@ -28,8 +26,8 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <VersionPrefix>2.2.0</VersionPrefix>
-    <VersionSuffix></VersionSuffix>
+    <VersionPrefix>3.0.0</VersionPrefix>
+    <VersionSuffix>beta1</VersionSuffix>
     <FileVersion>$(VersionPrefix)</FileVersion>
     <PackageProjectUrl>https://github.com/Macross-Software/core/tree/develop/ClassLibraries/Macross.Json.Extensions</PackageProjectUrl>
   </PropertyGroup>
@@ -47,7 +45,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="4.7.2" />
+    <PackageReference Include="System.Text.Json" Version="6.0.0" Condition="'$(TargetFramework)' != 'net6.0'" />
     <PackageReference Include="System.Reflection.Emit.Lightweight" Version="4.7.0" Condition="'$(TargetFramework)' == 'netstandard2.0'" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -45,7 +46,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberInvalidDeserializationWithFallbackTest()
 		{
-			JsonSerializerOptions Options = new JsonSerializerOptions();
+			JsonSerializerOptions Options = new();
 			Options.Converters.Add(new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: (ulong)DayOfWeek.Friday)));
 
 			DayOfWeek dayOfWeek = JsonSerializer.Deserialize<DayOfWeek>(@"""invalid_value""", Options);
@@ -68,7 +69,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberInvalidNumericValueDeserializationTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions();
+			JsonSerializerOptions options = new();
 			options.Converters.Add(new JsonStringEnumMemberConverter(allowIntegerValues: false));
 
 			JsonSerializer.Serialize((FlagDefinitions)255, options);
@@ -77,7 +78,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void NullableEnumSerializationTest()
 		{
-			JsonSerializerOptions Options = new JsonSerializerOptions();
+			JsonSerializerOptions Options = new();
 			Options.Converters.Add(new JsonStringEnumMemberConverter());
 
 			string Json = JsonSerializer.Serialize((DayOfWeek?)null, Options);
@@ -93,7 +94,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void NullableEnumDeserializationTest()
 		{
-			JsonSerializerOptions Options = new JsonSerializerOptions();
+			JsonSerializerOptions Options = new();
 			Options.Converters.Add(new JsonStringEnumMemberConverter());
 
 			DayOfWeek? Value = JsonSerializer.Deserialize<DayOfWeek?>("null", Options);
@@ -112,7 +113,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberSerializationOptionsTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase) }
 			};
@@ -127,7 +128,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberDeserializationOptionsTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter(JsonNamingPolicy.CamelCase) }
 			};
@@ -143,7 +144,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberInvalidDeserializationOptionsTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter() }
 			};
@@ -155,7 +156,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberInvalidTypeDeserializationOptionsTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter(allowIntegerValues: false) }
 			};
@@ -166,7 +167,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberInvalidDeserializationIncludesJsonPathInMessageTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter() }
 			};
@@ -194,7 +195,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void EnumMemberFlagInvalidDeserializationIncludesJsonPathInMessageTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter() }
 			};
@@ -222,7 +223,7 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void JsonSerializerOptionsTargetTypesTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters =
 				{
@@ -297,7 +298,7 @@ namespace Macross.Json.Extensions.Tests
 		[ExpectedException(typeof(JsonException))]
 		public void JsonStringEnumMemberConverterOptionsAttributeOverrideTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions
+			JsonSerializerOptions options = new()
 			{
 				Converters = { new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions(deserializationFailureFallbackValue: 1)) }
 			};
@@ -370,6 +371,71 @@ namespace Macross.Json.Extensions.Tests
 			Assert.AreEqual(MixedEnumDefintion.Third, Value);
 		}
 #endif
+
+		[TestMethod]
+		public void DictionaryWithEnumKeyTest()
+		{
+			Dictionary<FlagDefinitions, string> data = new()
+			{
+				[FlagDefinitions.One] = "One",
+				[FlagDefinitions.One | FlagDefinitions.Two] = "One+Two"
+			};
+
+			string Json = JsonSerializer.Serialize(data);
+
+			Assert.AreEqual("{\"one value\":\"One\",\"one value, two value\":\"One\\u002BTwo\"}", Json);
+
+			Dictionary<FlagDefinitions, string>? dataCopy
+				= JsonSerializer.Deserialize<Dictionary<FlagDefinitions, string>>(Json);
+
+			Assert.IsNotNull(dataCopy);
+			CollectionAssert.AreEqual(data, dataCopy);
+
+			dataCopy
+				= JsonSerializer.Deserialize<Dictionary<FlagDefinitions, string>>("{\"1\":\"One\",\"3\":\"One\\u002BTwo\"}");
+
+			Assert.IsNotNull(dataCopy);
+			CollectionAssert.AreEqual(data, dataCopy);
+		}
+
+		[TestMethod]
+		public void DictionaryWithInvalidEnumKeyTest()
+		{
+			Dictionary<FlagDefinitions, string> data = new()
+			{
+				[(FlagDefinitions)18] = "One",
+			};
+
+			Dictionary<FlagDefinitions, string>? invalidData = JsonSerializer.Deserialize<Dictionary<FlagDefinitions, string>>("{\"18\":\"One\"}");
+
+			Assert.IsNotNull(invalidData);
+			CollectionAssert.AreEqual(data, invalidData);
+
+			JsonSerializerOptions options = new();
+			options.Converters.Add(new JsonStringEnumMemberConverter(allowIntegerValues: false));
+
+			bool expectedExceptionThrown = false;
+			try
+			{
+				JsonSerializer.Deserialize<Dictionary<FlagDefinitions, string>>("{\"18\":\"One\"}", options);
+				Assert.Fail();
+			}
+			catch (JsonException)
+			{
+				expectedExceptionThrown = true;
+			}
+			Assert.IsTrue(expectedExceptionThrown);
+
+			options = new JsonSerializerOptions();
+			options.Converters.Add(new JsonStringEnumMemberConverter(new JsonStringEnumMemberConverterOptions(
+				allowIntegerValues: false,
+				deserializationFailureFallbackValue: FlagDefinitions.Four)));
+
+			invalidData = JsonSerializer.Deserialize<Dictionary<FlagDefinitions, string>>("{\"19\":\"One\"}", options);
+
+			Assert.IsNotNull(invalidData);
+			Assert.AreEqual("One", invalidData[FlagDefinitions.Four]);
+		}
 
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
 		[Flags]
