@@ -16,10 +16,10 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void SerializeAndDeserializeTest()
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions();
+			JsonSerializerOptions options = new();
 			options.Converters.Add(new JsonTypeConverterAdapter());
 
-			TestClass testObj = new TestClass()
+			TestClass testObj = new()
 			{
 				One = new ReferenceTest { X = 10, Y = "str" },
 				Many = new List<ReferenceTest>
@@ -71,7 +71,7 @@ namespace Macross.Json.Extensions.Tests
 		[ExpectedException(typeof(JsonException))]
 		public void InvalidReferenceValueTest(Type typeToConvert)
 		{
-			JsonSerializerOptions options = new JsonSerializerOptions();
+			JsonSerializerOptions options = new();
 			options.Converters.Add(new JsonTypeConverterAdapter());
 
 			JsonSerializer.Deserialize("1234", typeToConvert, options);
@@ -122,10 +122,10 @@ namespace Macross.Json.Extensions.Tests
 		private class ReferenceTypeConverter : TypeConverter
 #pragma warning restore CA1812 // Remove class never instantiated
 		{
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
 				sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 			{
 				if (value is string str)
 				{
@@ -145,10 +145,10 @@ namespace Macross.Json.Extensions.Tests
 		private class StructTypeConverter : TypeConverter
 #pragma warning restore CA1812 // Remove class never instantiated
 		{
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) =>
+			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType) =>
 				sourceType == typeof(string) || base.CanConvertFrom(context, sourceType);
 
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 			{
 				if (value is string str)
 				{

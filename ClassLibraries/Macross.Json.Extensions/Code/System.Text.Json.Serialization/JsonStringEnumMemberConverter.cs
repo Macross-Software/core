@@ -55,7 +55,6 @@ namespace System.Text.Json.Serialization
 					if (enumType.IsEnum)
 					{
 						_EnumTypes.Add(enumType);
-						_EnumTypes.Add(typeof(Nullable<>).MakeGenericType(enumType));
 						continue;
 					}
 
@@ -65,7 +64,6 @@ namespace System.Text.Json.Serialization
 						if (IsNullableEnum)
 						{
 							_EnumTypes.Add(UnderlyingType!);
-							_EnumTypes.Add(enumType);
 							continue;
 						}
 					}
@@ -82,8 +80,7 @@ namespace System.Text.Json.Serialization
 			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
 			return _EnumTypes != null
 				? _EnumTypes.Contains(typeToConvert)
-				: typeToConvert.IsEnum
-				|| (typeToConvert.IsGenericType && TestNullableEnum(typeToConvert).IsNullableEnum);
+				: typeToConvert.IsEnum;
 		}
 #pragma warning restore CA1062 // Validate arguments of public methods
 
@@ -94,19 +91,12 @@ namespace System.Text.Json.Serialization
 
 			try
 			{
-				return IsNullableEnum
-					? (JsonConverter)Activator.CreateInstance(
-						typeof(NullableEnumMemberConverter<>).MakeGenericType(UnderlyingType),
-						BindingFlags.Instance | BindingFlags.Public,
-						binder: null,
-						args: new object?[] { _Options },
-						culture: null)
-					: (JsonConverter)Activator.CreateInstance(
-						typeof(EnumMemberConverter<>).MakeGenericType(typeToConvert),
-						BindingFlags.Instance | BindingFlags.Public,
-						binder: null,
-						args: new object?[] { _Options },
-						culture: null);
+				return (JsonConverter)Activator.CreateInstance(
+					typeof(JsonStringEnumMemberConverter<>).MakeGenericType(IsNullableEnum ? UnderlyingType! : typeToConvert),
+					BindingFlags.Instance | BindingFlags.Public,
+					binder: null,
+					args: new object?[] { _Options },
+					culture: null)!;
 			}
 			catch (TargetInvocationException targetInvocationEx)
 			{
@@ -137,44 +127,6 @@ namespace System.Text.Json.Serialization
 				TypeCode.SByte => (ulong)(sbyte)value,
 				_ => throw new NotSupportedException($"Enum '{value}' of {enumTypeCode} type is not supported."),
 			};
-		}
-
-#pragma warning disable CA1812 // Remove class never instantiated
-		private class EnumMemberConverter<TEnum> : JsonConverter<TEnum>
-			where TEnum : struct, Enum
-#pragma warning restore CA1812 // Remove class never instantiated
-		{
-			private readonly JsonStringEnumMemberConverterHelper<TEnum> _JsonStringEnumMemberConverterHelper;
-
-			public EnumMemberConverter(JsonStringEnumMemberConverterOptions? options)
-			{
-				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(options);
-			}
-
-			public override TEnum Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-				=> _JsonStringEnumMemberConverterHelper.Read(ref reader);
-
-			public override void Write(Utf8JsonWriter writer, TEnum value, JsonSerializerOptions options)
-				=> _JsonStringEnumMemberConverterHelper.Write(writer, value);
-		}
-
-#pragma warning disable CA1812 // Remove class never instantiated
-		private class NullableEnumMemberConverter<TEnum> : JsonConverter<TEnum?>
-			where TEnum : struct, Enum
-#pragma warning restore CA1812 // Remove class never instantiated
-		{
-			private readonly JsonStringEnumMemberConverterHelper<TEnum> _JsonStringEnumMemberConverterHelper;
-
-			public NullableEnumMemberConverter(JsonStringEnumMemberConverterOptions? options)
-			{
-				_JsonStringEnumMemberConverterHelper = new JsonStringEnumMemberConverterHelper<TEnum>(options);
-			}
-
-			public override TEnum? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-				=> _JsonStringEnumMemberConverterHelper.Read(ref reader);
-
-			public override void Write(Utf8JsonWriter writer, TEnum? value, JsonSerializerOptions options)
-				=> _JsonStringEnumMemberConverterHelper.Write(writer, value!.Value);
 		}
 	}
 }

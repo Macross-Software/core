@@ -27,7 +27,7 @@ namespace Macross.Json.Extensions
 		{
 			Debug.Assert(s_JsonException_AppendPathInformation != null);
 
-			JsonException jsonException = new JsonException($"The JSON value could not be converted to {propertyType}.");
+			JsonException jsonException = new($"The JSON value could not be converted to {propertyType}.");
 			s_JsonException_AppendPathInformation?.SetValue(jsonException, true);
 			return jsonException;
 		}
@@ -55,7 +55,7 @@ namespace Macross.Json.Extensions
 		{
 			Debug.Assert(s_JsonException_AppendPathInformation != null);
 
-			JsonException jsonException = new JsonException(
+			JsonException jsonException = new(
 				$"The JSON value '{propertyValue}' could not be converted to {propertyType}.",
 				innerException);
 			s_JsonException_AppendPathInformation?.SetValue(jsonException, true);

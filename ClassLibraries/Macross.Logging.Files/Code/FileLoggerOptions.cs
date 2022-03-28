@@ -62,7 +62,7 @@ namespace Macross.Logging.Files
 		/// </remarks>
 		public static JsonSerializerOptions DefaultJsonOptions { get; } = new JsonSerializerOptions
 		{
-			IgnoreNullValues = true,
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
 		};
 
@@ -145,13 +145,11 @@ namespace Macross.Logging.Files
 		/// <summary>
 		/// Gets or sets the time of day to cutover log files. Default value: <see cref="DefaultLogFileCutoverTime"/>.
 		/// </summary>
-		[JsonConverter(typeof(JsonTimeSpanConverter))]
 		public TimeSpan? LogFileCutoverTime { get; set; }
 
 		/// <summary>
 		/// Gets or sets the time of day to archive log files. Default value: <see cref="DefaultLogFileArchiveTime"/>.
 		/// </summary>
-		[JsonConverter(typeof(JsonTimeSpanConverter))]
 		public TimeSpan? LogFileArchiveTime { get; set; }
 
 		/// <summary>

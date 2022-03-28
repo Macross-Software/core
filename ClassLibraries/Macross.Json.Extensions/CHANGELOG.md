@@ -1,6 +1,21 @@
 ﻿# Changelog
 
-# 2.2.0
+## 3.0.0
+
+* The 6.0.0 NuGet version of System.Text.Json is now the minimum supported
+  version.
+
+* **BREAKING CHANGE** `JsonTimeSpanConverter` and `JsonVersionConverter` have
+  been removed. `TimeSpan` and `Version` support is now native to
+  System.Text.Json.
+
+* `JsonStringEnumMemberConverter` now supports `Enum`s used as dictionary keys.
+  ([#27](https://github.com/Macross-Software/core/issues/27))
+
+* `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter`
+  performance improvements.
+
+## 2.2.0
 
 * `Utf8JsonStreamReader` now supports sequencing when the JSON being read
   doesn't fit into the default buffer.

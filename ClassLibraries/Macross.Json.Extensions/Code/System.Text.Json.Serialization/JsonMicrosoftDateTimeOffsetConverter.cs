@@ -15,60 +15,19 @@ namespace System.Text.Json.Serialization
 	{
 		/// <inheritdoc/>
 		public override bool CanConvert(Type typeToConvert)
-		{
-			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
-#pragma warning disable CA1062 // Validate arguments of public methods
-			return typeToConvert == typeof(DateTimeOffset)
-				|| (typeToConvert.IsGenericType && IsNullableDateTimeOffset(typeToConvert));
-#pragma warning restore CA1062 // Validate arguments of public methods
-		}
+			=> typeToConvert == typeof(DateTimeOffset);
 
 		/// <inheritdoc/>
 		public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options)
-		{
-			// Don't perform a typeToConvert == null check for performance. Trust our callers will be nice.
-#pragma warning disable CA1062 // Validate arguments of public methods
-			return typeToConvert.IsGenericType
-				? new JsonNullableDateTimeOffsetConverter()
-				: new JsonStandardDateTimeOffsetConverter();
-#pragma warning restore CA1062 // Validate arguments of public methods
-		}
+			=> new JsonDateTimeOffsetConverter();
 
-		private static bool IsNullableDateTimeOffset(Type typeToConvert)
+		private class JsonDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 		{
-			Type? UnderlyingType = Nullable.GetUnderlyingType(typeToConvert);
+			private static readonly DateTimeOffset s_Epoch = new(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+			private static readonly Regex s_Regex = new(@"^\\?/Date\((-?\d+)([+-])(\d{2})(\d{2})\)\\?/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
 
-			return UnderlyingType != null && UnderlyingType == typeof(DateTimeOffset);
-		}
-
-		private class JsonStandardDateTimeOffsetConverter : JsonDateTimeOffsetConverter<DateTimeOffset>
-		{
 			/// <inheritdoc/>
 			public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-				=> ReadDateTimeOffset(ref reader);
-
-			/// <inheritdoc/>
-			public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
-				=> WriteDateTimeOffset(writer, value);
-		}
-
-		private class JsonNullableDateTimeOffsetConverter : JsonDateTimeOffsetConverter<DateTimeOffset?>
-		{
-			/// <inheritdoc/>
-			public override DateTimeOffset? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-				=> ReadDateTimeOffset(ref reader);
-
-			/// <inheritdoc/>
-			public override void Write(Utf8JsonWriter writer, DateTimeOffset? value, JsonSerializerOptions options)
-				=> WriteDateTimeOffset(writer, value!.Value);
-		}
-
-		private abstract class JsonDateTimeOffsetConverter<T> : JsonConverter<T>
-		{
-			private static readonly DateTimeOffset s_Epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
-			private static readonly Regex s_Regex = new Regex(@"^\\?/Date\((-?\d+)([+-])(\d{2})(\d{2})\)\\?/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
-
-			public static DateTimeOffset ReadDateTimeOffset(ref Utf8JsonReader reader)
 			{
 				if (reader.TokenType != JsonTokenType.String)
 					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTimeOffset));
@@ -91,7 +50,8 @@ namespace System.Text.Json.Serialization
 				return s_Epoch.AddMilliseconds(unixTime).ToOffset(utcOffset);
 			}
 
-			public static void WriteDateTimeOffset(Utf8JsonWriter writer, DateTimeOffset value)
+			/// <inheritdoc/>
+			public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
 			{
 				long unixTime = Convert.ToInt64((value - s_Epoch).TotalMilliseconds);
 				TimeSpan utcOffset = value.Offset;
@@ -101,40 +61,67 @@ namespace System.Text.Json.Serialization
 				{
 					Span<byte> span = stackSize <= 1024 ? stackalloc byte[stackSize] : new byte[stackSize];
 
-					if (!Utf8Formatter.TryFormat(unixTime, span.Slice(7), out int bytesWritten, new StandardFormat('D'))
+					span[0] = (byte)'"';
+
+#if NETSTANDARD2_0
+					Span<byte> formatSpan = span.Slice(8);
+#else
+					Span<byte> formatSpan = span[8..];
+#endif
+					if (!Utf8Formatter.TryFormat(unixTime, formatSpan, out int bytesWritten, new StandardFormat('D'))
 						|| stackSize < 15 + bytesWritten)
 					{
 						stackSize *= 2;
 						continue;
 					}
 
-					JsonMicrosoftDateTimeConverter.Start.CopyTo(span);
-					span[7 + bytesWritten] = utcOffset >= TimeSpan.Zero ? (byte)0x2B : (byte)0x2D;
+#if NETSTANDARD2_0
+					JsonMicrosoftDateTimeConverter.Start.CopyTo(span.Slice(1));
+#else
+					JsonMicrosoftDateTimeConverter.Start.CopyTo(span[1..]);
+#endif
+					span[8 + bytesWritten] = utcOffset >= TimeSpan.Zero ? (byte)0x2B : (byte)0x2D;
 
 					int hours = Math.Abs(utcOffset.Hours);
 					if (hours < 10)
 					{
-						span[7 + bytesWritten + 1] = 0x30;
-						span[7 + bytesWritten + 2] = (byte)(0x30 + hours);
+						span[8 + bytesWritten + 1] = 0x30;
+						span[8 + bytesWritten + 2] = (byte)(0x30 + hours);
 					}
 					else
 					{
-						Utf8Formatter.TryFormat(hours, span.Slice(7 + bytesWritten + 1), out _, new StandardFormat('D'));
+#if NETSTANDARD2_0
+						formatSpan = span.Slice(8 + bytesWritten + 1);
+#else
+						formatSpan = span[(8 + bytesWritten + 1)..];
+#endif
+						Utf8Formatter.TryFormat(hours, formatSpan, out _, new StandardFormat('D'));
 					}
 					int minutes = Math.Abs(utcOffset.Minutes);
 					if (minutes < 10)
 					{
-						span[7 + bytesWritten + 3] = 0x30;
-						span[7 + bytesWritten + 4] = (byte)(0x30 + minutes);
+						span[8 + bytesWritten + 3] = 0x30;
+						span[8 + bytesWritten + 4] = (byte)(0x30 + minutes);
 					}
 					else
 					{
-						Utf8Formatter.TryFormat(minutes, span.Slice(7 + bytesWritten + 3), out _, new StandardFormat('D'));
+#if NETSTANDARD2_0
+						formatSpan = span.Slice(8 + bytesWritten + 3);
+#else
+						formatSpan = span[(8 + bytesWritten + 3)..];
+#endif
+						Utf8Formatter.TryFormat(minutes, formatSpan, out _, new StandardFormat('D'));
 					}
-					JsonMicrosoftDateTimeConverter.End.CopyTo(span.Slice(7 + bytesWritten + 5));
 
-					writer.WriteStringValue(
-						JsonMicrosoftDateTimeConverter.CreateJsonEncodedTextFunc(span.Slice(0, 15 + bytesWritten).ToArray()));
+#if NETSTANDARD2_0
+					JsonMicrosoftDateTimeConverter.End.CopyTo(span.Slice(8 + bytesWritten + 5));
+					span[16 + bytesWritten] = (byte)'"';
+					writer.WriteRawValue(span.Slice(0, 16 + bytesWritten + 1), skipInputValidation: true);
+#else
+					JsonMicrosoftDateTimeConverter.End.CopyTo(span[(8 + bytesWritten + 5)..]);
+					span[16 + bytesWritten] = (byte)'"';
+					writer.WriteRawValue(span[..(16 + bytesWritten + 1)], skipInputValidation: true);
+#endif
 					break;
 				}
 			}

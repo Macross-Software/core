@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,7 +84,11 @@ namespace System.Text.Json
 					if (bytesRead <= 0)
 						throw new JsonException("Unexpected end of json data reached.");
 
+#if NETSTANDARD2_0
 					data = data.Slice(0, bytesRead + offset);
+#else
+					data = data[..(bytesRead + offset)];
+#endif
 
 					DeserializeInternalFromMemory(instance, stateMachine, ref readerState, ref data, ref state);
 					if (readerState == null)
@@ -105,7 +110,7 @@ namespace System.Text.Json
 				}
 
 #pragma warning disable CA2000 // Dispose objects before losing scope
-				Sequence startSequence = new(true, buffer, buffer.Length);
+				Sequence? startSequence = new(true, buffer, buffer.Length);
 #pragma warning restore CA2000 // Dispose objects before losing scope
 				try
 				{
@@ -144,7 +149,7 @@ namespace System.Text.Json
 				}
 				catch
 				{
-					startSequence.Dispose();
+					startSequence!.Dispose();
 					throw;
 				}
 			}
@@ -187,8 +192,10 @@ namespace System.Text.Json
 			readerState = reader.CurrentState;
 		}
 
-		private static void DeserializeInternalFromSequence<T>(T instance, DeserializeStateMachine<T> stateMachine, ref JsonReaderState? readerState, ref Sequence startSequence, Sequence lastSequence, ref int state)
+		private static void DeserializeInternalFromSequence<T>(T instance, DeserializeStateMachine<T> stateMachine, ref JsonReaderState? readerState, ref Sequence? startSequence, Sequence lastSequence, ref int state)
 		{
+			Debug.Assert(startSequence != null);
+
 			Utf8JsonReader reader = new(new ReadOnlySequence<byte>(startSequence, 0, lastSequence, lastSequence.Count), false, readerState ?? default);
 
 			if (stateMachine(instance, ref reader, ref state))
@@ -206,7 +213,7 @@ namespace System.Text.Json
 				while (bytesConsumed >= startSequence.Count)
 				{
 					Sequence completeSequence = startSequence;
-					startSequence = (Sequence)startSequence.Next;
+					startSequence = (Sequence?)startSequence.Next;
 
 					completeSequence.SetNext(null);
 					completeSequence.Dispose();
