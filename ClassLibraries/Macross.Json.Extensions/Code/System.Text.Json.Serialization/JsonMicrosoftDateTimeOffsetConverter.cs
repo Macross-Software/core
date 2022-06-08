@@ -11,7 +11,7 @@ namespace System.Text.Json.Serialization
 	/// <remarks>Adapted from code posted on: <a href="https://github.com/dotnet/runtime/issues/30776">dotnet/runtime #30776</a>.</remarks>
 	public class JsonMicrosoftDateTimeOffsetConverter : JsonConverterFactory
 	{
-		internal static DateTimeOffset Epoch { get; } = new(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+		private static readonly DateTimeOffset s_Epoch = new(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
 		/// <inheritdoc/>
 		public override bool CanConvert(Type typeToConvert)
@@ -23,7 +23,7 @@ namespace System.Text.Json.Serialization
 
 		internal static void Write(Utf8JsonWriter writer, in DateTimeOffset value)
 		{
-			long unixTime = Convert.ToInt64((value - Epoch).TotalMilliseconds);
+			long unixTime = Convert.ToInt64((value - s_Epoch).TotalMilliseconds);
 			TimeSpan utcOffset = value.Offset;
 
 			int stackSize = 64;
@@ -116,7 +116,7 @@ namespace System.Text.Json.Serialization
 
 				TimeSpan utcOffset = TimeSpan.FromMinutes((parseResult.OffsetMultiplier * parseResult.OffsetHours * 60) + parseResult.OffsetMinutes);
 
-				return Epoch.AddMilliseconds(parseResult.UnixEpochMilliseconds).ToOffset(utcOffset);
+				return s_Epoch.AddMilliseconds(parseResult.UnixEpochMilliseconds).ToOffset(utcOffset);
 			}
 
 			/// <inheritdoc/>

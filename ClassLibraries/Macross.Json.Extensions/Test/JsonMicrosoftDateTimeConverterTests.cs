@@ -22,7 +22,7 @@ namespace Macross.Json.Extensions.Tests
 					DateTime = s_TestLocalDateTimeOffset.LocalDateTime
 				});
 
-			Assert.AreEqual($@"{{""DateTime"":""\/Date(1580803200000{(localOffset > TimeSpan.Zero ? '+' : '-')}{localOffset:hhmm})\/""}}", Json);
+			Assert.AreEqual($@"{{""DateTime"":""\/Date(1580803200000{(localOffset >= TimeSpan.Zero ? '+' : '-')}{localOffset:hhmm})\/""}}", Json);
 
 			Json = JsonSerializer.Serialize(
 				new TestClass
@@ -44,7 +44,7 @@ namespace Macross.Json.Extensions.Tests
 					DateTime = s_TestLocalDateTimeOffset.LocalDateTime
 				});
 
-			Assert.AreEqual($@"{{""DateTime"":""\/Date(1580803200000{(localOffset > TimeSpan.Zero ? '+' : '-')}{localOffset:hhmm})\/""}}", Json);
+			Assert.AreEqual($@"{{""DateTime"":""\/Date(1580803200000{(localOffset >= TimeSpan.Zero ? '+' : '-')}{localOffset:hhmm})\/""}}", Json);
 
 			Json = JsonSerializer.Serialize(
 				new NullableTestClass

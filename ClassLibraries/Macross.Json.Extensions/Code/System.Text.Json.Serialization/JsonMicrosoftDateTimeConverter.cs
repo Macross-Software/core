@@ -69,17 +69,11 @@ namespace System.Text.Json.Serialization
 					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTime), reader.GetString()!);
 				}
 
-				if (parseResult.OffsetMultiplier == 0)
-				{
-					return s_Epoch.AddMilliseconds(parseResult.UnixEpochMilliseconds);
-				}
+				DateTime dateTimeUtc = s_Epoch.AddMilliseconds(parseResult.UnixEpochMilliseconds);
 
-				TimeSpan utcOffset = TimeSpan.FromMinutes((parseResult.OffsetMultiplier * parseResult.OffsetHours * 60) + parseResult.OffsetMinutes);
-
-				return JsonMicrosoftDateTimeOffsetConverter.Epoch
-					.AddMilliseconds(parseResult.UnixEpochMilliseconds)
-					.ToOffset(utcOffset)
-					.LocalDateTime;
+				return parseResult.OffsetMultiplier == 0
+					? dateTimeUtc
+					: dateTimeUtc.ToLocalTime(); // Note: OffsetHours & OffsetMinutes are ignored in this case
 			}
 
 			/// <inheritdoc/>
