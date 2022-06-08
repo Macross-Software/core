@@ -6,8 +6,6 @@
 is a .NET Standard 2.0+ library for augmenting what is provided out of the box
 by the System.Text.Json & System.Net.Http APIs.
 
-Hopefully by .NET 6 this library will no longer be needed.
-
 For a list of changes see: [CHANGELOG](./CHANGELOG.md)
 
 ## Enumerations
@@ -210,13 +208,16 @@ but it adds a few features and bug fixes.
 
 ## TimeSpans
 
+Note: As of 3.0.0-beta1 `JsonTimeSpanConverter` has been removed.
+System.Text.Json has native support for `TimeSpan` as of .NET6.
+
 Blog:
 https://blog.macrosssoftware.com/index.php/2020/02/16/system-text-json-timespan-serialization/
 
 System.Text.Json doesn't support `TimeSpan` [de]serialization at all (see
 [corefx #38641](https://github.com/dotnet/corefx/issues/38641)). It appears to
 be slated for .NET 6, but in the meantime
-[JsonTimeSpanConverter](./Code/System.Text.Json.Serialization/JsonTimeSpanConverter.cs)
+[JsonTimeSpanConverter](https://github.com/Macross-Software/core/blob/91fe767493ab962e6f6125a6acc3f78f149e9fe4/ClassLibraries/Macross.Json.Extensions/Code/System.Text.Json.Serialization/JsonTimeSpanConverter.cs)
 is provided to add in support for `TimeSpan` and `TimeSpan?` for those of us who
 need to transport time values in our JSON ahead of the next major release.
 
@@ -238,6 +239,11 @@ public class TestClass
 ```
 
 ## DateTimes
+
+Note: As of 3.0.0-beta2 `JsonMicrosoftDateTimeConverter` follows the [DateTime
+Wire
+Format](https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/stand-alone-json-serialization#datetime-wire-format)
+specification.
 
 Blog:
 https://blog.macrosssoftware.com/index.php/2020/02/20/system-text-json-datetime-datetimeoffset-date-serialization/
@@ -308,6 +314,15 @@ Serialization output example:
     "IPv6EndPoint": "[::1]:443"
 }
 ```
+
+## Versions
+
+Note: As of 3.0.0-beta1 `JsonVersionConverter` has been removed.
+System.Text.Json has native support for `Version` as of .NET6.
+
+[JsonVersionConverter](https://github.com/Macross-Software/core/blob/91fe767493ab962e6f6125a6acc3f78f149e9fe4/ClassLibraries/Macross.Json.Extensions/Code/System.Text.Json.Serialization/JsonVersionConverter.cs)
+is provided to add in support for serialization of the `System.Version`. It will
+serialize using the `ToString` logic of `Version`.
 
 ## PushStreamContent
 
