@@ -15,6 +15,14 @@
 * `JsonMicrosoftDateTimeConverter` & `JsonMicrosoftDateTimeOffsetConverter`
   performance improvements.
 
+* **BREAKING CHANGE** `JsonMicrosoftDateTimeConverter` will now serialize
+  `DateTimeKind.Local` or `DateTimeKind.Unspecified` `DateTime`s with a time
+  zone offset where previously they would be converted to UTC. Json values
+  including a time zone offset will now be deserialized into
+  `DateTimeKind.Local` instances where previously a `JsonException` would be
+  thrown. This is to be compliant with the [DateTime Wire
+  Format](https://docs.microsoft.com/en-us/dotnet/framework/wcf/feature-details/stand-alone-json-serialization#datetime-wire-format)
+
 ## 2.2.0
 
 * `Utf8JsonStreamReader` now supports sequencing when the JSON being read
