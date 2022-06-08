@@ -1,9 +1,7 @@
 ﻿using System.Buffers;
 using System.Buffers.Text;
-using System.Globalization;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text.RegularExpressions;
 
 using Macross.Json.Extensions;
 
@@ -15,6 +13,8 @@ namespace System.Text.Json.Serialization
 	/// <remarks>Adapted from code posted on: <a href="https://github.com/dotnet/runtime/issues/30776">dotnet/runtime #30776</a>.</remarks>
 	public class JsonMicrosoftDateTimeConverter : JsonConverterFactory
 	{
+		private static readonly DateTime s_Epoch = DateTime.SpecifyKind(new DateTime(1970, 1, 1, 0, 0, 0), DateTimeKind.Utc);
+
 		// \/Date(
 		internal static byte[] Start { get; } = new byte[] { 0x5C, 0x2F, 0x44, 0x61, 0x74, 0x65, 0x28 };
 
@@ -52,29 +52,40 @@ namespace System.Text.Json.Serialization
 			return (Func<byte[], JsonEncodedText>)dynamicMethod.CreateDelegate(typeof(Func<byte[], JsonEncodedText>));
 		}
 
-		private class JsonDateTimeConverter : JsonConverter<DateTime>
+		private sealed class JsonDateTimeConverter : JsonConverter<DateTime>
 		{
-			private static readonly DateTime s_Epoch = DateTime.SpecifyKind(new DateTime(1970, 1, 1, 0, 0, 0), DateTimeKind.Utc);
-			private static readonly Regex s_Regex = new(@"^\\?/Date\((-?\d+)\)\\?/$", RegexOptions.CultureInvariant | RegexOptions.Compiled);
-
 			/// <inheritdoc/>
 			public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
 			{
 				if (reader.TokenType != JsonTokenType.String)
 					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTime));
 
-				string formatted = reader.GetString()!;
-				Match match = s_Regex.Match(formatted);
+				ReadOnlySpan<byte> value = reader.HasValueSequence
+					? reader.ValueSequence.ToArray()
+					: reader.ValueSpan;
 
-				return !match.Success
-					|| !long.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long unixTime)
-					? throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTime), formatted)
-					: s_Epoch.AddMilliseconds(unixTime);
+				if (!DateTimeWireFormatHelper.TryParse(value, out DateTimeWireFormatHelper.DateTimeOffsetParseResult parseResult))
+				{
+					throw ThrowHelper.GenerateJsonException_DeserializeUnableToConvertValue(typeof(DateTime), reader.GetString()!);
+				}
+
+				DateTime dateTimeUtc = s_Epoch.AddMilliseconds(parseResult.UnixEpochMilliseconds);
+
+				return parseResult.OffsetMultiplier == 0
+					? dateTimeUtc
+					: dateTimeUtc.ToLocalTime(); // Note: OffsetHours & OffsetMinutes are ignored in this case
 			}
 
 			/// <inheritdoc/>
 			public override void Write(Utf8JsonWriter writer, DateTime value, JsonSerializerOptions options)
 			{
+				if (value.Kind != DateTimeKind.Utc)
+				{
+					DateTimeOffset dto = value;
+					JsonMicrosoftDateTimeOffsetConverter.Write(writer, in dto);
+					return;
+				}
+
 				long unixTime = Convert.ToInt64((value.ToUniversalTime() - s_Epoch).TotalMilliseconds);
 
 				int stackSize = 64;

@@ -14,13 +14,15 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void DateTimeSerializationTest()
 		{
+			TimeSpan localOffset = new DateTimeOffset(s_TestLocalDateTimeOffset.LocalDateTime).Offset;
+
 			string Json = JsonSerializer.Serialize(
 				new TestClass
 				{
 					DateTime = s_TestLocalDateTimeOffset.LocalDateTime
 				});
 
-			Assert.AreEqual(@"{""DateTime"":""\/Date(1580803200000)\/""}", Json);
+			Assert.AreEqual($@"{{""DateTime"":""\/Date(1580803200000{(localOffset >= TimeSpan.Zero ? '+' : '-')}{localOffset:hhmm})\/""}}", Json);
 
 			Json = JsonSerializer.Serialize(
 				new TestClass
@@ -34,10 +36,20 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void NullableDateTimeSerializationTest()
 		{
+			TimeSpan localOffset = new DateTimeOffset(s_TestLocalDateTimeOffset.LocalDateTime).Offset;
+
 			string Json = JsonSerializer.Serialize(
 				new NullableTestClass
 				{
 					DateTime = s_TestLocalDateTimeOffset.LocalDateTime
+				});
+
+			Assert.AreEqual($@"{{""DateTime"":""\/Date(1580803200000{(localOffset >= TimeSpan.Zero ? '+' : '-')}{localOffset:hhmm})\/""}}", Json);
+
+			Json = JsonSerializer.Serialize(
+				new NullableTestClass
+				{
+					DateTime = s_TestLocalDateTimeOffset.UtcDateTime
 				});
 
 			Assert.AreEqual(@"{""DateTime"":""\/Date(1580803200000)\/""}", Json);
@@ -55,6 +67,16 @@ namespace Macross.Json.Extensions.Tests
 			Assert.IsNotNull(Actual);
 			Assert.AreEqual(DateTimeKind.Utc, Actual.DateTime.Kind);
 			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTime);
+		}
+
+		[TestMethod]
+		public void DateTimeLocalDeserializationTest()
+		{
+			TestClass? Actual = JsonSerializer.Deserialize<TestClass>(@"{""DateTime"":""\/Date(1580803200000+0800)\/""}");
+
+			Assert.IsNotNull(Actual);
+			Assert.AreEqual(DateTimeKind.Local, Actual.DateTime.Kind);
+			Assert.AreEqual(s_TestLocalDateTimeOffset.UtcDateTime, Actual.DateTime.ToUniversalTime());
 		}
 
 		[ExpectedException(typeof(JsonException))]
