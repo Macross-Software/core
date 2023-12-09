@@ -348,27 +348,27 @@ namespace Macross.Json.Extensions.Tests
 		[TestMethod]
 		public void JsonPropertyNameSerializationTest()
 		{
-			string Json = JsonSerializer.Serialize(MixedEnumDefintion.First);
+			string Json = JsonSerializer.Serialize(MixedEnumDefinition.First);
 			Assert.AreEqual(@"""_first""", Json);
 
-			Json = JsonSerializer.Serialize(MixedEnumDefintion.Second);
+			Json = JsonSerializer.Serialize(MixedEnumDefinition.Second);
 			Assert.AreEqual(@"""_second""", Json);
 
-			Json = JsonSerializer.Serialize(MixedEnumDefintion.Third);
+			Json = JsonSerializer.Serialize(MixedEnumDefinition.Third);
 			Assert.AreEqual(@"""_third_enumMember""", Json);
 		}
 
 		[TestMethod]
 		public void JsonPropertyNameDeserializationTest()
 		{
-			MixedEnumDefintion Value = JsonSerializer.Deserialize<MixedEnumDefintion>(@"""_first""");
-			Assert.AreEqual(MixedEnumDefintion.First, Value);
+			MixedEnumDefinition Value = JsonSerializer.Deserialize<MixedEnumDefinition>(@"""_first""");
+			Assert.AreEqual(MixedEnumDefinition.First, Value);
 
-			Value = JsonSerializer.Deserialize<MixedEnumDefintion>(@"""_second""");
-			Assert.AreEqual(MixedEnumDefintion.Second, Value);
+			Value = JsonSerializer.Deserialize<MixedEnumDefinition>(@"""_second""");
+			Assert.AreEqual(MixedEnumDefinition.Second, Value);
 
-			Value = JsonSerializer.Deserialize<MixedEnumDefintion>(@"""_third_enumMember""");
-			Assert.AreEqual(MixedEnumDefintion.Third, Value);
+			Value = JsonSerializer.Deserialize<MixedEnumDefinition>(@"""_third_enumMember""");
+			Assert.AreEqual(MixedEnumDefinition.Third, Value);
 		}
 #endif
 
@@ -499,7 +499,7 @@ namespace Macross.Json.Extensions.Tests
 
 #if NET5_0_OR_GREATER
 		[JsonConverter(typeof(JsonStringEnumMemberConverter))]
-		public enum MixedEnumDefintion
+		public enum MixedEnumDefinition
 		{
 			[EnumMember(Value = "_first")]
 			First,
