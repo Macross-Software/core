@@ -1,4 +1,4 @@
-﻿using Macross.OpenTelemetry.Extensions;
+using Macross.OpenTelemetry.Extensions;
 
 namespace System.Diagnostics
 {
