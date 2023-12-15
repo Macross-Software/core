@@ -1,0 +1,23 @@
+# Called by ci.yml to perform dotnet format linting
+# See: https://docs.github.com/en/actions/using-workflows/reusing-workflows#creating-a-reusable-workflow
+name: Lint - dotnet format
+
+on:
+  workflow_call:
+
+jobs:
+  run-dotnet-format:
+    runs-on: windows-latest
+
+    steps:
+    - name: check out code
+      uses: actions/checkout@v4
+
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v4
+
+    - name: dotnet restore
+      run: dotnet restore
+
+    - name: dotnet format
+      run: dotnet format Macross-Master.sln --no-restore --verify-no-changes

@@ -1,15 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0-windows;netstandard2.1;netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>net6.0-windows;netstandard2.1;netstandard2.0</TargetFrameworks>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>keypair.snk</AssemblyOriginatorKeyFile>
     <Description>
       Macross Software Windows service management library.
 
-      Provides an API for managing Windows services. Operations inlcuded: create, delete, query, start, stop, pause, &amp; continue.
+      Provides an API for managing Windows services. Operations included: create, delete, query, start, stop, pause, &amp; continue.
 
-      Contains similiar functionality to what is provided in System.ServiceProcess but also adds in Create &amp; Delete operations to replace (in spirit) what ServiceProcessInstaller &amp; ServiceInstaller from System.Configuration.Install provided in .NET Framework.
+      Contains similar functionality to what is provided in System.ServiceProcess but also adds in Create &amp; Delete operations to replace (in spirit) what ServiceProcessInstaller &amp; ServiceInstaller from System.Configuration.Install provided in .NET Framework.
 
       Provides an asynchronous WaitForStatus method.
     </Description>

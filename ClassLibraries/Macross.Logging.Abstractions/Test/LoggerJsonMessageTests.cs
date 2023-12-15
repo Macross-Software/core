@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -202,7 +203,7 @@ namespace Macross.Logging.Abstractions.Tests
 				Logger.Message,
 				new JsonSerializerOptions
 				{
-					IgnoreNullValues = true
+					DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
 				});
 
 			Assert.IsNotNull(Logger.Message);

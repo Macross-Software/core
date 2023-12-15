@@ -1,10 +1,16 @@
 # top-most EditorConfig file for Macross Software
 root = true
 
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
 [*.{cs,js,config,xml,json,html,htm,aspx,asmx,ascx,css,token,xaml,sql,cshtml,ps1}]
 indent_style             = tab
 tab_width                = 4
-trim_trailing_whitespace = true
 indent_size              = tab
 
 # Dotnet code style settings:

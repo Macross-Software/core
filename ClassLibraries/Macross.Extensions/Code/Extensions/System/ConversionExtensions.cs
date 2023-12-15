@@ -65,34 +65,34 @@ namespace System
 		}
 
 		/// <summary>
-		/// Converts an array of bytes into a string of hexidecimal characters.
+		/// Converts an array of bytes into a string of hexadecimal characters.
 		/// </summary>
-		/// <param name="data">Sequence of bytes to be converted into a hexidecimal string instance.</param>
-		/// <returns>Hexidecimal string instance of the converted bytes.</returns>
+		/// <param name="data">Sequence of bytes to be converted into a hexadecimal string instance.</param>
+		/// <returns>Hexadecimal string instance of the converted bytes.</returns>
 		public static string ToHexString(this byte[] data)
 			=> new string(ToHexArray(data, 0, data?.Length ?? 0));
 
 		/// <summary>
-		/// Converts an array of bytes into an array of hexidecimal characters.
+		/// Converts an array of bytes into an array of hexadecimal characters.
 		/// </summary>
-		/// <param name="data">Sequence of bytes to be converted into a hexidecimal character array instance.</param>
-		/// <returns>Array of hexidecimal characters converted from the provided bytes.</returns>
+		/// <param name="data">Sequence of bytes to be converted into a hexadecimal character array instance.</param>
+		/// <returns>Array of hexadecimal characters converted from the provided bytes.</returns>
 		public static char[] ToHexArray(this byte[] data)
 			=> ToHexArray(data, 0, data?.Length ?? 0);
 
 		/// <summary>
-		/// Converts an array of bytes into a string of hexidecimal characters.
+		/// Converts an array of bytes into a string of hexadecimal characters.
 		/// </summary>
-		/// <param name="data">Sequence of bytes to be converted into a hexidecimal string instance.</param>
-		/// <returns>Hexidecimal string instance of the converted bytes.</returns>
+		/// <param name="data">Sequence of bytes to be converted into a hexadecimal string instance.</param>
+		/// <returns>Hexadecimal string instance of the converted bytes.</returns>
 		public static string ToHexString(this ArraySegment<byte> data)
 			=> new string(ToHexArray(data));
 
 		/// <summary>
-		/// Converts an array of bytes into an array of hexidecimal characters.
+		/// Converts an array of bytes into an array of hexadecimal characters.
 		/// </summary>
-		/// <param name="data">Sequence of bytes to be converted into a hexidecimal character array instance.</param>
-		/// <returns>Array of hexidecimal characters converted from the provided bytes.</returns>
+		/// <param name="data">Sequence of bytes to be converted into a hexadecimal character array instance.</param>
+		/// <returns>Array of hexadecimal characters converted from the provided bytes.</returns>
 		public static char[] ToHexArray(this ArraySegment<byte> data)
 			=> ToHexArray(data.Array, data.Offset, data.Count);
 
@@ -113,10 +113,10 @@ namespace System
 		}
 
 		/// <summary>
-		/// Converts a byte into a string of hexidecimal characters.
+		/// Converts a byte into a string of hexadecimal characters.
 		/// </summary>
-		/// <param name="value">Byte value to be converted into a hexidecimal string instance.</param>
-		/// <returns>Hexidecimal string instance of the converted bytes.</returns>
+		/// <param name="value">Byte value to be converted into a hexadecimal string instance.</param>
+		/// <returns>Hexadecimal string instance of the converted bytes.</returns>
 		public static string ToHexString(this byte value)
 		{
 			return new string(new char[2]

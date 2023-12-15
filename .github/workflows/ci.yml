@@ -1,0 +1,55 @@
+name: Build
+
+on:
+  pull_request:
+    branches: [ 'develop*', 'master*' ]
+
+jobs:
+  lint-misspell-sanitycheck:
+    uses: ./.github/workflows/sanitycheck.yml
+
+  detect-changes:
+    runs-on: windows-latest
+    outputs:
+      changes: ${{ steps.changes.outputs.changes }}
+    steps:
+    - uses: AurorNZ/paths-filter@v3
+      id: changes
+      with:
+        filters: |
+          md: ['**.md']
+          build: ['build/**', '.github/**/*.yml', '**/*.targets', '**/*.props']
+          code: ['**.cs', '**.csproj', '.editorconfig']
+
+  lint-md:
+    needs: detect-changes
+    if: contains(needs.detect-changes.outputs.changes, 'md')
+    uses: ./.github/workflows/markdownlint.yml
+
+  lint-dotnet-format:
+    needs: detect-changes
+    if: contains(needs.detect-changes.outputs.changes, 'code')
+    uses: ./.github/workflows/dotnet-format.yml
+
+  build-test-solution:
+    needs: detect-changes
+    if: |
+      contains(needs.detect-changes.outputs.changes, 'code')
+      || contains(needs.detect-changes.outputs.changes, 'build')
+    uses: ./.github/workflows/Component.BuildTest.yml
+    with:
+      project-name: 'Macross-Master.sln'
+      code-cov-name: 'Solution'
+
+  build-test:
+    needs: [
+      lint-misspell-sanitycheck,
+      detect-changes,
+      lint-md,
+      lint-dotnet-format,
+      build-test-solution,
+      ]
+    if: always() && !cancelled() && !contains(needs.*.result, 'failure')
+    runs-on: windows-latest
+    steps:
+    - run: echo 'build complete'

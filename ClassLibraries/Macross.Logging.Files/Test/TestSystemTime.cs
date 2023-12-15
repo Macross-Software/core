@@ -1,4 +1,4 @@
-﻿namespace System
+namespace System
 {
 	public class TestSystemTime : ISystemTime
 	{

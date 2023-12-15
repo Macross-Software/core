@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Diagnostics;
 using System.Text.Encodings.Web;
 using System.Collections.Generic;
@@ -64,7 +65,7 @@ namespace Macross.Windows.Debugging
 		/// </remarks>
 		public static JsonSerializerOptions DefaultJsonOptions { get; } = new JsonSerializerOptions
 		{
-			IgnoreNullValues = true,
+			DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 			WriteIndented = true,
 			Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
 		};

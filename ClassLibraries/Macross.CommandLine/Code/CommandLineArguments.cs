@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+#if !NETSTANDARD2_0
 using System.Diagnostics.CodeAnalysis;
+#endif
 
 namespace Macross.CommandLine
 {
