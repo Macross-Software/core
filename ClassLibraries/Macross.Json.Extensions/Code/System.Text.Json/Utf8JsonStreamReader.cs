@@ -18,7 +18,7 @@ namespace System.Text.Json
 			=> ArrayPool<byte>.Shared.Return(buffer);
 
 		/// <summary>
-		/// Utf8JsonStreamReader deserialization state maching callback.
+		/// Utf8JsonStreamReader deserialization state machine callback.
 		/// </summary>
 		/// <typeparam name="T">The type being deserialized.</typeparam>
 		/// <param name="instance">The instance of <typeparamref name="T"/> being deserialized.</param>
