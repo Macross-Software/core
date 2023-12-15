@@ -6,7 +6,7 @@
 
 ## SoapClient
 
-The traditional client used by `System.ServiceModel` is `ClientBase<T>` but `ISoapClientFactory` will issue instances of `SoapClient<T>`. What's the differnece? `SoapClient` can be disposed regardless of the state of the connection. `ClientBase` will throw an exception if you dispose a connection in anything other than its happy state. That leads to extra boilerplate being needed, or bugs, so I went a different direction here given there was an opportunity to break with the past.
+The traditional client used by `System.ServiceModel` is `ClientBase<T>` but `ISoapClientFactory` will issue instances of `SoapClient<T>`. What's the difference? `SoapClient` can be disposed regardless of the state of the connection. `ClientBase` will throw an exception if you dispose a connection in anything other than its happy state. That leads to extra boilerplate being needed, or bugs, so I went a different direction here given there was an opportunity to break with the past.
 
 ## Basic Usage
 
