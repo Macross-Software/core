@@ -150,7 +150,7 @@ namespace Macross.Windows.ServiceManagement
 				for (ArgumentIndex = 0; ArgumentIndex < arguments.Length; ArgumentIndex++)
 				{
 					if (arguments[ArgumentIndex] == null)
-						throw new ArgumentException($"Argument at index {ArgumentIndex} is null which cannot be passed to sevice.", nameof(arguments));
+						throw new ArgumentException($"Argument at index {ArgumentIndex} is null which cannot be passed to service.", nameof(arguments));
 					ArumentPointers[ArgumentIndex] = Marshal.StringToHGlobalUni(arguments[ArgumentIndex]);
 				}
 
