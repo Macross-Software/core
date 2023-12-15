@@ -19,7 +19,7 @@ namespace DemoWebApplication
 			IHost host = CreateHostBuilder(args).Build();
 
 			ILogger log = host.Services.GetRequiredService<ILoggerFactory>()
-				.CreateLogger(typeof(Program).FullName);
+				.CreateLogger(typeof(Program).FullName!);
 
 			using IDisposable group = log.BeginGroup("Main");
 

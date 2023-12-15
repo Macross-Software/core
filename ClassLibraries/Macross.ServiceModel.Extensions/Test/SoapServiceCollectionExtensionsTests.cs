@@ -3,7 +3,6 @@ using System.ServiceModel;
 using System.ServiceModel.Channels;
 using System.ServiceModel.Description;
 using System.ServiceModel.Dispatcher;
-using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 

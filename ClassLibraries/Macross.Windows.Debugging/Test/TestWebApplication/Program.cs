@@ -1,4 +1,6 @@
+#if WINDOWS && DEBUG
 using System.Drawing;
+#endif
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
