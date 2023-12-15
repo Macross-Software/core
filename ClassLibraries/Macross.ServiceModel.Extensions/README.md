@@ -28,30 +28,30 @@ Here is the most simple way to use the `ISoapClientFactory`:
 [ServiceContract]
 public interface ILegacyProductProxy
 {
-	[OperationContract]
-	Task<int> GetStatusAsync();
+  [OperationContract]
+  Task<int> GetStatusAsync();
 }
 
 public class ProductService : ILegacyProductProxy
 {
-	private readonly ILogger<ProductService> _Logger;
-	private readonly SoapClient<ILegacyProductProxy> _SoapClient;
+  private readonly ILogger<ProductService> _Logger;
+  private readonly SoapClient<ILegacyProductProxy> _SoapClient;
 
-	public ProductService(ILogger<ProductService> logger, SoapClient<ILegacyProductProxy> soapClient)
-	{
-		_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		_SoapClient = soapClient ?? throw new ArgumentNullException(nameof(soapClient));
-	}
+  public ProductService(ILogger<ProductService> logger, SoapClient<ILegacyProductProxy> soapClient)
+  {
+    _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    _SoapClient = soapClient ?? throw new ArgumentNullException(nameof(soapClient));
+  }
 
-	public Task<int> GetStatusAsync() => _SoapClient.Channel.GetStatusAsync();
+  public Task<int> GetStatusAsync() => _SoapClient.Channel.GetStatusAsync();
 }
 
 public void ConfigureServices(IServiceCollection services)
 {
-	services.AddSoapClient<ILegacyProductProxy, ProductService>(()
-		=> new ChannelFactory<ILegacyProductProxy>(
-			new BasicHttpBinding(),
-			new EndpointAddress("http://localhost/LegacyService/")));
+  services.AddSoapClient<ILegacyProductProxy, ProductService>(()
+    => new ChannelFactory<ILegacyProductProxy>(
+      new BasicHttpBinding(),
+      new EndpointAddress("http://localhost/LegacyService/")));
 }
 ```
 
@@ -79,65 +79,65 @@ Here's a more advanced example which shows off more of the feature set:
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-	IDisposable? ChangeWatcher = null;
-	services
-		.AddSoapClient<IProductService, ProductService, ILegacyProductProxy>((serviceProvider, factory) =>
-		{
-			IOptionsMonitor<ProductServiceOptions> Options = serviceProvider.GetRequiredService<IOptionsMonitor<ProductServiceOptions>>();
+  IDisposable? ChangeWatcher = null;
+  services
+    .AddSoapClient<IProductService, ProductService, ILegacyProductProxy>((serviceProvider, factory) =>
+    {
+      IOptionsMonitor<ProductServiceOptions> Options = serviceProvider.GetRequiredService<IOptionsMonitor<ProductServiceOptions>>();
 
-			if (ChangeWatcher != null)
-				ChangeWatcher.Dispose();
-			ChangeWatcher = Options.OnChange(_ => factory.Invalidate<ILegacyProductProxy>());
+      if (ChangeWatcher != null)
+        ChangeWatcher.Dispose();
+      ChangeWatcher = Options.OnChange(_ => factory.Invalidate<ILegacyProductProxy>());
 
-			WSHttpBinding WSHttpBinding = new WSHttpBinding();
-			WSHttpBinding.Security.Mode = Options.CurrentValue.ServiceUrl.Scheme == "https" ? SecurityMode.Transport : SecurityMode.None;
-			WSHttpBinding.MaxReceivedMessageSize = int.MaxValue;
+      WSHttpBinding WSHttpBinding = new WSHttpBinding();
+      WSHttpBinding.Security.Mode = Options.CurrentValue.ServiceUrl.Scheme == "https" ? SecurityMode.Transport : SecurityMode.None;
+      WSHttpBinding.MaxReceivedMessageSize = int.MaxValue;
 
-			return new ChannelFactory<ILegacyProductProxy>(
-				WSHttpBinding,
-				new EndpointAddress(Options.CurrentValue.ServiceUrl));
-		})
-		.ConfigureChannelFactory(channelFactory	=> channelFactory.Credentials.Windows.ClientCredential = CredentialCache.DefaultNetworkCredentials)
-		.AddEndpointBehavior<CustomEndpointBehavior>();
+      return new ChannelFactory<ILegacyProductProxy>(
+        WSHttpBinding,
+        new EndpointAddress(Options.CurrentValue.ServiceUrl));
+    })
+    .ConfigureChannelFactory(channelFactory	=> channelFactory.Credentials.Windows.ClientCredential = CredentialCache.DefaultNetworkCredentials)
+    .AddEndpointBehavior<CustomEndpointBehavior>();
 }
 
 public class ProductServiceOptions
 {
-	public Uri ServiceUrl { get; set; }
+  public Uri ServiceUrl { get; set; }
 }
 
 public interface IProductService
 {
-	Task EnsureStatus(int status);
+  Task EnsureStatus(int status);
 }
 
 public class ProductService : IProductService
 {
-	private readonly ILogger<ProductService> _Logger;
-	private readonly SoapClient<ILegacyProductProxy> _SoapClient;
+  private readonly ILogger<ProductService> _Logger;
+  private readonly SoapClient<ILegacyProductProxy> _SoapClient;
 
-	public ProductService(ILogger<ProductService> logger, SoapClient<ILegacyProductProxy> soapClient)
-	{
-		_Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-		_SoapClient = soapClient ?? throw new ArgumentNullException(nameof(soapClient));
-	}
+  public ProductService(ILogger<ProductService> logger, SoapClient<ILegacyProductProxy> soapClient)
+  {
+    _Logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    _SoapClient = soapClient ?? throw new ArgumentNullException(nameof(soapClient));
+  }
 
-	public async Task EnsureStatus(int status)
-	{
-		if (await _SoapClient.Channel.GetStatusAsync().ConfigureAwait(false) != status)
-			throw new InvalidOperationException();
-	}
+  public async Task EnsureStatus(int status)
+  {
+    if (await _SoapClient.Channel.GetStatusAsync().ConfigureAwait(false) != status)
+      throw new InvalidOperationException();
+  }
 }
 
 [ServiceContract]
 public interface ILegacyProductProxy
 {
-	[OperationContract]
-	Task<int> GetStatusAsync();
+  [OperationContract]
+  Task<int> GetStatusAsync();
 }
 
 public class CustomEndpointBehavior : IEndpointBehavior
 {
-	// Endpoint behavior logic goes here.
+  // Endpoint behavior logic goes here.
 }
 ```
