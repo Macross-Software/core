@@ -356,7 +356,7 @@ otherwise routing information won't be available.
 
 ## Writing the flattened message JSON structure to actual log files...
 
-If you find the flattened message JSON format displayed in the UI conveniant and
+If you find the flattened message JSON format displayed in the UI convenient and
 want to write it out into actual log files, see
 [Macross.Logging.Files](../Macross.Logging.Files/README.md). To write it out to
 Console (stdout), see
